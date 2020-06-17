@@ -1,0 +1,32 @@
+# https://code.nettantra.com/nettantra-it/nettantra-lamp-projects
+# Copyright 2019 NetTantra Technologies
+# For internal use only.
+# Any unauthorized copying, reproduction, and broadcasting in  is strictly prohibited and illegal
+version: '3'
+services:
+  cranberrymail_api_web:
+    build: ./docker-deps/php
+    restart: always
+    ports:
+      - 8000:80
+    volumes:
+      - ./cm-api:/app
+    links:
+      - 'cranberrymail_api_db'
+
+  cranberrymail_api_db:
+    build: ./docker-deps/mariadb
+    restart: always
+    volumes:
+      - ./mysql-db-root:/var/lib/mysql
+    environment:
+      TZ: "Asia/Kolkata"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: 'testuser'
+      MYSQL_PASSWORD: 'testpassword'
+      MYSQL_DATABASE: 'testdb'
+      MYSQL_ROOT_HOST: '%'
+
+volumes:
+  mariadb:

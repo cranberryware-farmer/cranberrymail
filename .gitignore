@@ -1,12 +1,51 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
 /node_modules
-/public/hot
-/public/storage
-/storage/*.key
-/vendor
-.env
-.env.backup
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.idea
+.idea/*
+./cm-api/idea
+./cm-api/idea/*
+cm-api/cmail_settings/.env
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+/src/styles/reduction.css
+/mysql-db-root
+
+
+## CranberryMail API
+/cm-api/node_modules
+/cm-api/public/hot
+/cm-api/public/storage
+/cm-api/cmail_settings/.env_local
+/cm-api/.env.backup
+/cm-api/.phpunit.result.cache
+/cm-api/Homestead.json
+/cm-api/Homestead.yaml
+/cm-api/npm-debug.log
+/cm-api/yarn-error.log
+/cm-api/phpMyAdmin
+/cm-api/public/hot
+/cm-api/storage/installed
+/cm-api/storage/framework/*
+/cm-api/storage/logs/*
+/releases/*.zip
+*.zip
+build.log
