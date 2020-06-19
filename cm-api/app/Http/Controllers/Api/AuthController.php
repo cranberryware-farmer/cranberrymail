@@ -17,6 +17,7 @@ class AuthController extends Controller
         if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){ 
             $user = Auth::user(); 
             $success['token'] =  $user->createToken('Cmail')-> accessToken; 
+            $request->session()->put('auth_token', $success['token']);
             Log::info("Token generated for user",['file' => __FILE__, 'line' => __LINE__]);
             return response()->json(['success' => $success, "status" => 1], $this-> successStatus); 
         } else{
@@ -64,6 +65,7 @@ class AuthController extends Controller
             $user = User::create($input); 
             
             $success['token'] =  $user->createToken('AppName')-> accessToken;
+            $request->session()->put('auth_token', $success['token']);
             Log::info("Token successfully generated for the user",['file' => __FILE__, 'line' => __LINE__]); 
             return response()->json(['success' => $success, "status" => 1], $this-> successStatus);
             

@@ -21,7 +21,7 @@ Route::prefix('v1')->group(function(){
     Route::post('db_check', 'HomeController@db_check');
     Route::post('drop_create_db', 'HomeController@drop_create_db');
 
-    Route::group(['middleware' => ['auth:api','cors']], function() {
+    Route::group(['middleware' => ['auth:api', 'cranberryAuth','cors']], function() {
          Route::post('getUser', 'Api\AuthController@getUser');
          Route::post('folders','Api\ImapController@get_folders');
          Route::post('star_emails','Api\ImapController@star_emails');
