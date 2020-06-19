@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, Col, Row } from 'reactstrap';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Cookies from 'js-cookie';
 
 class AuthPage extends React.Component {
   handleAuthState = authState => {
@@ -10,6 +11,19 @@ class AuthPage extends React.Component {
       this.props.history.push('/login');
     } else {
       this.props.history.push('/signup');
+    }
+  };
+
+  componentDidMount() {
+    const token = Cookies.get("app_auth") ? Cookies.get("app_auth") : "";
+    if(token){
+      this.props.history.push({
+        pathname: '/',
+        state: {
+          detail: "Retreived mailbox.",
+          token
+        }
+      }); 
     }
   };
 

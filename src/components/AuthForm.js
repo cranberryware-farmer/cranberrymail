@@ -19,6 +19,7 @@ import {
   } from 'react-icons/fa';
 
 import {  withRouter } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 
 class AuthForm extends React.Component {
@@ -93,6 +94,7 @@ class AuthForm extends React.Component {
               token: res.data.success.token
             }
           }); 
+          Cookies.set('app_auth', res.data.success.token);
         }
       });
     }

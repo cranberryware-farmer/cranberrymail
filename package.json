@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "^4.5.0",
     "@material-ui/icons": "^4.4.3",
+    "@types/js-cookie": "^2.2.6",
     "axios": "^0.19.0",
     "bootstrap": "4.3.1",
     "chart.js": "2.7.2",
@@ -16,6 +17,7 @@
     "draftjs-to-html": "^0.9.1",
     "enzyme-adapter-react-16.1": "^1.6.2",
     "faker": "^4.1.0",
+    "js-cookie": "^2.2.1",
     "markdown-draft-js": "^2.2.0",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
@@ -56,6 +58,7 @@
     "serve": "serve -s build",
     "deploy": "gh-pages -d build",
     "test": "react-scripts test --env=jsdom",
+    "build-test": "react-scripts build && rsync -va build/* cm-api/cmail",
     "eject": "react-scripts eject",
     "build": "react-scripts build && rsync -va build/* cm-api/cmail && mkdir -p releases/cranberrymail && rm -f releases/cmail_installer.zip && cd cm-api && cp -r . ../releases/cranberrymail && cd ../releases && mkdir -p cranberrymail/storage/framework/cache cranberrymail/storage/framework/sessions cranberrymail/storage/framework/views && zip -q -r cmail_installer.zip cranberrymail && rm -rf cranberrymail",
     "clean": "rm -rf build; rm -f releases/cranberrymail-web-$npm_package_version.zip; rm -rf cm-api/cmail; mkdir -p cm-api/cmail; touch cm-api/cmail/.gitkeep"

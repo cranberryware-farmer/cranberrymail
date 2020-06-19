@@ -26,11 +26,10 @@
 
 1. Clone the repository to your pc or laptop
 2. cd `<repository>`
-3. `git checkout opensrc` to go to the open source edition of Cranberry Mail.
-4. Run `nvm use` to use node.js 10 LTS edition
-5. Run `yarn install` to install all the dependencies 
-6. Run `yarn clean` to start with a fresh build
-7. Run `yarn build` to get a production ready build of CranberryMail as a zip file in `releases` folder
+3. Run `nvm use` to use node.js 10 LTS edition
+4. Run `yarn install` to install all the dependencies 
+5. Run `yarn clean` to start with a fresh build
+6. Run `yarn build` to get a production ready build of CranberryMail as a zip file in `releases` folder
 
 ## Installation and Setup the CranberryMail software
 1. Install the above listed softwares before installing CranberryMail on your server or local pc/laptop.

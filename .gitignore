@@ -16,6 +16,7 @@
 ./cm-api/idea
 ./cm-api/idea/*
 cm-api/cmail_settings/.env
+/mysql
 
 .env.local
 .env.development.local
