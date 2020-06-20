@@ -20,7 +20,8 @@ class CranberryAuth
         if($auth_token === $app_token) {
             return $next($request);
         } else {
-            return response()->json(['success' => false, 'force_logout' => true, 'error' => __('Invalid Access.')]); 
+            $request->session()->flush();
+            return response()->json(['success' => false, 'force_logout' => true, 'error' => __('Invalid Access.')]);
         }
     }
 }
