@@ -53,7 +53,7 @@ class ImapController extends Controller
      * Fetch folders
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
 
     public function get_folders(Request $request){
@@ -126,7 +126,7 @@ class ImapController extends Controller
      * Move emails to inbox from trash.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
 
@@ -161,7 +161,7 @@ class ImapController extends Controller
      * Move emails to trash.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
@@ -230,7 +230,7 @@ class ImapController extends Controller
      * Move emails to inbox from spam.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
 
@@ -265,7 +265,7 @@ class ImapController extends Controller
      * Mark emails as spam.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
 
@@ -307,7 +307,7 @@ class ImapController extends Controller
      * Mark or Unmark emails as starred
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
 
@@ -385,7 +385,7 @@ class ImapController extends Controller
      * search emails for a given text
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
@@ -554,7 +554,7 @@ class ImapController extends Controller
      * Fetch emails for a folder
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
@@ -653,7 +653,7 @@ class ImapController extends Controller
      * Fetch email by uid.
      *
      * @param Request $request
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
