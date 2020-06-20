@@ -11,7 +11,8 @@ import {
   Input, 
   Label,
   InputGroup,
-  InputGroupAddon } from 'reactstrap';
+  InputGroupAddon,
+  Spinner } from 'reactstrap';
 
   import {
     FaEye,
@@ -62,6 +63,7 @@ class AuthForm extends React.Component {
 
   handleSubmit = event => {
     event.preventDefault();
+    this.setState({isLoading : true});
     
     if(this.isLogin){
       const fields = {
@@ -70,20 +72,22 @@ class AuthForm extends React.Component {
         cbox: this.state.cbox
       };
 
-     axios.interceptors.response.use(response => {
+      axios.interceptors.response.use(response => {
         return response;
-     }, error => {
-       if (error.response.status === 401) {
+      }, error => {
+        if (error.response.status === 401) {
           toast("Incorrect email or password");
-       }
-       return error;
-     });
+          this.setState({isLoading : false});
+        }
+        return Promise.reject(error);
+      });
 
       axios.post(window._api+"/login",fields).then(res => { 
         if(res.data.status===1){
           this.setState({
             token: res.data.success.token
           });
+          this.setState({isLoading : false});
           
           this.props.history.push({
             pathname: '/',
@@ -95,6 +99,9 @@ class AuthForm extends React.Component {
           }); 
           Cookies.set('app_auth', res.data.success.token);
         }
+      })
+      .catch(error => {
+        console.log("Invalid Creds", error);
       });
     }
 
@@ -156,8 +163,13 @@ class AuthForm extends React.Component {
           size="lg"
           className="bg-gradient-theme-left border-0"
           block
-          onClick={this.handleSubmit}>
+          onClick={!this.state.isLoading ? this.handleSubmit : null}
+          disabled={this.state.isLoading}>
           {this.renderButtonText()}
+          {this.state.isLoading ? < Spinner 
+            type = "grow"
+            color = "light" 
+          /> : null}
         </Button>
 
         
