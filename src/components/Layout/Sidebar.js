@@ -19,6 +19,10 @@ import {
   NavLink as BSNavLink,
 } from 'reactstrap';
 import bn from 'utils/bemnames';
+import Cookies from 'js-cookie';
+import {
+    toast
+} from 'react-toastify';
 
 
 
@@ -53,25 +57,32 @@ class Sidebar extends React.Component {
 
     axios.post(window._api+"/folders",{},config).then( res => {
       if(res.status===200){
-        let items = [];
-        let folders =[];
-        for(let i=0;i<res.data.length;i++){
-          let path = res.data[i];
-          items[i]={
-            to: path,
-            name: res.data[i],
-            exact: true,
-            Icon: MdWeb
-          };                
+        const result = res.data;
+        if(result.hasOwnProperty("success") && result.hasOwnProperty("force_logout") && result.success === false && res.data.force_logout === true){
+          Cookies.remove('app_auth');
+          this.props.history.push('/login');
+        } else {
+          toast('Welcome to Cranberry Mail');
+          let items = [];
+          let folders =[];
+          for(let i=0;i<result.length;i++){
+            let path = result[i];
+            items[i]={
+              to: path,
+              name: result[i],
+              exact: true,
+              Icon: MdWeb
+            };                
+          }
+          for(let i=0;i<items.length; i++){
+            folders.push(items[i].name);
+          }
+          this.props.saveFolders(folders);  
+          this.props.saveCurFolder(items[0].name);
+          this.setState({
+              navItems: items
+          });
         }
-        for(let i=0;i<items.length; i++){
-          folders.push(items[i].name);
-        }
-        this.props.saveFolders(folders);  
-        this.props.saveCurFolder(items[0].name);
-        this.setState({
-            navItems: items
-        });
       }
     });
 

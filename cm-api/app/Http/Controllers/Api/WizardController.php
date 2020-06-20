@@ -7,7 +7,6 @@ use Symfony\Component\Process\Process;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Crypt;
 
 class WizardController extends Controller
 {

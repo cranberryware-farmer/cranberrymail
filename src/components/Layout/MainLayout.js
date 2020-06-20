@@ -1,10 +1,5 @@
 import { Content, Footer, Header, Sidebar } from 'components/Layout';
 import React from 'react';
-import {
-  MdPermIdentity
-} from 'react-icons/md';
-import NotificationSystem from 'react-notification-system';
-import { NOTIFICATION_SYSTEM_STYLE } from 'utils/constants';
 import {  withRouter } from 'react-router-dom';
 
 class MainLayout extends React.Component {
@@ -23,20 +18,6 @@ class MainLayout extends React.Component {
 
   componentDidMount() {
     this.checkBreakpoint(this.props.breakpoint);
-
-    
-    setTimeout(() => {
-      if (!this.notificationSystem) {
-        return;
-      }
-
-      this.notificationSystem.addNotification({
-        title: <MdPermIdentity />,
-        message: 'Welcome to Cranberry Mail',
-        level: 'info',
-      });
-    }, 1500);
-    
   }
 
   // close sidebar when
@@ -79,20 +60,15 @@ class MainLayout extends React.Component {
     const { children } = this.props;
     return (
       <main className="cr-app bg-light">
-        <Sidebar saveCurFolder={this.props.saveCurFolder} saveFolders={this.props.saveFolders} />
+        <Sidebar 
+          saveCurFolder={this.props.saveCurFolder} 
+          saveFolders={this.props.saveFolders}
+        />
         <Content fluid onClick={this.handleContentClick}>
           <Header search={this.props.handleSearch} />
           {children}
           <Footer />
         </Content>
-
-        <NotificationSystem
-          dismissible={false}
-          ref={notificationSystem =>
-            (this.notificationSystem = notificationSystem)
-          }
-          style={NOTIFICATION_SYSTEM_STYLE}
-        />
       </main>
     );
   }

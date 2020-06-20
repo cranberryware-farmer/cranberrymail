@@ -90,7 +90,6 @@ class AuthForm extends React.Component {
             state: {
               detail: "Logged into your mailbox.",
               email: this.state.email,
-              password: this.state.password,
               token: res.data.success.token
             }
           }); 
