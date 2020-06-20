@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
-    
+
     /**
      * Create a new controller instance.
      *
@@ -15,7 +15,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        
+
     }
 
     /**
@@ -27,9 +27,13 @@ class HomeController extends Controller
     {
             Log::info("Moving to login screen",['file' => __FILE__, 'line' => __LINE__]);
             return view('reactidx');
-                 
+
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function db_check(Request $request){
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
@@ -44,7 +48,7 @@ class HomeController extends Controller
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             return response()->json([
                 "status" => 0,
-                "message" => "Please click on OK to drop existing database. Click on Cancel to choose new database or use existing database." 
+                "message" => "Please click on OK to drop existing database. Click on Cancel to choose new database or use existing database."
             ], 200);
         } catch(\PDOException $e) {
             $flag = 1;
@@ -60,21 +64,25 @@ class HomeController extends Controller
                 $pdo->query("use $db");
                 return response()->json([
                     "status" => 1,
-                    "message" => "DB created" 
+                    "message" => "DB created"
                 ], 200);
             } catch(\PDOException $e) {
                 return response()->json([
                     "status" => 0,
-                    "message" => "No DB found" 
+                    "message" => "No DB found"
                 ], 200);
             }
-            
-            
+
+
         }
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function drop_create_db(Request $request){
-        
+
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
         $db = $_POST['db'];
@@ -91,13 +99,13 @@ class HomeController extends Controller
             $pdo->query("use $db");
             return response()->json([
                 "status" => 1,
-                "message" => "New database has been created" 
+                "message" => "New database has been created"
             ], 200);
         } catch(\PDOException $e) {
             return response()->json([
                 "status" => 0,
-                "message" => "Unable to delete database. Please delete and create new database manually to proceed." 
+                "message" => "Unable to delete database. Please delete and create new database manually to proceed."
             ], 200);
         }
-    } 
+    }
 }

@@ -24,7 +24,8 @@ class WizardController extends Controller
     /**
      * Get imap and smtp settings for an email address
      *
-     * @return json object
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -108,9 +109,10 @@ class WizardController extends Controller
         return $response[1];
     }
 
-     /**
+    /**
      * Converts XML to Array
      *
+     * @param $xml
      * @return array
      */
 
@@ -122,9 +124,10 @@ class WizardController extends Controller
         return $array;
     }
 
-     /**
+    /**
      * Fetches mail domain's smtp and imap data
      *
+     * @param $mail_domain
      * @return array of smtp and imap configuration
      */
 
@@ -137,9 +140,10 @@ class WizardController extends Controller
         return $result;
     }
 
-     /**
+    /**
      * Gets the MX record for the given email
      *
+     * @param $email
      * @return string of mx records
      */
 

@@ -10,8 +10,15 @@ use Validator;
 
 class AuthController extends Controller
 {
+    /**
+     * @var int
+     */
     public $successStatus = 200;
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request){
         Log::info("Entered login function",['file' => __FILE__, 'line' => __LINE__]);
         if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
@@ -72,12 +79,19 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getUser() {
         $user = Auth::user();
         Log::info("User data retrieved successfully",['file' => __FILE__, 'line' => __LINE__]);
         return response()->json(['success' => $user, "status" => 1], $this->successStatus);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request){
         Log::info("Logout function called",['file' => __FILE__, 'line' => __LINE__]);
         if (Auth::check()) {

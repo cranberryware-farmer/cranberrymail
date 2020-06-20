@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
 
 
 class SmtpController extends Controller
 {
-    
+
      /**
      * Create a new controller instance.
      *
@@ -20,9 +20,12 @@ class SmtpController extends Controller
      */
     public function __construct()
     {
-        
+
     }
 
+    /**
+     * @return array
+     */
     public function getSmtp(){
         $smtp = [
             "host" => env("SMTP_HOST"),
@@ -33,11 +36,15 @@ class SmtpController extends Controller
         return $smtp;
     }
 
+    /**
+     * @param $emails
+     * @return false|string[]
+     */
     private function sepEmails($emails){
         if(stripos($emails,",")){
             $result = explode(',', $emails);
             Log::info("Convert emails into an array", ['file' => __FILE__, 'line' => __LINE__]);
-        
+
         }else{
             $result = $emails;
             Log::info("No change in emails", ['file' => __FILE__, 'line' => __LINE__]);
@@ -45,8 +52,12 @@ class SmtpController extends Controller
         return $result;
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendEmail(Request $request){
-        
+
         $validator = Validator::make($request->all(),[
             'to'=>'required',
             'cc'=>'nullable',
@@ -65,7 +76,7 @@ class SmtpController extends Controller
                 "message" => "Error: please check the size of your attachment."
             ), 200);
         }
-       
+
 
         try{
             $user = Auth::user();
@@ -79,17 +90,17 @@ class SmtpController extends Controller
             $subject = $request->input("subject");
             $body=$request->input("body");
             $msgId=$request->input('messageId');
-            
-            
-            
+
+
+
             $smtp = $this->getSmtp();
-            
+
             $name = explode("@",$from);
 
             $flag=0;
             $env=env("APP_ENV");
             if($smtp['encryption']=="starttls"){
-                
+
                 $smtp['encryption'] = "tls";
                 $flag=1;
                 Log::info("Encryption from starttls to tls", ['file' => __FILE__, 'line' => __LINE__]);
@@ -107,12 +118,12 @@ class SmtpController extends Controller
 
             $swift_mailer = new \Swift_Mailer($transport);
             if($request->hasFile('attachment')){
-                
+
 
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])
                 ->setTo($to);
-                
+
                 $files = $request->file('attachment');
                 foreach($files as $file){
                     $msg->attach(\Swift_Attachment::fromPath($file->getPathName())->setFilename($file->getClientOriginalName()));
@@ -120,14 +131,14 @@ class SmtpController extends Controller
                 Log::info("Attach files to email", ['file' => __FILE__, 'line' => __LINE__]);
 
              }else{
-                
+
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])
                 ->setTo($to);
 
                 Log::info("No file attachments", ['file' => __FILE__, 'line' => __LINE__]);
             }
-        
+
 
             if(!empty($ccs)){
                 $cc = $this->sepEmails($ccs);
@@ -137,10 +148,10 @@ class SmtpController extends Controller
 
             if(!empty($bccs)){
                 $bcc = $this->sepEmails($bccs);
-                $msg->setBcc($bcc); 
+                $msg->setBcc($bcc);
                 Log::info("Set BCC", ['file' => __FILE__, 'line' => __LINE__]);
             }
-        
+
             $msg->setBody($body,'text/html');
             $msg->addPart(strip_tags($body),"text/plain");
 
@@ -151,25 +162,25 @@ class SmtpController extends Controller
                 Log::info("Set Headers", ['file' => __FILE__, 'line' => __LINE__]);
             }
 
-            
+
             $result = $swift_mailer->send($msg);
             $msg = "Success, email sent";
 
             Log::info("Email Sent", ['file' => __FILE__, 'line' => __LINE__]);
-            
+
         } catch (\Exception $e) {
             report($e);
             $result = -1;
             $msg = $e->getMessage();
             Log::error($msg, ['file' => __FILE__, 'line' => __LINE__]);
-            
+
         }
 
         return response()->json(array(
             "result" => $result,
             "message" => $msg
-        ), 200); 
+        ), 200);
 
-        
+
     }
 }
