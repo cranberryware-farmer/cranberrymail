@@ -87,7 +87,7 @@ const composeModal = (props) => {
   });
 
   const composeContent = (
-    <div className={hiddenClass}>
+    <div>
       <Row className='bg-secondary text-white ml-0 mr-0 cm-h-30p cm-sticky-header'>
         <Col md={headerLeft} sm={headerLeft} xs={headerLeft} className='mt-1 mb-1'>
           <div className='ml-2'> New Email </div>
@@ -138,87 +138,89 @@ const composeModal = (props) => {
         </Col>
       </Row>
 
-      <Form onSubmit={() => { props.sendemail() }} className="m-1">
-        <FormGroup>
-          <Input
-            type="text"
-            name="to"
-            id="to"
-            placeholder="To:"
-            className='cm-h-30p'
-            defaultValue={props.to}
-            required
-          />
-          <Input
-            type="text"
-            name="text"
-            id="cc"
-            placeholder="CC:"
-            className='cm-h-30p mt-1'
-            defaultValue={props.cc}
-          />
-          <Input
-            type="text"
-            name="bcc"
-            id="bcc"
-            placeholder="Bcc:"
-            className='cm-h-30p mt-1'
-            defaultValue={props.bcc}
-          />
-          <FormText color="muted"> Email addresses to be separated by ,</FormText>
-          <Input
-            type="text"
-            name="subject"
-            id="subject"
-            placeholder="Subject of the email"
-            className='cm-h-30p mt-1'
-            defaultValue={props.subject}
-          />
-        </FormGroup>
-        <FormGroup>
-          {/* <Editor
-            editorState={props.meditorstate}
-            wrapperClassName="demo-wrapper"
-            editorClassName="demo-editor"
-            onEditorStateChange={(es) => {
-              props.meditorstatehandler(es);
-            }}
-            id="email"
-            toolbarClassName="toolbar-class"
-            toolbar={{
-              inline: { inDropdown: true },
-              list: { inDropdown: true },
-              textAlign: { inDropdown: true },
-              link: { inDropdown: true },
-              history: { inDropdown: true },
-            }}
-            /> */}
-          <CustomToolbarEditor 
-            id="email"
-            editorState={props.meditorstate}
-            content={ props.content }
-            onEditorStateChange={(es) => {
-              props.meditorstatehandler(es);
-            }}
-          />
-        </FormGroup>
-        <FormGroup>
-          <RButton onClick={ () =>  props.sendemail() }>
-            Send <RiSendPlaneLine />
-          </RButton>
-          <Label for="attachment" className='float-right'><MdAttachFile /></Label>
-          <Input
-            type="file"
-            name="attachment"
-            id="attachment"
-            multiple="multiple"
-            onChange={ (ev) => {
-              props.attachmenthandler(ev);
-            }}
-            hidden
-          />
-        </FormGroup>
-      </Form>
+      <div className={hiddenClass}>
+        <Form onSubmit={() => { props.sendemail() }} className="m-1">
+          <FormGroup>
+            <Input
+              type="text"
+              name="to"
+              id="to"
+              placeholder="To:"
+              className='cm-h-30p'
+              defaultValue={props.to}
+              required
+            />
+            <Input
+              type="text"
+              name="text"
+              id="cc"
+              placeholder="CC:"
+              className='cm-h-30p mt-1'
+              defaultValue={props.cc}
+            />
+            <Input
+              type="text"
+              name="bcc"
+              id="bcc"
+              placeholder="Bcc:"
+              className='cm-h-30p mt-1'
+              defaultValue={props.bcc}
+            />
+            <FormText color="muted"> Email addresses to be separated by ,</FormText>
+            <Input
+              type="text"
+              name="subject"
+              id="subject"
+              placeholder="Subject of the email"
+              className='cm-h-30p mt-1'
+              defaultValue={props.subject}
+            />
+          </FormGroup>
+          <FormGroup>
+            {/* <Editor
+              editorState={props.meditorstate}
+              wrapperClassName="demo-wrapper"
+              editorClassName="demo-editor"
+              onEditorStateChange={(es) => {
+                props.meditorstatehandler(es);
+              }}
+              id="email"
+              toolbarClassName="toolbar-class"
+              toolbar={{
+                inline: { inDropdown: true },
+                list: { inDropdown: true },
+                textAlign: { inDropdown: true },
+                link: { inDropdown: true },
+                history: { inDropdown: true },
+              }}
+              /> */}
+            <CustomToolbarEditor 
+              id="email"
+              editorState={props.meditorstate}
+              content={ props.content }
+              onEditorStateChange={(es) => {
+                props.meditorstatehandler(es);
+              }}
+            />
+          </FormGroup>
+          <FormGroup>
+            <RButton onClick={ () =>  props.sendemail() }>
+              Send <RiSendPlaneLine />
+            </RButton>
+            <Label for="attachment" className='float-right'><MdAttachFile /></Label>
+            <Input
+              type="file"
+              name="attachment"
+              id="attachment"
+              multiple="multiple"
+              onChange={ (ev) => {
+                props.attachmenthandler(ev);
+              }}
+              hidden
+            />
+          </FormGroup>
+        </Form>
+      </div>
     </div>
   );
 
