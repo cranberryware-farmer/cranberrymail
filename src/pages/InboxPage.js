@@ -77,6 +77,8 @@ class InboxPage extends React.Component {
       bcc: '',
       date: '',
       fwdMsg:'',
+      content: '',
+      attachmentContent: '',
       editor: false,
       modalEditorState: EditorState.createEmpty(),
       isEmailFwd: false,
@@ -87,7 +89,8 @@ class InboxPage extends React.Component {
       messageId: '',
       enableMarkdown: false,
       enableEmailThread: false,
-      dateFormat: ''
+      dateFormat: '',
+      dockState: "normal"
     };
   }
 
@@ -555,9 +558,28 @@ class InboxPage extends React.Component {
   closeModal = () =>{
     this.setState({
       modal: false,
+      dockState: 'normal'
     });
   };
   
+  resizeDock = dockstate => {
+    let cc =  document.getElementById('cc').value;
+    let bcc = document.getElementById('bcc').value;
+    let to = document.getElementById('to').value;
+    let subject = document.getElementById('subject').value;
+    let attachmentContent = document.getElementById('attachment').files;
+    let content = this.state.modalEditorState.getCurrentContent();
+    this.setState({
+      dockState: dockstate,
+      to,
+      cc,
+      bcc,
+      subject,
+      content,
+      attachmentContent
+    });
+  };
+
   setEmailNode = node => {
     
     let cc = '';
@@ -983,8 +1005,16 @@ class InboxPage extends React.Component {
 
               {this.state.modal && <ComposeModal
                                         modal = {this.state.modal}
+                                        dockState = {this.state.dockState}
+                                        to = {this.state.to}
+                                        cc = {this.state.cc}
+                                        bcc = {this.state.bcc}
+                                        subject = {this.state.subject}
+                                        content = {this.state.content}
+                                        attachmentContent = {this.state.attachmentContent}
                                         composehandler = {this.handleCompose}
                                         closemodal = {this.closeModal}
+                                        resizeDock = {this.resizeDock}
                                         classnm = {this.props.className}
                                         sendemail = {this.sendEmail}
                                         meditorstate = {this.state.modalEditorState}
