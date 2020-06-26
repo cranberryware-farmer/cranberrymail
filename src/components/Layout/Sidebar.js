@@ -5,7 +5,7 @@ import React from 'react';
 import axios from 'axios';
 import {  withRouter } from 'react-router-dom';
 import {
-  MdWeb,
+  MdLabel,
 } from 'react-icons/md';
 import {
   FaSync,
@@ -86,7 +86,7 @@ class Sidebar extends React.Component {
               to: result[i],
               name: path,
               exact: true,
-              Icon: folderMaps.hasOwnProperty(lowerPath) ? folderMaps[lowerPath] : MdWeb
+              Icon: folderMaps.hasOwnProperty(lowerPath) ? folderMaps[lowerPath] : MdLabel
             };                
           }
           for(let i=0;i<items.length; i++){
