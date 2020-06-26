@@ -6,24 +6,10 @@ import axios from 'axios';
 import {  withRouter } from 'react-router-dom';
 import {
   MdWeb,
-  MdDrafts
 } from 'react-icons/md';
 import {
   FaSync,
-  FaDumpster
 } from 'react-icons/fa';
-import {
-  TiArrowRightOutline,
-  TiStarFullOutline
-} from 'react-icons/ti';
-import {
-  RiInboxArchiveLine,
-  RiSpam2Line,
-  RiDeleteBinLine
-} from 'react-icons/ri';
-import {
-  AiOutlineInbox
-} from 'react-icons/ai';
 import { NavLink } from 'react-router-dom';
 import {
   Button,
@@ -35,23 +21,26 @@ import {
 import bn from 'utils/bemnames';
 import Cookies from 'js-cookie';
 import {
-    toast
+  toast
 } from 'react-toastify';
 
-
+import { folderMaps } from 'constants/folderMapping';
 
 const bem = bn.create('sidebar');
 
-const folderMapping = {
-  'INBOX':   AiOutlineInbox,
-  'INBOX.Archive': RiInboxArchiveLine,
-  'INBOX.Starred': TiStarFullOutline,
-  'INBOX.spam': RiSpam2Line,
-  'INBOX.Drafts': MdDrafts,
-  'INBOX.Junk': FaDumpster,
-  'INBOX.Trash': RiDeleteBinLine,
-  'INBOX.Sent': TiArrowRightOutline
-};
+const camelCase = str => { 
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) 
+  { 
+    return word.toUpperCase(); 
+  }); 
+}
+
+const formatPath = str => {
+  let pathArr = str.split(/[./]+/);
+  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
+  str = camelCase(str);
+  return str;
+}
 
 class Sidebar extends React.Component {
   state = {
@@ -60,10 +49,8 @@ class Sidebar extends React.Component {
     isOpenPages: true,
     navItems: [],
   };
-
  
-  componentDidMount(){
-    
+  componentDidMount(){ 
     if(this.props.location.state!==undefined){
       this.loadFolders();
     }
@@ -78,8 +65,6 @@ class Sidebar extends React.Component {
       }
     };
 
-    
-
     axios.post(window._api+"/folders",{},config).then( res => {
       if(res.status===200){
         const result = res.data;
@@ -92,11 +77,16 @@ class Sidebar extends React.Component {
           let folders =[];
           for(let i=0;i<result.length;i++){
             let path = result[i];
+            let lowerPath = path;
+            if(path){
+              path = formatPath(path);
+              lowerPath = path.toString().toLowerCase();
+            } 
             items[i]={
-              to: path,
-              name: result[i],
+              to: result[i],
+              name: path,
               exact: true,
-              Icon: folderMapping.hasOwnProperty(path) ? folderMapping[path] : MdWeb
+              Icon: folderMaps.hasOwnProperty(lowerPath) ? folderMaps[lowerPath] : MdWeb
             };                
           }
           for(let i=0;i<items.length; i++){
@@ -107,7 +97,6 @@ class Sidebar extends React.Component {
           this.setState({
               navItems: items
           });
-          console.log(items);
         }
       }
     });
@@ -170,9 +159,7 @@ class Sidebar extends React.Component {
                   exact={exact}
                   onClick={(e) => {
                     e.preventDefault();
-                    let folder = e.target;
-                    let curFolder=folder.innerText;
-                    this.props.saveCurFolder(curFolder);
+                    this.props.saveCurFolder(to);
                   }}
                 >
                   <Icon className={bem.e('nav-item-icon')} />

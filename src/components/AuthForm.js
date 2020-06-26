@@ -12,12 +12,13 @@ import {
   Label,
   InputGroup,
   InputGroupAddon,
-  Spinner } from 'reactstrap';
+  Spinner 
+} from 'reactstrap';
 
-  import {
-    FaEye,
-    FaEyeSlash
-  } from 'react-icons/fa';
+import {
+  FaEye,
+  FaEyeSlash
+} from 'react-icons/fa';
 
 import {  withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
