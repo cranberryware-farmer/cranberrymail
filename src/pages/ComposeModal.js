@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
     Button as RButton,
     Form,
@@ -56,8 +56,6 @@ const minDockStyles = {
 };
 
 const composeModal = (props) => {
-
-  const [count, setCount] = useState(0);
   const dockState = props.dockState;
 
   let headerLeft, headerRight;
@@ -171,7 +169,7 @@ const composeModal = (props) => {
               type="text"
               name="subject"
               id="subject"
-              placeholder="Subject of the email"
+              placeholder="Subject:"
               className='cm-h-30p mt-1'
               defaultValue={props.subject}
             />
