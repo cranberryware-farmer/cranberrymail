@@ -31,6 +31,7 @@ import {
 } from 'reactstrap';
 import bn from 'utils/bemnames';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const bem = bn.create('header');
 
@@ -171,20 +172,26 @@ class Header extends React.Component {
                     </ListGroupItem>
                     <ListGroupItem tag="a" href="#" action className="border-light">
                       <span onClick={()=>{
-                      let el=this;
-                      let token =  this.props.location.state.token;
-                      const config = {
-                        headers: {
-                          Accept: 'application/json',
-                          Authorization: 'Bearer ' + token,
-                        },
-                      };
-                      axios.post(window._api + '/logout', {}, config)
-                      .then(res => {
-                        el.props.history.push('/login');  
-                      });
-                      
-                    }}><MdExitToApp /> Signout</span>
+                        this.props.triggerCentralLoading(true);
+                        let el=this;
+                        let token =  this.props.location.state.token;
+                        const config = {
+                          headers: {
+                            Accept: 'application/json',
+                            Authorization: 'Bearer ' + token,
+                          },
+                        };
+                        axios.post(window._api + '/logout', {}, config)
+                        .then(res => {
+                          Cookies.remove('app_auth');
+                          this.props.triggerCentralLoading(false);
+                          el.props.history.push('/login');  
+                        })
+                        .catch(error => {
+                          console.log("Logout Unsuccessful", error);
+                        });
+                        
+                      }}><MdExitToApp /> Signout</span>
                     </ListGroupItem>
                   </ListGroup>
                 </UserCard>

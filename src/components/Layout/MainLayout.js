@@ -1,8 +1,13 @@
 import { Content, Footer, Header, Sidebar } from 'components/Layout';
 import React from 'react';
-import {  withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import { Spinner } from 'reactstrap';
 
 class MainLayout extends React.Component {
+
+  state = {
+    isCentralLoading: false,
+  };
   
   static isSidebarOpen() {
     return document
@@ -56,16 +61,31 @@ class MainLayout extends React.Component {
     document.querySelector('.cr-sidebar').classList.remove('cr-sidebar--open');
   }
 
+  triggerCentralLoading = param => {
+    this.setState({
+      isCentralLoading: param,
+    });
+  }
+
   render() {
     const { children } = this.props;
     return (
       <main className="cr-app bg-light">
+        {this.state.isCentralLoading === true && <div className='cm-page-loader cr-page-spinner'>
+                                                    <Spinner 
+                                                      color = "secondary" 
+                                                      className='cm-main-loader'
+                                                    />
+                                                  </div>}
         <Sidebar 
           saveCurFolder={this.props.saveCurFolder} 
           saveFolders={this.props.saveFolders}
         />
         <Content fluid onClick={this.handleContentClick}>
-          <Header search={this.props.handleSearch} />
+          <Header 
+            search={this.props.handleSearch}
+            triggerCentralLoading={this.triggerCentralLoading}
+          />
           {children}
           <Footer />
         </Content>
