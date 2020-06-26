@@ -5,11 +5,25 @@ import React from 'react';
 import axios from 'axios';
 import {  withRouter } from 'react-router-dom';
 import {
-  MdWeb
+  MdWeb,
+  MdDrafts
 } from 'react-icons/md';
 import {
-  FaSync
+  FaSync,
+  FaDumpster
 } from 'react-icons/fa';
+import {
+  TiArrowRightOutline,
+  TiStarFullOutline
+} from 'react-icons/ti';
+import {
+  RiInboxArchiveLine,
+  RiSpam2Line,
+  RiDeleteBinLine
+} from 'react-icons/ri';
+import {
+  AiOutlineInbox
+} from 'react-icons/ai';
 import { NavLink } from 'react-router-dom';
 import {
   Button,
@@ -27,6 +41,17 @@ import {
 
 
 const bem = bn.create('sidebar');
+
+const folderMapping = {
+  'INBOX':   AiOutlineInbox,
+  'INBOX.Archive': RiInboxArchiveLine,
+  'INBOX.Starred': TiStarFullOutline,
+  'INBOX.spam': RiSpam2Line,
+  'INBOX.Drafts': MdDrafts,
+  'INBOX.Junk': FaDumpster,
+  'INBOX.Trash': RiDeleteBinLine,
+  'INBOX.Sent': TiArrowRightOutline
+};
 
 class Sidebar extends React.Component {
   state = {
@@ -71,17 +96,18 @@ class Sidebar extends React.Component {
               to: path,
               name: result[i],
               exact: true,
-              Icon: MdWeb
+              Icon: folderMapping.hasOwnProperty(path) ? folderMapping[path] : MdWeb
             };                
           }
           for(let i=0;i<items.length; i++){
             folders.push(items[i].name);
           }
           this.props.saveFolders(folders);  
-          this.props.saveCurFolder(items[0].name);
+          this.props.saveCurFolder(items[0].name); 
           this.setState({
               navItems: items
           });
+          console.log(items);
         }
       }
     });
