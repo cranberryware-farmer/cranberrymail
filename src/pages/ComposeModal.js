@@ -22,6 +22,7 @@ import {
 import {
   FaWindowMaximize,
   FaRegWindowMinimize,
+  FaSave,
 } from 'react-icons/fa';
 import {isMobile} from 'react-device-detect';
 import { toast } from 'react-toastify';
@@ -228,6 +229,10 @@ const composeModal = (props) => {
               /> : <RiSendPlaneLine /> }
             </RButton>
             <Label for="attachment" className='float-right'><MdAttachFile /></Label>
+            <FaSave 
+              className='float-right' 
+              onClick={() => props.saveDraft()}
+            />
             <Input
               type="file"
               name="attachment"

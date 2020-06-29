@@ -28,6 +28,8 @@ Route::prefix('v1')->group(function(){
 
          Route::post('trash_emails','Api\ImapController@trash_emails');
          Route::post('untrash_emails','Api\ImapController@untrash_emails');
+
+         Route::post('save_draft','Api\ImapController@saveDraft');
          
          Route::post('spam_emails','Api\ImapController@spam_emails');
          Route::post('unspam_emails','Api\ImapController@unspam_emails');
