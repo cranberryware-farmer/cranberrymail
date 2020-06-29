@@ -90,7 +90,13 @@ class InboxPage extends React.Component {
       enableMarkdown: false,
       enableEmailThread: false,
       dateFormat: '',
-      dockState: "normal"
+      dockState: "normal",
+      isSending: false,
+      toCompose: '',
+      ccCompose: '',
+      bccCompose: '',
+      subjectCompose: '',
+      contentCompose: '',
     };
   }
 
@@ -461,6 +467,9 @@ class InboxPage extends React.Component {
         Authorization: 'Bearer ' + token,
       },
     };
+    this.setState({
+      isSending: true
+    });
 
     let body = {};
     let content = this.state.modalEditorState.getCurrentContent();
@@ -523,9 +532,13 @@ class InboxPage extends React.Component {
           this.resetFields();
           this.setState({
             modal: false,
+            isSending: false
           });
           toast('Email has been sent');
         }else{
+          this.setState({
+            isSending: false
+          });
           toast(res.data.message);
         }
       });
@@ -558,7 +571,13 @@ class InboxPage extends React.Component {
   closeModal = () =>{
     this.setState({
       modal: false,
-      dockState: 'normal'
+      dockState: 'normal',
+      toCompose: '',
+      ccCompose: '',
+      bccCompose: '',
+      subjectCompose: '',
+      contentCompose: '',
+      attachmentContent: ''
     });
   };
   
@@ -571,11 +590,11 @@ class InboxPage extends React.Component {
     let content = this.state.modalEditorState.getCurrentContent();
     this.setState({
       dockState: dockstate,
-      to,
-      cc,
-      bcc,
-      subject,
-      content,
+      toCompose: to,
+      ccCompose: cc,
+      bccCompose: bcc,
+      subjectCompose: subject,
+      contentCompose: content,
       attachmentContent
     });
   };
@@ -1006,11 +1025,12 @@ class InboxPage extends React.Component {
               {this.state.modal && <ComposeModal
                                         modal = {this.state.modal}
                                         dockState = {this.state.dockState}
-                                        to = {this.state.to}
-                                        cc = {this.state.cc}
-                                        bcc = {this.state.bcc}
-                                        subject = {this.state.subject}
-                                        content = {this.state.content}
+                                        to = {this.state.toCompose}
+                                        cc = {this.state.ccCompose}
+                                        bcc = {this.state.bccCompose}
+                                        subject = {this.state.subjectCompose}
+                                        content = {this.state.contentCompose}
+                                        isSending = {this.state.isSending}
                                         attachmentContent = {this.state.attachmentContent}
                                         composehandler = {this.handleCompose}
                                         closemodal = {this.closeModal}

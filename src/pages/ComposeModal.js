@@ -10,6 +10,7 @@ import {
     FormText,
     Modal,
     ModalBody,
+    Spinner,
 } from 'reactstrap';
 import { MdAttachFile } from "react-icons/md";
 // import { Editor } from 'react-draft-wysiwyg';
@@ -23,6 +24,7 @@ import {
   FaRegWindowMinimize,
 } from 'react-icons/fa';
 import {isMobile} from 'react-device-detect';
+import { toast } from 'react-toastify';
 
 
 const dockStyles = {
@@ -83,6 +85,17 @@ const composeModal = (props) => {
       document.getElementById('attachment').files = props.attachmentContent;
     }
   });
+
+  const sendEmail = () => {
+    if(!props.isSending) {
+      const toValue = document.getElementById('to').value;
+      if(toValue) {
+        props.sendemail();
+      } else {
+        toast("Empty to Field");
+      }
+    }
+  }
 
   const composeContent = (
     <div>
@@ -202,8 +215,17 @@ const composeModal = (props) => {
             />
           </FormGroup>
           <FormGroup>
-            <RButton onClick={ () =>  props.sendemail() }>
-              Send <RiSendPlaneLine />
+            <RButton 
+              onClick={() => sendEmail()}
+              disabled={props.isSending}
+            >
+              Send  
+              { props.isSending ? <Spinner 
+                type = "grow"
+                color = "light"
+                size="sm"
+                className='send-spinner'
+              /> : <RiSendPlaneLine /> }
             </RButton>
             <Label for="attachment" className='float-right'><MdAttachFile /></Label>
             <Input
