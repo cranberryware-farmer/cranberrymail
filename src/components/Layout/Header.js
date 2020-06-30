@@ -87,14 +87,22 @@ class Header extends React.Component {
         email: this.props.location.state.email  
       });
     }
+    if(!this.state.email){
+      const app_email = Cookies.get("app_email") ? Cookies.get("app_email") : "";
+      if(app_email) {
+        this.setState({
+          email: app_email  
+        });
+      }
+    }
   }
 
   render() {
     const { isNotificationConfirmed, email } = this.state;
-    let EmailName = '';
+    let EmailName = ' ';
     if(email){
       const NEmailExtract = email.split('@');
-      EmailName =  NEmailExtract[0];
+      EmailName =  NEmailExtract[0].toString().replace(/[._]/g," ");
     }
     
     return (
@@ -191,6 +199,7 @@ class Header extends React.Component {
                         axios.post(window._api + '/logout', {}, config)
                         .then(res => {
                           Cookies.remove('app_auth');
+                          Cookies.remove('app_email');
                           this.props.triggerCentralLoading(false);
                           el.props.history.push('/login');  
                         })

@@ -99,6 +99,7 @@ class AuthForm extends React.Component {
             }
           }); 
           Cookies.set('app_auth', res.data.success.token);
+          Cookies.set('app_email', this.state.email);
         }
       })
       .catch(error => {

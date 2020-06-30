@@ -70,6 +70,7 @@ class Sidebar extends React.Component {
         const result = res.data;
         if(result.hasOwnProperty("success") && result.hasOwnProperty("force_logout") && result.success === false && res.data.force_logout === true){
           Cookies.remove('app_auth');
+          Cookies.remove('app_email');
           this.props.history.push('/login');
         } else {
           toast('Welcome to Cranberry Mail');
