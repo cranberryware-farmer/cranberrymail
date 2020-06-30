@@ -18,7 +18,8 @@
         "laravel/ui": "^1.1",
         "oscarafdev/migrations-generator": "^2.0",
         "pear-pear.horde.org/horde_cache": "*",
-        "pear-pear.horde.org/horde_imap_client": "*"
+        "pear-pear.horde.org/horde_imap_client": "*",
+        "pear/mail_mime": "^1.10"
     },
     "require-dev": {
         "facade/ignition": "^1.4",

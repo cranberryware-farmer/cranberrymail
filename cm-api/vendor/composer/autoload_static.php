@@ -542,6 +542,10 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
             array (
                 0 => __DIR__ . '/..' . '/mockery/mockery/library',
             ),
+            'Mail' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/mail_mime',
+            ),
         ),
         'H' => 
         array (
@@ -554,6 +558,17 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
                 0 => __DIR__ . '/..' . '/scrivo/highlight.php',
             ),
         ),
+        'C' => 
+        array (
+            'Console' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/console_getopt',
+            ),
+        ),
+    );
+
+    public static $fallbackDirsPsr0 = array (
+        0 => __DIR__ . '/..' . '/pear/pear-core-minimal/src',
     );
 
     public static $classMap = array (
@@ -627,6 +642,7 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
         'Carbon\\Traits\\Units' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Units.php',
         'Carbon\\Traits\\Week' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Week.php',
         'Carbon\\Translator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Translator.php',
+        'Console_Getopt' => __DIR__ . '/..' . '/pear/console_getopt/Console/Getopt.php',
         'Cron\\AbstractField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/AbstractField.php',
         'Cron\\CronExpression' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/CronExpression.php',
         'Cron\\DayOfMonthField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/DayOfMonthField.php',
@@ -3333,6 +3349,8 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
         'League\\OAuth2\\Server\\ResponseTypes\\BearerTokenResponse' => __DIR__ . '/..' . '/league/oauth2-server/src/ResponseTypes/BearerTokenResponse.php',
         'League\\OAuth2\\Server\\ResponseTypes\\RedirectResponse' => __DIR__ . '/..' . '/league/oauth2-server/src/ResponseTypes/RedirectResponse.php',
         'League\\OAuth2\\Server\\ResponseTypes\\ResponseTypeInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/ResponseTypes/ResponseTypeInterface.php',
+        'Mail_mime' => __DIR__ . '/..' . '/pear/mail_mime/Mail/mime.php',
+        'Mail_mimePart' => __DIR__ . '/..' . '/pear/mail_mime/Mail/mimePart.php',
         'Mockery' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery.php',
         'Mockery\\Adapter\\Phpunit\\Legacy\\TestListenerForV5' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/Legacy/TestListenerForV5.php',
         'Mockery\\Adapter\\Phpunit\\Legacy\\TestListenerForV6' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/Legacy/TestListenerForV6.php',
@@ -3559,6 +3577,7 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
         'Nyholm\\Psr7\\Stream' => __DIR__ . '/..' . '/nyholm/psr7/src/Stream.php',
         'Nyholm\\Psr7\\UploadedFile' => __DIR__ . '/..' . '/nyholm/psr7/src/UploadedFile.php',
         'Nyholm\\Psr7\\Uri' => __DIR__ . '/..' . '/nyholm/psr7/src/Uri.php',
+        'OS_Guess' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/OS/Guess.php',
         'Opis\\Closure\\Analyzer' => __DIR__ . '/..' . '/opis/closure/src/Analyzer.php',
         'Opis\\Closure\\ClosureContext' => __DIR__ . '/..' . '/opis/closure/src/ClosureContext.php',
         'Opis\\Closure\\ClosureScope' => __DIR__ . '/..' . '/opis/closure/src/ClosureScope.php',
@@ -3585,6 +3604,10 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
         'OscarAFDev\\MigrationsGenerator\\Syntax\\DroppedTable' => __DIR__ . '/..' . '/oscarafdev/migrations-generator/src/OscarAFDev/MigrationsGenerator/Syntax/DroppedTable.php',
         'OscarAFDev\\MigrationsGenerator\\Syntax\\RemoveForeignKeysFromTable' => __DIR__ . '/..' . '/oscarafdev/migrations-generator/src/OscarAFDev/MigrationsGenerator/Syntax/RemoveForeignKeysFromTable.php',
         'OscarAFDev\\MigrationsGenerator\\Syntax\\Table' => __DIR__ . '/..' . '/oscarafdev/migrations-generator/src/OscarAFDev/MigrationsGenerator/Syntax/Table.php',
+        'PEAR' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
+        'PEAR_Error' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
+        'PEAR_ErrorStack' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR/ErrorStack.php',
+        'PEAR_Exception' => __DIR__ . '/..' . '/pear/pear_exception/PEAR/Exception.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert.php',
         'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Exception/AssertionFailedError.php',
@@ -5410,6 +5433,7 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
         'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
         'Symfony\\Polyfill\\Php73\\Php73' => __DIR__ . '/..' . '/symfony/polyfill-php73/Php73.php',
+        'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'Tests\\CreatesApplication' => __DIR__ . '/../..' . '/tests/CreatesApplication.php',
         'Tests\\Feature\\ExampleTest' => __DIR__ . '/../..' . '/tests/Feature/ExampleTest.php',
         'Tests\\TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
@@ -5581,6 +5605,7 @@ class ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf
             $loader->prefixLengthsPsr4 = ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf::$fallbackDirsPsr0;
             $loader->classMap = ComposerStaticInit848b3ec3a540536bb21edf89a9c844bf::$classMap;
 
         }, null, ClassLoader::class);

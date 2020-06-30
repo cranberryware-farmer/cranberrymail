@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
-
+use Mail_mime;
 
 class ImapController extends Controller
 {
@@ -64,6 +64,7 @@ class ImapController extends Controller
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Horde_Imap_Client_Exception
      */
 
     public function get_folders(Request $request){
@@ -315,18 +316,15 @@ class ImapController extends Controller
         $subject = $request->input("subject");
         $body=$request->input("body");
 
-        $envelope["to"]  = $tos;
-        $envelope["cc"]  = $ccs;
-        $envelope["bcc"]  = $bccs;
-        $envelope["subject"]  = $subject;
+        $mail_mime = new Mail_mime();
+        $mail_mime->addTo($tos);
+        $mail_mime->addCc($ccs);
+        $mail_mime->addBcc($bccs);
+        $mail_mime->setSubject($subject);
+        $mail_mime->setHTMLBody($body);
 
-        $part["type"] = "TEXT";
-        $part["subtype"] = "html";
-        $part["contents.data"] = $body;
-
-        $mail_body[1] = $part;
-
-        $msg = imap_mail_compose($envelope, $mail_body);
+        $msg = $mail_mime->getMessage();
+        
         $append_body[] = ['data' => $msg];
 
         $draft = $oClient->append(

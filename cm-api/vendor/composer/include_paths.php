@@ -24,4 +24,8 @@ return array(
     $vendorDir . '/pear-pear.horde.org/Horde_Text_Flowed',
     $vendorDir . '/pear-pear.horde.org/Horde_Translation',
     $vendorDir . '/pear-pear.horde.org/Horde_Util',
+    $vendorDir . '/pear/console_getopt',
+    $vendorDir . '/pear/mail_mime',
+    $vendorDir . '/pear/pear-core-minimal/src',
+    $vendorDir . '/pear/pear_exception',
 );

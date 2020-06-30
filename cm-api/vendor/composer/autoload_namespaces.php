@@ -10,6 +10,9 @@ return array(
     'OscarAFDev\\MigrationsGenerator' => array($vendorDir . '/oscarafdev/migrations-generator/src'),
     'Orangehill\\Iseed' => array($vendorDir . '/orangehill/iseed/src'),
     'Mockery' => array($vendorDir . '/mockery/mockery/library'),
+    'Mail' => array($vendorDir . '/pear/mail_mime'),
     'Highlight\\' => array($vendorDir . '/scrivo/highlight.php'),
     'HighlightUtilities\\' => array($vendorDir . '/scrivo/highlight.php'),
+    'Console' => array($vendorDir . '/pear/console_getopt'),
+    '' => array($vendorDir . '/pear/pear-core-minimal/src'),
 );
