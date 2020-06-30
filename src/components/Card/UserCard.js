@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import { Card, CardTitle, CardSubtitle, CardText, CardBody } from 'reactstrap';
 
-import Avatar from '../Avatar';
+import CAvatar from '../CAvatar';
 
 const UserCard = ({
   avatar,
@@ -15,6 +15,7 @@ const UserCard = ({
   text,
   children,
   className,
+  name,
   ...restProps
 }) => {
   const classes = classNames('bg-gradient-theme', className);
@@ -22,7 +23,7 @@ const UserCard = ({
   return (
     <Card inverse className={classes} {...restProps}>
       <CardBody className="d-flex justify-content-center align-items-center flex-column">
-        <Avatar src={avatar} size={avatarSize} className="mb-2" />
+        <CAvatar name={name} size={avatarSize} className="mb-2" />
         <CardTitle>{title}</CardTitle>
         <CardSubtitle>{subtitle}</CardSubtitle>
         <CardText>

@@ -1,4 +1,4 @@
-import Avatar from 'components/Avatar';
+import CAvatar from 'components/CAvatar';
 import React, { Fragment } from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
 import PropTypes from 'utils/propTypes';
@@ -22,7 +22,7 @@ const HorizontalAvatarList = ({
 
           return (
             <Fragment key={index}>
-              <Avatar
+              <CAvatar
                 {...avatarProps}
                 id={`HorizontalAvatarList-avatar-${index}`}
                 src={avatar}

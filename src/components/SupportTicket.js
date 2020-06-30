@@ -3,7 +3,7 @@ import PropTypes from 'utils/propTypes';
 
 import { Media, Button } from 'reactstrap';
 
-import Avatar from './Avatar';
+import CAvatar from './CAvatar';
 
 const statusMap = {
   open: 'info',
@@ -24,7 +24,7 @@ const SupportTicket = ({
     <div {...restProps}>
       <Media className="m-2">
         <Media left className="mr-2">
-          <Avatar src={avatar} />
+          <CAvatar src={avatar} />
         </Media>
         <Media body>
           <Media heading tag="h6" className="m-0">

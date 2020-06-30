@@ -16,12 +16,14 @@ class AuthPage extends React.Component {
 
   componentDidMount() {
     const token = Cookies.get("app_auth") ? Cookies.get("app_auth") : "";
+    const app_email = Cookies.get("app_email") ? Cookies.get("app_email") : "";
     if(token){
       this.props.history.push({
         pathname: '/',
         state: {
           detail: "Retreived mailbox.",
-          token
+          token,
+          email: app_email
         }
       }); 
     }

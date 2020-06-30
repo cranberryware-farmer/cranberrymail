@@ -3,14 +3,14 @@ import PropTypes from 'utils/propTypes';
 
 import { Table, Progress } from 'reactstrap';
 
-import Avatar from 'components/Avatar';
+import CAvatar from 'components/CAvatar';
 
 import withBadge from 'hocs/withBadge';
 
 const AvatarWithBadge = withBadge({
   position: 'bottom-right',
   color: 'success',
-})(Avatar);
+})(CAvatar);
 
 const UserProgressTable = ({ headers, usersData, ...restProps }) => {
   return (

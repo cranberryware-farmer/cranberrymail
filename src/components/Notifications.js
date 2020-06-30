@@ -3,7 +3,7 @@ import PropTypes from 'utils/propTypes';
 
 import { Media } from 'reactstrap';
 
-import Avatar from 'components/Avatar';
+import CAvatar from 'components/CAvatar';
 
 const Notifications = ({ notificationsData }) => {
   return (
@@ -12,7 +12,7 @@ const Notifications = ({ notificationsData }) => {
     notificationsData.map(({ id, avatar, message, date }) => (
       <Media key={id} className="pb-2">
         <Media left className="align-self-center pr-3">
-          <Avatar tag={Media} object src={avatar} alt="Avatar" />
+          <CAvatar tag={Media} object src={avatar} alt="Avatar" />
         </Media>
         <Media body middle className="align-self-center">
           {message}
