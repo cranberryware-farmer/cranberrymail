@@ -3,9 +3,9 @@ import PropTypes from 'utils/propTypes';
 
 import classNames from 'classnames';
 
-import userImage from 'assets/img/users/100_4.jpg';
+import Avatar from 'react-avatar';
 
-const Avatar = ({
+const CAvatar = ({
   rounded,
   circle,
   src,
@@ -13,20 +13,32 @@ const Avatar = ({
   tag: Tag,
   className,
   style,
+  name,
   ...restProps
 }) => {
   const classes = classNames({ 'rounded-circle': circle, rounded }, className);
-  return (
-    <Tag
-      src={src}
-      style={{ width: size, height: size, ...style }}
-      className={classes}
-      {...restProps}
-    />
-  );
+  if(src) {
+    return (
+      <Tag
+        src={src}
+        style={{ width: size, height: size, ...style }}
+        className={classes}
+        {...restProps}
+      />
+    );
+  } else {
+    return (
+      <Avatar
+        name={name}
+        size={size}
+        style={{ width: size, height: size, ...style }}
+        className={classes}
+      />
+    );
+  }
 };
 
-Avatar.propTypes = {
+CAvatar.propTypes = {
   tag: PropTypes.component,
   rounded: PropTypes.bool,
   circle: PropTypes.bool,
@@ -35,13 +47,13 @@ Avatar.propTypes = {
   style: PropTypes.object,
 };
 
-Avatar.defaultProps = {
+CAvatar.defaultProps = {
   tag: 'img',
   rounded: false,
   circle: true,
   size: 40,
-  src: userImage,
+  src: '',
   style: {},
 };
 
-export default Avatar;
+export default CAvatar;

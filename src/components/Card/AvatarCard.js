@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { Card, CardBody, CardSubtitle, CardText, CardTitle } from 'reactstrap';
 import PropTypes from 'utils/propTypes';
-import Avatar from '../Avatar';
+import CAvatar from '../CAvatar';
 
 const AvatarCard = ({
   avatar,
@@ -19,7 +19,7 @@ const AvatarCard = ({
   return (
     <Card inverse className={classes} {...restProps}>
       <CardBody className="d-flex justify-content-center align-items-center flex-column">
-        <Avatar src={avatar} size={avatarSize} className="mb-3" />
+        <CAvatar src={avatar} size={avatarSize} className="mb-3" />
         <CardTitle>{title}</CardTitle>
         {!!subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
         {!!text && (

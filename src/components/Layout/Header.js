@@ -1,4 +1,4 @@
-import Avatar from 'components/Avatar';
+import CAvatar from 'components/CAvatar';
 import { UserCard } from 'components/Card';
 import Notifications from 'components/Notifications';
 import SearchInput from 'components/SearchInput';
@@ -90,7 +90,12 @@ class Header extends React.Component {
   }
 
   render() {
-    const { isNotificationConfirmed } = this.state;
+    const { isNotificationConfirmed, email } = this.state;
+    let EmailName = '';
+    if(email){
+      const NEmailExtract = email.split('@');
+      EmailName =  NEmailExtract[0];
+    }
     
     return (
       <Navbar light expand className={bem.b('bg-white')}>
@@ -134,7 +139,8 @@ class Header extends React.Component {
 
           <NavItem>
             <NavLink id="Popover2">
-              <Avatar
+              <CAvatar
+                name={EmailName}
                 onClick={this.toggleUserCardPopover}
                 className="can-click"
               />
@@ -149,6 +155,7 @@ class Header extends React.Component {
             >
               <PopoverBody className="p-0 border-light">
                 <UserCard
+                  name={EmailName}
                   title={this.state.name}
                   subtitle={this.state.email}
                   text="Last updated 3 mins ago"

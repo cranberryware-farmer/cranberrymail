@@ -3,7 +3,7 @@ import PropTypes from 'utils/propTypes';
 
 import { Card, CardHeader, CardBody, CardText, Button } from 'reactstrap';
 
-import Avatar from 'components/Avatar';
+import CAvatar from 'components/CAvatar';
 
 import classNames from 'classnames';
 
@@ -30,7 +30,7 @@ const AnnouncementCard = ({
         header
       )}
       <CardBody className="d-flex flex-wrap flex-column align-items-center justify-content-center">
-        <Avatar size={avatarSize} src={avatar} />
+        <CAvatar size={avatarSize} src={avatar} />
         <CardText className="text-center">
           <strong className="d-block">{name}</strong>
           <small className="text-muted">{date}</small>
