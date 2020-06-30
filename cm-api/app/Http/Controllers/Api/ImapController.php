@@ -320,7 +320,7 @@ class ImapController extends Controller
         $envelope["bcc"]  = $bccs;
         $envelope["subject"]  = $subject;
 
-        $part["type"] = TYPETEXT;
+        $part["type"] = "TEXT";
         $part["subtype"] = "html";
         $part["contents.data"] = $body;
 
