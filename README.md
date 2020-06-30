@@ -21,6 +21,7 @@
 8. Tokenizer
 9. XML (SimpleXML)
 10. MySQLi
+11. PHP IMAP
 
 ## Steps for building production ready CranberryMail from git repository:
 

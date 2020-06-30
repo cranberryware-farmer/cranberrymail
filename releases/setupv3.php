@@ -112,7 +112,8 @@
                                 'json_encode' => 'JSON',
                                 'curl_init' => 'Curl',
                                 'simplexml_load_string' => 'SimpleXML',
-                                'mysqli_init' => 'MySQLi'
+                                'mysqli_init' => 'MySQLi',
+                                'imap_open' => 'imap',
                             ),
                             'defined' => array(
                                 'PDO::ATTR_DRIVER_NAME' => 'PDO'
