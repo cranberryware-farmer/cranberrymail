@@ -324,7 +324,7 @@ class ImapController extends Controller
         $mail_mime->setHTMLBody($body);
 
         $msg = $mail_mime->getMessage();
-        
+
         $append_body[] = ['data' => $msg];
 
         $draft = $oClient->append(

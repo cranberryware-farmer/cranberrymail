@@ -209,7 +209,6 @@ const composeModal = (props) => {
             <CustomToolbarEditor 
               id="email"
               editorState={props.meditorstate}
-              content={ props.content }
               onEditorStateChange={(es) => {
                 props.meditorstatehandler(es);
               }}
