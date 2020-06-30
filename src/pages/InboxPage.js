@@ -97,6 +97,8 @@ class InboxPage extends React.Component {
       bccCompose: '',
       subjectCompose: '',
       contentCompose: '',
+      savingDraft: false,
+      draftID: 0
     };
   }
 
@@ -459,6 +461,93 @@ class InboxPage extends React.Component {
     });
   };
 
+  saveDraft = (e) => {
+    let { token } = this.state.app;
+    const config = {
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+    };
+    this.setState({
+      savingDraft: true
+    });
+
+    let body = {};
+    let content = this.state.modalEditorState.getCurrentContent();
+
+    if(this.state.enableMarkdown){
+      body = draftToMarkdown(convertToRaw(content));
+    }else{
+      body = draftToHtml(convertToRaw(content));
+    }
+    
+    let cc =  document.getElementById('cc');
+    let bcc = document.getElementById('bcc');
+    let to = document.getElementById('to').value;
+    let subject = document.getElementById('subject').value;
+
+    let data = {};
+
+    if(this.state.attachment){
+      let i=0;
+      data = new FormData();
+    
+      let fileData = this.state.attachment;
+      
+      for(;i<fileData.length;i++){
+        data.append('attachment[]',fileData[i]);
+      }
+      
+      data.append('to',to);
+      data.append('subject',subject);
+      data.append('body',body);
+
+      if(cc !== null){
+        data.append('cc',cc.value);
+      }
+      if(bcc!== null){
+        data.append('bcc',bcc.value);
+      }
+      data.append('draft_id',this.state.draftID);
+  
+      config.headers['Content-Type']= 'multipart/form-data';
+     
+    }else{
+      data = {
+        to,
+        subject,
+        body,
+      };
+      if(cc !== null){
+        data.cc = cc.value;
+      }
+      if(bcc!== null){
+        data.bcc = bcc.value;
+      }
+      data.draft_id = this.state.draftID;
+      console.log(data);
+    }
+
+    axios
+      .post(window._api + '/save_draft', data, config)
+      .then(res => {
+        console.log(res);
+        if (res.data.success) {
+          this.setState({
+            savingDraft: false,
+            draftID: res.data.draft
+          });
+          toast('Email has been saved to draft');
+        }else{
+          this.setState({
+            savingDraft: false
+          });
+          // toast(res.message);
+        }
+      });
+  };
+
   sendEmail = (e) => {
     let { token } = this.state.app;
     const config = {
@@ -555,7 +644,6 @@ class InboxPage extends React.Component {
         modalEditorState: EditorState.createEmpty(),
         attachment: false
       });
-     
     }
   };
 
@@ -577,7 +665,8 @@ class InboxPage extends React.Component {
       bccCompose: '',
       subjectCompose: '',
       contentCompose: '',
-      attachmentContent: ''
+      attachmentContent: '',
+      draftID: 0
     });
   };
   
@@ -1037,6 +1126,7 @@ class InboxPage extends React.Component {
                                         resizeDock = {this.resizeDock}
                                         classnm = {this.props.className}
                                         sendemail = {this.sendEmail}
+                                        saveDraft = {this.saveDraft}
                                         meditorstate = {this.state.modalEditorState}
                                         meditorstatehandler= {this.onModalEditorStateChange}
                                         attachmenthandler = {this.handleAttachment}

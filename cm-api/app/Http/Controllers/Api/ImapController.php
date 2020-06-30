@@ -50,6 +50,16 @@ class ImapController extends Controller
     }
 
     /**
+     * @param string $folder_name
+     * @return string
+     */
+    private function formatFolderName($folder_name) {
+        $folder_arr = preg_split('/[.\/]+/', $folder_name);
+        $folder_name = count($folder_arr) > 0 ? end($folder_arr) : $folder_name;
+        return strtolower($folder_name);
+    }
+
+    /**
      * Fetch folders
      *
      * @param Request $request
@@ -65,7 +75,12 @@ class ImapController extends Controller
         Log::info("Got mailboxes", ['file' => __FILE__, 'line' => __LINE__]);
         $data = [];
         foreach($mailBoxes as $mailBox){
-            array_push($data,$mailBox['mailbox']->utf8);
+            $mailbox_name = $mailBox['mailbox']->utf8;
+            $mailbox_formatted = $this->formatFolderName($mailbox_name);
+            if(in_array($mailbox_formatted, ['drafts', 'draft'])){
+                $request->session()->put('draft_folder', $mailbox_name);
+            }
+            array_push($data, $mailbox_name);
         }
         Log::info("Retrieved mailboxes as an array", ['file' => __FILE__, 'line' => __LINE__]);
         return response()->json($data, 200);
@@ -253,6 +268,76 @@ class ImapController extends Controller
         $data=[
             "result" => 1,
             "status" => $result
+        ];
+
+        Log::info("Returning the result of operation",['file' => __FILE__, 'line' => __LINE__]);
+
+        return response()->json($data, 200);
+
+    }
+
+    /**
+     * Move emails to inbox from spam.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Horde_Imap_Client_Exception
+     */
+
+    public function saveDraft(Request $request)
+    {
+        $user = Auth::user();
+        $oClient = $this->get_credentials($user);
+
+        $draft_folder = $request->session()->get('draft_folder', '');
+
+        $draft_id = $request->input("draft_id");
+
+        if($draft_id) {
+            $ids = new \Horde_Imap_Client_Ids($draft_id);
+
+            $oClient->store($draft_folder, array(
+                'ids' => $ids,
+                'add' => '\deleted',
+            ));
+
+            Log::info("Added deleted flag to given emails in trash folder",['file' => __FILE__, 'line' => __LINE__]);
+
+            $result = $oClient->expunge($draft_folder,[
+                'ids' => $ids,
+                'list' => true
+            ]);
+        }
+
+        $tos = $request->input("to");
+        $ccs = $request->input("cc");
+        $bccs = $request->input("bcc");
+        $subject = $request->input("subject");
+        $body=$request->input("body");
+
+        $envelope["to"]  = $tos;
+        $envelope["cc"]  = $ccs;
+        $envelope["bcc"]  = $bccs;
+        $envelope["subject"]  = $subject;
+
+        $part["type"] = "TEXT";
+        $part["subtype"] = "html";
+        $part["contents.data"] = $body;
+
+        $mail_body[1] = $part;
+
+        $msg = imap_mail_compose($envelope, $mail_body);
+        $append_body[] = ['data' => $msg];
+
+        $draft = $oClient->append(
+            $draft_folder,
+            $append_body
+        );
+        $draft = $draft->ids;
+
+        $data=[
+            "success" => true,
+            "draft" => $draft[0]
         ];
 
         Log::info("Returning the result of operation",['file' => __FILE__, 'line' => __LINE__]);
