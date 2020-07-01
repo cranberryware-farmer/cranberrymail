@@ -99,7 +99,8 @@ class InboxPage extends React.Component {
       bccCompose: '',
       subjectCompose: '',
       savingDraft: false,
-      draftID: 0
+      draftID: 0,
+      attachmentURLs: []
     };
   }
 
@@ -516,6 +517,10 @@ class InboxPage extends React.Component {
         data.append('bcc',bcc.value);
       }
       data.append('draft_id',this.state.draftID);
+
+      if(this.state.attachmentURLs.length >0) {
+        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
+      }
   
       config.headers['Content-Type']= 'multipart/form-data';
      
@@ -532,6 +537,9 @@ class InboxPage extends React.Component {
         data.bcc = bcc.value;
       }
       data.draft_id = this.state.draftID;
+      if(this.state.attachmentURLs.length >0) {
+        data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
+      }
     }
 
     axios
@@ -606,6 +614,9 @@ class InboxPage extends React.Component {
         data.append('bcc',bcc.value);
       }
       data.append('draft_id',this.state.draftID);
+      if(this.state.attachmentURLs.length >0) {
+        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
+      }
   
       config.headers['Content-Type']= 'multipart/form-data';
      
@@ -622,13 +633,20 @@ class InboxPage extends React.Component {
         data.bcc = bcc.value;
       }
       data.draft_id = this.state.draftID;
+      if(this.state.attachmentURLs.length >0) {
+        data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
+      }
     }
 
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
       .then(res => {
         if (res.data.result > 0) {
-          
+          const currentFolder = this.props.curFolder;
+          const currentFolderLower = currentFolder.toString().toLowerCase();
+          if(currentFolderLower.match('draft') !== null){
+            this.fetchEmails();
+          }
           this.resetFields();
           this.setState({
             modal: false,
@@ -668,7 +686,9 @@ class InboxPage extends React.Component {
   };
 
   closeModal = () =>{
-    this.saveDraft();
+    if (document.getElementById('to')){
+      this.saveDraft();
+    } 
     this.setState({
       modal: false,
       dockState: 'normal',
@@ -677,7 +697,8 @@ class InboxPage extends React.Component {
       bccCompose: '',
       subjectCompose: '',
       attachmentContent: '',
-      draftID: 0
+      draftID: 0,
+      modalEditorState: EditorState.createEmpty(),
     });
   };
   
@@ -864,7 +885,7 @@ class InboxPage extends React.Component {
         .then(res => {
           if (res.status === 200 && res.data.length > 0) {
             if(currentFolderLower.match("draft") !== null){
-              const {body, to, uid, cc, bcc, subject} = res.data[0];
+              const {body, to, uid, cc, bcc, subject, attachment} = res.data[0];
               this.setState({
                 modal: true,
                 dockState: 'normal',
@@ -874,6 +895,7 @@ class InboxPage extends React.Component {
                 subjectCompose: subject,
                 modalEditorState: EditorState.createWithContent(stateFromHTML(body)),
                 draftID: uid,
+                attachmentURLs: attachment
               });
             } else {
               this.setEmailNode(res.data[0]);

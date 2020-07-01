@@ -302,7 +302,7 @@ class ImapController extends Controller
                 'add' => '\deleted',
             ));
 
-            Log::info("Added deleted flag to given emails in trash folder",['file' => __FILE__, 'line' => __LINE__]);
+            Log::info("Added deleted flag to previous draft copy of the email",['file' => __FILE__, 'line' => __LINE__]);
 
             $result = $oClient->expunge($draft_folder,[
                 'ids' => $ids,
@@ -322,6 +322,20 @@ class ImapController extends Controller
         $mail_mime->addBcc($bccs);
         $mail_mime->setSubject($subject);
         $mail_mime->setHTMLBody($body);
+
+        if($request->hasFile('attachment')) {
+            $files = $request->file('attachment');
+            foreach($files as $file){
+                $mail_mime->addAttachment($file, 'application/octet-stream', $file->getClientOriginalName());
+            }
+        } else if($request->input("attachmentURLs")) {
+            $attached_urls = $request->input("attachmentURLs");
+            $urls_arr = json_decode($attached_urls, true);
+            foreach($urls_arr as $file){
+                $file_path = storage_path('app/') . $file["file"];
+                $mail_mime->addAttachment($file_path, 'application/octet-stream', $file["file"]);
+            }
+        }
 
         $msg = $mail_mime->getMessage();
 
@@ -822,11 +836,13 @@ class ImapController extends Controller
 
                     Storage::put($filename, $attachment['content']);
                     $url = "/storage/app/".$filename;
-                    unset($attachment);
+
                     array_push($msgdata->attachments,[
                         "url" => $url,
-                        "file" => $filename
+                        "file" => $filename,
+                        "type" => $attachment['type'],
                     ]);
+                    unset($attachment);
                 }
             }
 
@@ -915,9 +931,7 @@ class ImapController extends Controller
      */
     private function getCallableMethods($object){
         $reflection = new \ReflectionClass($object);
-        $methods = $reflection->getMethods();
-
-        return $methods;
+        return $reflection->getMethods();
     }
 
     /**
@@ -927,7 +941,6 @@ class ImapController extends Controller
      */
     private function getProperties($object){
         $reflection = new \ReflectionClass($object);
-
         return $reflection->getProperties();
     }
 

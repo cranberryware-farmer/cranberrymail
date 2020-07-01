@@ -148,7 +148,6 @@ class SmtpController extends Controller
             $swift_mailer = new \Swift_Mailer($transport);
             if($request->hasFile('attachment')){
 
-
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])
                 ->setTo($to);
@@ -159,7 +158,17 @@ class SmtpController extends Controller
                 }
                 Log::info("Attach files to email", ['file' => __FILE__, 'line' => __LINE__]);
 
-             }else{
+            } else if($request->input("attachmentURLs")) {
+                $msg = (new \Swift_Message($subject))
+                    ->setFrom([ $from => $name[0]])
+                    ->setTo($to);
+                $attached_urls = $request->input("attachmentURLs");
+                $urls_arr = json_decode($attached_urls, true);
+                foreach($urls_arr as $file){
+                    $file_path = storage_path('app/') . $file["file"];
+                    $msg->attach(\Swift_Attachment::fromPath($file_path)->setFilename($file["file"]));
+                }
+            } else {
 
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])
