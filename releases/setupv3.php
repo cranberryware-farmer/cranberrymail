@@ -3,7 +3,7 @@
 	ini_set('display_startup_errors', 1);
 	error_reporting(E_ALL);*/
     session_start();
-    define('CM_VERSION','latest');
+    define('CM_VERSION','cmail_installer');
     define('SETTINGS','cmail_settings');
 
     function terminal($command)
@@ -294,7 +294,7 @@
                     $uploadFlag=false;
                     // print_r($_FILES);exit;
                     $download = 1;
-                    if(isset($_FILES['cmail'])){
+                    if(isset($_FILES['cmail']) && $_FILES['cmail']["size"] > 0){
                         $ext = pathinfo($_FILES['cmail']["name"], PATHINFO_EXTENSION);
                         if($ext == "zip"){
                             $za = new ZipArchive;
