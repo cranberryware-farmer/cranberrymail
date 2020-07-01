@@ -321,6 +321,8 @@ class ImapController extends Controller
         $mail_mime->addCc($ccs);
         $mail_mime->addBcc($bccs);
         $mail_mime->setSubject($subject);
+        $mail_mime->setFrom($user->email);
+
         $mail_mime->setHTMLBody($body);
 
         if($request->hasFile('attachment')) {
