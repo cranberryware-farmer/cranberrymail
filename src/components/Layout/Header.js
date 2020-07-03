@@ -117,8 +117,8 @@ class Header extends React.Component {
         </Nav>
 
         <Nav navbar className={bem.e('nav-right')}>
-          <NavItem className="d-inline-flex">
-            {/* <NavLink id="Popover1" className="position-relative">
+          {/* <NavItem className="d-inline-flex">
+            <NavLink id="Popover1" className="position-relative">
               {isNotificationConfirmed ? (
                 <MdNotificationsNone
                   size={25}
@@ -132,7 +132,7 @@ class Header extends React.Component {
                   onClick={this.toggleNotificationPopover}
                 />
               )}
-            </NavLink> */}
+            </NavLink>
             <Popover
               placement="bottom"
               isOpen={this.state.isOpenNotificationPopover}
@@ -143,7 +143,7 @@ class Header extends React.Component {
                 <Notifications notificationsData={notificationsData} />
               </PopoverBody>
             </Popover>
-          </NavItem>
+          </NavItem> */}
 
           <NavItem>
             <NavLink id="Popover2">
