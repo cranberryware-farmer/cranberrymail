@@ -18,6 +18,7 @@ Route::prefix('v1')->group(function(){
     Route::post('login', 'Api\AuthController@login');
     Route::post('reg', 'Api\AuthController@register');
     Route::post('wizard/emailsettings', 'Api\WizardController@index');
+    Route::post('wizard/migrate', 'Api\WizardController@cranMigrate');
     Route::post('db_check', 'HomeController@db_check');
     Route::post('drop_create_db', 'HomeController@drop_create_db');
 
