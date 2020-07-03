@@ -667,7 +667,7 @@
 					<input type="hidden" name="app_log_level" id="app_log_level" value="error" />
 					<input type="hidden" name="broadcast_driver" id="broadcast_driver" value="log"  />
 					<input type="hidden" name="cache_driver" id="cache_driver" value="file" />
-					<input type="hidden" name="session_driver" id="session_driver" value="file" />
+					<input type="hidden" name="session_driver" id="session_driver" value="database" />
 					<input type="hidden" name="queue_driver" id="queue_driver" value="sync" />
 					<input type="hidden" name="redis_hostname" id="redis_hostname" value="127.0.0.1" />
 					<input type="hidden" name="redis_password" id="redis_password" value="null" />
