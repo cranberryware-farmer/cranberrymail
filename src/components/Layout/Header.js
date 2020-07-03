@@ -118,7 +118,7 @@ class Header extends React.Component {
 
         <Nav navbar className={bem.e('nav-right')}>
           <NavItem className="d-inline-flex">
-            <NavLink id="Popover1" className="position-relative">
+            {/* <NavLink id="Popover1" className="position-relative">
               {isNotificationConfirmed ? (
                 <MdNotificationsNone
                   size={25}
@@ -132,7 +132,7 @@ class Header extends React.Component {
                   onClick={this.toggleNotificationPopover}
                 />
               )}
-            </NavLink>
+            </NavLink> */}
             <Popover
               placement="bottom"
               isOpen={this.state.isOpenNotificationPopover}
@@ -170,7 +170,7 @@ class Header extends React.Component {
                   className="border-light"
                 >
                   <ListGroup flush>
-                    <ListGroupItem tag="a" href="#" className="border-light">
+                    {/* <ListGroupItem tag="a" href="#" className="border-light">
                       <MdPersonPin /> Profile
                     </ListGroupItem>
                     <ListGroupItem tag="a" href="#" className="border-light">
@@ -184,7 +184,7 @@ class Header extends React.Component {
                     </ListGroupItem>
                     <ListGroupItem tag="a" href="#" className="border-light">
                       <MdHelp /> Help
-                    </ListGroupItem>
+                    </ListGroupItem> */}
                     <ListGroupItem tag="a" href="#" action className="border-light">
                       <span onClick={()=>{
                         this.props.triggerCentralLoading(true);
