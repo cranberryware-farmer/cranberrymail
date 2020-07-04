@@ -7,6 +7,7 @@ use Symfony\Component\Process\Process;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Artisan;
 
 class WizardController extends Controller
 {
@@ -92,6 +93,39 @@ class WizardController extends Controller
                 "msg" => "Success, email provider detected."
             ], 200);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cranMigrate(Request $request)
+    {
+        Artisan::call('migrate');
+        Artisan::call('db:seed');
+        $sess_driver = env('SESSION_DRIVER', 'file');
+        if($sess_driver !== 'database'){
+            $envPath = base_path() . '/cmail_settings/.env';
+            $lines = file($envPath);
+            $result = '';
+
+            foreach($lines as $line) {
+                if(strpos($line, 'SESSION_DRIVER=') === 0) {
+                    $result .= "SESSION_DRIVER=database\n";
+                } else if(strpos($line, 'APP_ENV=') === 0) {
+                    $result .= "APP_ENV=production\n";
+                } else {
+                    $result .= $line;
+                }
+            }
+
+            file_put_contents($envPath, $result);
+        }
+        $data=[
+            "success" => true,
+            "message" => "Migrations successfully completed."
+        ];
+        return response()->json($data, 200);
     }
 
 

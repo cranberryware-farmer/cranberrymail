@@ -24,6 +24,8 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import ComposeModal from './ComposeModal';
 import EmailPage from './EmailPage';
 import SettingsPage from './SettingsPage';
+import {stateFromHTML} from 'draft-js-import-html';
+
 
 function createData(id, starred, from, subject,body,attachment, timestamp) {
   return { id, starred, from, subject, timestamp };
@@ -96,9 +98,9 @@ class InboxPage extends React.Component {
       ccCompose: '',
       bccCompose: '',
       subjectCompose: '',
-      contentCompose: '',
       savingDraft: false,
-      draftID: 0
+      draftID: 0,
+      attachmentURLs: []
     };
   }
 
@@ -200,6 +202,11 @@ class InboxPage extends React.Component {
             toast('Email has been sent');
             this.resetSubject();
             this.closeEditors();
+            const currentFolder = this.props.curFolder;
+            const currentFolderLower = currentFolder.toString().toLowerCase();
+            if(currentFolderLower.match('draft') !== null){
+              this.fetchEmails();
+            }
         }else{
           toast(res.data.message);
         }
@@ -510,6 +517,10 @@ class InboxPage extends React.Component {
         data.append('bcc',bcc.value);
       }
       data.append('draft_id',this.state.draftID);
+
+      if(this.state.attachmentURLs.length >0) {
+        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
+      }
   
       config.headers['Content-Type']= 'multipart/form-data';
      
@@ -526,18 +537,24 @@ class InboxPage extends React.Component {
         data.bcc = bcc.value;
       }
       data.draft_id = this.state.draftID;
-      console.log(data);
+      if(this.state.attachmentURLs.length >0) {
+        data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
+      }
     }
 
     axios
       .post(window._api + '/save_draft', data, config)
       .then(res => {
-        console.log(res);
         if (res.data.success) {
           this.setState({
             savingDraft: false,
             draftID: res.data.draft
           });
+          const currentFolder = this.props.curFolder;
+          const currentFolderLower = currentFolder.toString().toLowerCase();
+          if(currentFolderLower.match('draft') !== null){
+            this.fetchEmails();
+          }
           toast('Email has been saved to draft');
         }else{
           this.setState({
@@ -596,6 +613,10 @@ class InboxPage extends React.Component {
       if(bcc!== null){
         data.append('bcc',bcc.value);
       }
+      data.append('draft_id',this.state.draftID);
+      if(this.state.attachmentURLs.length >0) {
+        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
+      }
   
       config.headers['Content-Type']= 'multipart/form-data';
      
@@ -611,13 +632,21 @@ class InboxPage extends React.Component {
       if(bcc!== null){
         data.bcc = bcc.value;
       }
+      data.draft_id = this.state.draftID;
+      if(this.state.attachmentURLs.length >0) {
+        data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
+      }
     }
 
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
       .then(res => {
         if (res.data.result > 0) {
-          
+          const currentFolder = this.props.curFolder;
+          const currentFolderLower = currentFolder.toString().toLowerCase();
+          if(currentFolderLower.match('draft') !== null){
+            this.fetchEmails();
+          }
           this.resetFields();
           this.setState({
             modal: false,
@@ -657,6 +686,9 @@ class InboxPage extends React.Component {
   };
 
   closeModal = () =>{
+    if (document.getElementById('to')){
+      this.saveDraft();
+    } 
     this.setState({
       modal: false,
       dockState: 'normal',
@@ -664,9 +696,9 @@ class InboxPage extends React.Component {
       ccCompose: '',
       bccCompose: '',
       subjectCompose: '',
-      contentCompose: '',
       attachmentContent: '',
-      draftID: 0
+      draftID: 0,
+      modalEditorState: EditorState.createEmpty(),
     });
   };
   
@@ -676,14 +708,12 @@ class InboxPage extends React.Component {
     let to = document.getElementById('to').value;
     let subject = document.getElementById('subject').value;
     let attachmentContent = document.getElementById('attachment').files;
-    let content = this.state.modalEditorState.getCurrentContent();
     this.setState({
       dockState: dockstate,
       toCompose: to,
       ccCompose: cc,
       bccCompose: bcc,
       subjectCompose: subject,
-      contentCompose: content,
       attachmentContent
     });
   };
@@ -824,46 +854,63 @@ class InboxPage extends React.Component {
   };
 
   showEmail = uid => {
-    if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
+    const currentFolder = this.props.curFolder;
+    const currentFolderLower = currentFolder.toString().toLowerCase();
+    if(currentFolder !== '' || currentFolder !== undefined){
       let row_index = this.getRowIndex(uid);
-    window.scrollTo(0, 0);
-    
-    this.setState({
-      busy: 1,
-      rows: [],
-    });
-    const config = {
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + this.state.app.token,
-      },
-    };
+      window.scrollTo(0, 0);
+      
+      if(currentFolderLower.match("draft") === null) {
+        this.setState({
+          busy: 1,
+          rows: [],
+        });
+      }
+      
+      const config = {
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer ' + this.state.app.token,
+        },
+      };
 
-    
+      const data = {
+        folder: currentFolder,
+        thread_uids: this.state.emailThreads[row_index]['uids'],
+        has_thread: 1
+      };
 
-    const data = {
-      folder: this.props.curFolder,
-      thread_uids: this.state.emailThreads[row_index]['uids'],
-      has_thread: 1
-    };
-
-    axios
-      .post(window._api + '/email', data, config)
-      .then(res => {
-        if (res.status === 200 && res.data.length > 0) {
-          this.setEmailNode(res.data[0]);
-          this.setState({
-            "thread" : res.data
-          });
-          this.closeEditors();
-
-        }else{
-         this.setState({
-            page: 'list',
-          });
-          this.fetchEmails();
-        }
-      });  
+      axios
+        .post(window._api + '/email', data, config)
+        .then(res => {
+          if (res.status === 200 && res.data.length > 0) {
+            if(currentFolderLower.match("draft") !== null){
+              const {body, to, uid, cc, bcc, subject, attachment} = res.data[0];
+              this.setState({
+                modal: true,
+                dockState: 'normal',
+                toCompose: to,
+                ccCompose: cc,
+                bccCompose: bcc,
+                subjectCompose: subject,
+                modalEditorState: EditorState.createWithContent(stateFromHTML(body)),
+                draftID: uid,
+                attachmentURLs: attachment
+              });
+            } else {
+              this.setEmailNode(res.data[0]);
+              this.setState({
+                "thread" : res.data
+              });
+              this.closeEditors();
+            }
+          }else{
+            this.setState({
+              page: 'list',
+            });
+            this.fetchEmails();
+          }
+        });  
     }
   };
 
@@ -1118,7 +1165,6 @@ class InboxPage extends React.Component {
                                         cc = {this.state.ccCompose}
                                         bcc = {this.state.bccCompose}
                                         subject = {this.state.subjectCompose}
-                                        content = {this.state.contentCompose}
                                         isSending = {this.state.isSending}
                                         attachmentContent = {this.state.attachmentContent}
                                         composehandler = {this.handleCompose}

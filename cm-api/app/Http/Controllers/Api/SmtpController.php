@@ -77,7 +77,6 @@ class SmtpController extends Controller
             ), 200);
         }
 
-
         try{
             $user = Auth::user();
             $from = $user->email;
@@ -90,8 +89,38 @@ class SmtpController extends Controller
             $subject = $request->input("subject");
             $body=$request->input("body");
             $msgId=$request->input('messageId');
+            $draft_id = $request->input('draft_id');
 
+            if($draft_id) {
+                $draft_folder = $request->session()->get('draft_folder', '');
+                $user = Auth::user();
+                $email = $user->email;
+                $password=Crypt::decryptString($user->key);
 
+                $oClient = new \Horde_Imap_Client_Socket([
+                    'username' => $email,
+                    'password' => $password,
+                    'hostspec' => env('IMAP_HOST'),
+                    'port' => env('IMAP_PORT'),
+                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
+                ]);
+                Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
+                $oClient->login();
+                Log::info("Login with oClient", ['file' => __FILE__, 'line' => __LINE__]);
+
+                $ids = new \Horde_Imap_Client_Ids($draft_id);
+                $oClient->store($draft_folder, array(
+                    'ids' => $ids,
+                    'add' => '\deleted',
+                ));
+
+                Log::info("Added deleted flag to given emails in trash folder",['file' => __FILE__, 'line' => __LINE__]);
+
+                $draft_deleted = $oClient->expunge($draft_folder,[
+                    'ids' => $ids,
+                    'list' => true
+                ]);
+            }
 
             $smtp = $this->getSmtp();
 
@@ -119,7 +148,6 @@ class SmtpController extends Controller
             $swift_mailer = new \Swift_Mailer($transport);
             if($request->hasFile('attachment')){
 
-
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])
                 ->setTo($to);
@@ -130,7 +158,17 @@ class SmtpController extends Controller
                 }
                 Log::info("Attach files to email", ['file' => __FILE__, 'line' => __LINE__]);
 
-             }else{
+            } else if($request->input("attachmentURLs")) {
+                $msg = (new \Swift_Message($subject))
+                    ->setFrom([ $from => $name[0]])
+                    ->setTo($to);
+                $attached_urls = $request->input("attachmentURLs");
+                $urls_arr = json_decode($attached_urls, true);
+                foreach($urls_arr as $file){
+                    $file_path = storage_path('app/') . $file["file"];
+                    $msg->attach(\Swift_Attachment::fromPath($file_path)->setFilename($file["file"]));
+                }
+            } else {
 
                 $msg = (new \Swift_Message($subject))
                 ->setFrom([ $from => $name[0]])

@@ -3,7 +3,7 @@
 	ini_set('display_startup_errors', 1);
 	error_reporting(E_ALL);*/
     session_start();
-    define('CM_VERSION','latest');
+    define('CM_VERSION','cmail_installer');
     define('SETTINGS','cmail_settings');
 
     function terminal($command)
@@ -64,6 +64,20 @@
         // return the smallest of them, this defines the real limit
         return min($max_upload, $max_post, $memory_limit);
     }
+    function rrmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object))
+                    rrmdir($dir. DIRECTORY_SEPARATOR .$object);
+                else
+                    unlink($dir. DIRECTORY_SEPARATOR .$object);
+                }
+            }
+            rmdir($dir);
+        }
+    }
 ?>
 <!doctype html>
 <html>
@@ -78,9 +92,9 @@
     <body>
         <?php $step = (isset($_REQUEST['step'])) ? $_REQUEST['step'] : null;?>
         <nav class="navbar navbar-light bg-light">
-            <a class="navbar-brand" href="https://nettantra.com">
-                <img src="https://cdn.nettantra.net/wp-content/uploads/2019/10/nettantra-logo-2019.svg" width="25%" height="25%" class="d-inline-block align-top" alt="Nettantra">
-            </a>
+            <span class="navbar-brand">
+                <img src="https://cranberryware.com/images/cm-logo-web.png" width="25%" height="25%" class="d-inline-block align-top" alt="CranberryMail" />
+            </span>
         </nav>
         <?php if($step!=null) { ?>
 
@@ -113,7 +127,6 @@
                                 'curl_init' => 'Curl',
                                 'simplexml_load_string' => 'SimpleXML',
                                 'mysqli_init' => 'MySQLi',
-                                'imap_open' => 'imap',
                             ),
                             'defined' => array(
                                 'PDO::ATTR_DRIVER_NAME' => 'PDO'
@@ -250,7 +263,9 @@
                     function install($directory) {
                         $error = '';
                         if($directory != "."){
-                          terminal("mkdir -p ".__DIR__.'/'.escapeshellarg($directory));
+                            if (!file_exists(__DIR__.'/'.$directory)) {
+                                mkdir(__DIR__.'/'.$directory, 0755, true);
+                            }
                         }
 
                         if($error=="" && file_exists('./'.$directory."/index.php"))
@@ -295,7 +310,7 @@
                     $uploadFlag=false;
                     // print_r($_FILES);exit;
                     $download = 1;
-                    if(isset($_FILES['cmail'])){
+                    if(isset($_FILES['cmail']) && $_FILES['cmail']["size"] > 0){
                         $ext = pathinfo($_FILES['cmail']["name"], PATHINFO_EXTENSION);
                         if($ext == "zip"){
                             $za = new ZipArchive;
@@ -700,8 +715,12 @@
                     $path = getcwd();
                     $target_dir = $path . "/" . $_SESSION['dir'];
                     $src_tmp_dir = $path . "/" . $_SESSION['tmp_dir'];
-                    rename($target_dir.'/database_old', $target_dir."/database");
-                    terminal("rm -rf ".escapeshellarg($src_tmp_dir));
+                    if(is_dir($target_dir.'/database_old')){
+                        rename($target_dir.'/database_old', $target_dir."/database");
+                    }
+                    if(file_exists($src_tmp_dir)){
+                        rrmdir($src_tmp_dir);
+                    }
                     header('Location: /');
                 }else{ //dB migration and end
                     $path = getcwd();
@@ -712,130 +731,138 @@
                     }
 
                     $error = 1;
-                    if (terminal('php -r \'echo "test";\'') === 'test') {
-                        $cmd = "cd ".$path;
+                    $cmd = "cd ".$path;
 
-                        if(isset($_SESSION['dir']) && $_SESSION['dir']!='.'){
-                            $cmd = $cmd."/".$_SESSION['dir'];
+                    if(isset($_SESSION['dir']) && $_SESSION['dir']!='.'){
+                        $cmd = $cmd."/".$_SESSION['dir'];
+                    }
+
+                    if($_POST['database_connection'] == "mysql"){
+                        $conn = new mysqli($_POST['database_hostname'], $_POST['database_username'], $_POST['database_password'], $_POST['database_name'], $_POST['database_port']);
+                        if($conn->connect_errno > 0) {
+                            $error = 2;
                         }
 
-                        if($_POST['database_connection'] == "mysql"){
-                            $conn = new mysqli($_POST['database_hostname'], $_POST['database_username'], $_POST['database_password'], $_POST['database_name'], $_POST['database_port']);
-                            if($conn->connect_errno > 0) {
-                                $error = 2;
-                            }
+                        $query = mysqli_query($conn,"CREATE TABLE IF NOT EXISTS CREATE_ACCESS_CHECK (
+                            id INT NOT NULL
+                        )");
 
-                            $query = mysqli_query($conn,"CREATE TABLE IF NOT EXISTS CREATE_ACCESS_CHECK (
-                                id INT NOT NULL
-                            )");
-
-                            if(!$query) {
-                                $error = 2;
-                            } else {
-                                $query1 = mysqli_query($conn,"DROP TABLE CREATE_ACCESS_CHECK");
-                                $error = 0;
-                            }
+                        if(!$query) {
+                            $error = 2;
                         } else {
+                            $query1 = mysqli_query($conn,"DROP TABLE CREATE_ACCESS_CHECK");
                             $error = 0;
                         }
-                        $path = getcwd();
-                        $target_dir = $path . "/" . $_SESSION['dir'];
-                        $src_tmp_dir = $path . "/" . $_SESSION['tmp_dir'];
-                        if($error == 0) {
-                            if($_POST['update_stat'] == "i") {
-                                $envFileData =
-                                    'APP_NAME=\'' . $_POST['app_name'] . "'\n" .
-                                    'APP_ENV=' . $_POST['environment'] . "\n" .
-                                    'APP_KEY=' . 'base64:bODi8VtmENqnjklBmNJzQcTTSC8jNjBysfnjQN59btE=' . "\n" .
-                                    'APP_DEBUG=' . $_POST['app_debug'] . "\n" .
-                                    'APP_LOG_FILE=\'cmail_settings/app.log\''."\n".
-                                    'APP_LOG_LEVEL=' . $_POST['app_log_level'] . "\n" .
-                                    'APP_URL=' . $_POST['app_url'] . "\n\n" .
-                                    'DB_CONNECTION=' . $_POST['database_connection'] . "\n" .
-                                    'DB_HOST=' . $_POST['database_hostname'] . "\n" .
-                                    'DB_PORT=' . $_POST['database_port'] . "\n" .
-                                    'DB_DATABASE=' . $_POST['database_name'] . "\n" .
-                                    'DB_USERNAME=' . $_POST['database_username'] . "\n" .
-                                    'DB_PASSWORD=' . $_POST['database_password'] . "\n\n" .
-                                    'IMAP_HOST='.$_POST['imap_host']."\n".
-                                    'IMAP_PORT='.$_POST['imap_port']."\n".
-                                    'IMAP_ENCRYPTION='.$_POST['imap_encryption']."\n\n".
-                                    'SMTP_HOST='.$_POST['smtp_host']."\n".
-                                    'SMTP_PORT='.$_POST['smtp_port']."\n".
-                                    'SMTP_ENCRYPTION='.$_POST['smtp_encryption']."\n\n".
-                                    'BROADCAST_DRIVER=' . $_POST['broadcast_driver'] . "\n" .
-                                    'CACHE_DRIVER=' . $_POST['cache_driver'] . "\n" .
-                                    'SESSION_DRIVER=' . $_POST['session_driver'] . "\n" .
-                                    'QUEUE_DRIVER=' . $_POST['queue_driver'] . "\n\n" .
-                                    'REDIS_HOST=' . $_POST['redis_hostname'] . "\n" .
-                                    'REDIS_PASSWORD=' . $_POST['redis_password'] . "\n" .
-                                    'REDIS_PORT=' . $_POST['redis_port'] . "\n\n" .
-                                    'MAIL_DRIVER=' . $_POST['mail_driver'] . "\n" .
-                                    'MAIL_HOST=' . $_POST['mail_host'] . "\n" .
-                                    'MAIL_PORT=' . $_POST['mail_port'] . "\n" .
-                                    'MAIL_USERNAME=' . $_POST['mail_username'] . "\n" .
-                                    'MAIL_PASSWORD=' . $_POST['mail_password'] . "\n" .
-                                    'MAIL_ENCRYPTION=' . $_POST['mail_encryption'] . "\n\n" .
-                                    'PUSHER_APP_ID=' . $_POST['pusher_app_id'] . "\n" .
-                                    'PUSHER_APP_KEY=' . $_POST['pusher_app_key'] . "\n" .
-                                    'PUSHER_APP_SECRET=' . $_POST['pusher_app_secret'];
+                    } else {
+                        $error = 0;
+                    }
+                    $path = getcwd();
+                    $target_dir = $path . "/" . $_SESSION['dir'];
+                    $src_tmp_dir = $path . "/" . $_SESSION['tmp_dir'];
+                    if($error == 0) {
+                        if($_POST['update_stat'] == "i") {
+                            $envFileData =
+                                'APP_NAME=\'' . $_POST['app_name'] . "'\n" .
+                                'APP_ENV=' . $_POST['environment'] . "\n" .
+                                'APP_KEY=' . 'base64:bODi8VtmENqnjklBmNJzQcTTSC8jNjBysfnjQN59btE=' . "\n" .
+                                'APP_DEBUG=' . $_POST['app_debug'] . "\n" .
+                                'APP_LOG_FILE=\'cmail_settings/app.log\''."\n".
+                                'APP_LOG_LEVEL=' . $_POST['app_log_level'] . "\n" .
+                                'APP_URL=' . $_POST['app_url'] . "\n\n" .
+                                'DB_CONNECTION=' . $_POST['database_connection'] . "\n" .
+                                'DB_HOST=' . $_POST['database_hostname'] . "\n" .
+                                'DB_PORT=' . $_POST['database_port'] . "\n" .
+                                'DB_DATABASE=' . $_POST['database_name'] . "\n" .
+                                'DB_USERNAME=' . $_POST['database_username'] . "\n" .
+                                'DB_PASSWORD=' . $_POST['database_password'] . "\n\n" .
+                                'IMAP_HOST='.$_POST['imap_host']."\n".
+                                'IMAP_PORT='.$_POST['imap_port']."\n".
+                                'IMAP_ENCRYPTION='.$_POST['imap_encryption']."\n\n".
+                                'SMTP_HOST='.$_POST['smtp_host']."\n".
+                                'SMTP_PORT='.$_POST['smtp_port']."\n".
+                                'SMTP_ENCRYPTION='.$_POST['smtp_encryption']."\n\n".
+                                'BROADCAST_DRIVER=' . $_POST['broadcast_driver'] . "\n" .
+                                'CACHE_DRIVER=' . $_POST['cache_driver'] . "\n" .
+                                'SESSION_DRIVER=' . $_POST['session_driver'] . "\n" .
+                                'QUEUE_DRIVER=' . $_POST['queue_driver'] . "\n\n" .
+                                'REDIS_HOST=' . $_POST['redis_hostname'] . "\n" .
+                                'REDIS_PASSWORD=' . $_POST['redis_password'] . "\n" .
+                                'REDIS_PORT=' . $_POST['redis_port'] . "\n\n" .
+                                'MAIL_DRIVER=' . $_POST['mail_driver'] . "\n" .
+                                'MAIL_HOST=' . $_POST['mail_host'] . "\n" .
+                                'MAIL_PORT=' . $_POST['mail_port'] . "\n" .
+                                'MAIL_USERNAME=' . $_POST['mail_username'] . "\n" .
+                                'MAIL_PASSWORD=' . $_POST['mail_password'] . "\n" .
+                                'MAIL_ENCRYPTION=' . $_POST['mail_encryption'] . "\n\n" .
+                                'PUSHER_APP_ID=' . $_POST['pusher_app_id'] . "\n" .
+                                'PUSHER_APP_KEY=' . $_POST['pusher_app_key'] . "\n" .
+                                'PUSHER_APP_SECRET=' . $_POST['pusher_app_secret'];
 
-                                file_put_contents($envPath, $envFileData);
-                                //Copy full folders
+                            file_put_contents($envPath, $envFileData);
+                            //Copy full folders
 
-                                foreach (array_diff(scandir($src_tmp_dir.'/cranberrymail'), array('..', '.', 'database', 'cmail_settings')) as $item) {
-                                    rename($src_tmp_dir.'/cranberrymail/'.$item, $target_dir."/".$item);
-                                }
-                            } else {
-                                //Update and preg_replace line
-                                $lines = file($envPath);
-                                $result = '';
+                            foreach (array_diff(scandir($src_tmp_dir.'/cranberrymail'), array('','..', '.', 'database', 'cmail_settings')) as $item) {
+                                rename($src_tmp_dir.'/cranberrymail/'.$item, $target_dir."/".$item);
+                            }
+                        } else {
+                            //Update and preg_replace line
+                            $lines = file($envPath);
+                            $result = '';
 
-                                foreach($lines as $line) {
-                                    if(strpos($line, 'APP_URL=') === 0) {
-                                        $result .= 'APP_URL=' . $_POST['app_url'] ."\n";
-                                    } else if (strpos($line, 'DB_CONNECTION=') === 0) {
-                                        $result .= 'DB_CONNECTION=' . $_POST['database_connection'] ."\n";
-                                    } else if (strpos($line, 'DB_HOST=') === 0) {
-                                        $result .= 'DB_HOST=' . $_POST['database_hostname'] ."\n";
-                                    } else if (strpos($line, 'DB_PORT=') === 0) {
-                                        $result .= 'DB_PORT=' . $_POST['database_port'] ."\n";
-                                    } else if (strpos($line, 'DB_DATABASE=') === 0) {
-                                        $result .= 'DB_DATABASE=' . $_POST['database_name'] ."\n";
-                                    } else if (strpos($line, 'DB_USERNAME=') === 0) {
-                                        $result .= 'DB_USERNAME=' . $_POST['database_username'] ."\n";
-                                    } else if (strpos($line, 'DB_PASSWORD=') === 0) {
-                                        $result .= 'DB_PASSWORD=' . $_POST['database_password'] ."\n";
-                                    } else if (strpos($line, 'IMAP_HOST=') === 0) {
-                                        $result .= 'IMAP_HOST='.$_POST['imap_host'] ."\n";
-                                    } else if (strpos($line, 'IMAP_PORT=') === 0) {
-                                        $result .= 'IMAP_PORT='.$_POST['imap_port'] ."\n";
-                                    } else if (strpos($line, 'IMAP_ENCRYPTION=') === 0) {
-                                        $result .= 'IMAP_ENCRYPTION='.$_POST['imap_encryption'] ."\n";
-                                    } else if (strpos($line, 'SMTP_HOST=') === 0) {
-                                        $result .= 'SMTP_HOST='.$_POST['smtp_host'] ."\n";
-                                    } else if (strpos($line, 'SMTP_PORT=') === 0) {
-                                        $result .= 'SMTP_PORT='.$_POST['smtp_port'] ."\n";
-                                    } else if (strpos($line, 'SMTP_ENCRYPTION=') === 0) {
-                                        $result .= 'SMTP_ENCRYPTION='.$_POST['smtp_encryption'] ."\n";
-                                    } else {
-                                        $result .= $line;
-                                    }
-                                }
-
-                                file_put_contents($envPath, $result);
-
-                                //Copy other folders
-                                foreach (array_diff(scandir($src_tmp_dir.'/cranberrymail'), array('..', '.', 'database', 'storage', 'cmail_settings')) as $item) {
-                                    terminal("rm -rf " . $target_dir."/" . $item ." && mv " . $src_tmp_dir.'/cranberrymail/'.$item . " " . $target_dir."/");
+                            foreach($lines as $line) {
+                                if(strpos($line, 'APP_URL=') === 0) {
+                                    $result .= 'APP_URL=' . $_POST['app_url'] ."\n";
+                                } else if (strpos($line, 'DB_CONNECTION=') === 0) {
+                                    $result .= 'DB_CONNECTION=' . $_POST['database_connection'] ."\n";
+                                } else if (strpos($line, 'DB_HOST=') === 0) {
+                                    $result .= 'DB_HOST=' . $_POST['database_hostname'] ."\n";
+                                } else if (strpos($line, 'DB_PORT=') === 0) {
+                                    $result .= 'DB_PORT=' . $_POST['database_port'] ."\n";
+                                } else if (strpos($line, 'DB_DATABASE=') === 0) {
+                                    $result .= 'DB_DATABASE=' . $_POST['database_name'] ."\n";
+                                } else if (strpos($line, 'DB_USERNAME=') === 0) {
+                                    $result .= 'DB_USERNAME=' . $_POST['database_username'] ."\n";
+                                } else if (strpos($line, 'DB_PASSWORD=') === 0) {
+                                    $result .= 'DB_PASSWORD=' . $_POST['database_password'] ."\n";
+                                } else if (strpos($line, 'IMAP_HOST=') === 0) {
+                                    $result .= 'IMAP_HOST='.$_POST['imap_host'] ."\n";
+                                } else if (strpos($line, 'IMAP_PORT=') === 0) {
+                                    $result .= 'IMAP_PORT='.$_POST['imap_port'] ."\n";
+                                } else if (strpos($line, 'IMAP_ENCRYPTION=') === 0) {
+                                    $result .= 'IMAP_ENCRYPTION='.$_POST['imap_encryption'] ."\n";
+                                } else if (strpos($line, 'SMTP_HOST=') === 0) {
+                                    $result .= 'SMTP_HOST='.$_POST['smtp_host'] ."\n";
+                                } else if (strpos($line, 'SMTP_PORT=') === 0) {
+                                    $result .= 'SMTP_PORT='.$_POST['smtp_port'] ."\n";
+                                } else if (strpos($line, 'SMTP_ENCRYPTION=') === 0) {
+                                    $result .= 'SMTP_ENCRYPTION='.$_POST['smtp_encryption'] ."\n";
+                                } else {
+                                    $result .= $line;
                                 }
                             }
 
-                            $cmd = $cmd." && php artisan migrate && php artisan db:seed";
-                            terminal($cmd);
-                            terminal("rm -rf ".escapeshellarg($src_tmp_dir));
-                            terminal("rm -rf ".escapeshellarg($target_dir)."/database_old");
+                            file_put_contents($envPath, $result);
+
+                            //Copy other folders
+                            foreach (array_diff(scandir($src_tmp_dir.'/cranberrymail'), array('..', '.', 'database', 'storage', 'cmail_settings')) as $item) {
+                                rrmdir($target_dir."/" . $item);
+                                rename($src_tmp_dir.'/cranberrymail/'.$item, $target_dir."/" .$item);
+                            }
                         }
+
+                        
+                        if(is_dir($src_tmp_dir)) {
+                            rrmdir($src_tmp_dir);
+                        }
+                        if(is_dir($target_dir."/database_old")) {
+                            rrmdir($target_dir."/database_old");
+                        }
+                    }
+                    if (terminal('php -r \'echo "test";\'') === 'test') {
+                        $cmd = $cmd." && php artisan migrate && php artisan db:seed";
+                        terminal($cmd);
+                    } else {
+                        $error = 1;
                     } ?>
                     <li class="breadcrumb-item active" aria-current="page">Finish</li>
             </ol>
@@ -845,13 +872,7 @@
                 <h5 class="card-header">Finish Installation</h5>
 
                 <div class="card-body">
-                    <p class="card-text"><?php if ($error == 1) {?>
-                        Installer has encountered some errors. Please make sure that <strong>php-cli</strong> is installed in your systerm. And run the following commands in your installation directory/folder.
-                        <ol>
-                            <li>php artisan migrate</li>
-                            <li>php artisan db:seed</li>
-                        </ol>
-                    <?php } else if($error == 2) {?>
+                    <p class="card-text"><?php if ($error == 2) {?>
                         User Does not have create privilage to the Database. Please make sure that the database user has right privilages. And run the following commands in your installation directory/folder.
                         <ol>
                             <li>php artisan migrate</li>
@@ -860,9 +881,10 @@
                     <?php } else {
                         echo "CranberryMail has been installed successfully.";
                     } ?></p>
-                    <a href="/<?=$_SESSION['dir']?>" class="btn btn-primary">Finish</a>
+                    <a href="javascript:void(0)" id="cran_migrate" class="btn btn-primary">Migrate</a>
+                    <a href="/<?=$_SESSION['dir']?>" id="cran_finish" class="btn btn-primary" style="display: none;">Finish</a>
                     <?php if ($error != 0){?>
-                    <a href="?step=rollback" class="btn btn-secondary">Rollback</a>
+                    <a href="?step=rollback" id="cran_rollback" class="btn btn-secondary">Rollback</a>
                     <?php } ?>
                 </div>
                 </div>
@@ -985,14 +1007,15 @@
                                     text: "Creating new database",
                                     textAnimation: "fadein"
                                  });
-                                jQuery.post(_api+"/drop_create_db",{
-                                    conn: conn,
-                                    hostname: hostname,
-                                    db: db,
-                                    username: username,
-                                    password: password,
-
-                                },function(data){
+                                 jQuery.post(_api+"/change_session_driver",{},
+                                 function(data){
+                                    jQuery.post(_api+"/drop_create_db",{
+                                        conn: conn,
+                                        hostname: hostname,
+                                        db: db,
+                                        username: username,
+                                        password: password,
+                                    },function(data){
                                         jQuery.LoadingOverlay("hide");
 
                                         if(data.status!=1){
@@ -1001,10 +1024,15 @@
                                             jQuery("#env").submit();
                                         }
 
+                                    }).fail(function(){
+                                        jQuery.LoadingOverlay("hide");
+                                        alertify.alert("CranberryMail","Please delete and create the database manually");
+                                    });
                                 }).fail(function(){
                                     jQuery.LoadingOverlay("hide");
                                     alertify.alert("CranberryMail","Please delete and create the database manually");
                                 });
+                                
                             },
                             function(){
                                 alertify.alert("CranberryMail","Please change database name or installer will use the existing database");
@@ -1057,6 +1085,35 @@
         jQuery("#env").one("submit",function(e){
             e.preventDefault();
             db_check();
+        });
+
+        jQuery("#cran_migrate").click(function(){
+            let url = window.location.origin+"/<?php if(in_array($_SESSION['dir'], ['', '.'])){echo '';} else {echo $_SESSION['dir'];}?>";
+            url = url.trim();
+            let cr_api = url+'/api/v1';
+            jQuery.LoadingOverlay("show",{
+                text: "Completing Migrations",
+                textAnimation: "fadein"
+            });
+            jQuery.post(cr_api+"/wizard/migrate",{},
+            function(data){
+                jQuery.LoadingOverlay("hide");
+
+                if(data.success){
+                    jQuery("#cran_migrate").hide();
+                    jQuery("#cran_rollback").hide();
+                    jQuery("#cran_finish").show();
+                } else {
+                    jQuery("#cran_finish").hide();
+                    jQuery.LoadingOverlay("hide");
+                    alertify.alert("CranberryMail","Please run Migrate script manually");
+                }
+
+            }).fail(function(){
+                jQuery("#cran_finish").hide();
+                jQuery.LoadingOverlay("hide");
+                alertify.alert("CranberryMail","Please run Migrate script manually");
+            });
         });
 
 

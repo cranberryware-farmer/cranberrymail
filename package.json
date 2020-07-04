@@ -69,7 +69,7 @@
     "test": "react-scripts test --env=jsdom",
     "build-test": "react-scripts build && rsync -va build/* cm-api/cmail",
     "eject": "react-scripts eject",
-    "build": "react-scripts build && rsync -va build/* cm-api/cmail && mkdir -p releases/cranberrymail && rm -f releases/cmail_installer.zip && cd cm-api && cp -r . ../releases/cranberrymail && cd ../releases && mkdir -p cranberrymail/storage/framework/cache cranberrymail/storage/framework/sessions cranberrymail/storage/framework/views && zip -q -r cmail_installer.zip cranberrymail && rm -rf cranberrymail",
+    "build": "react-scripts build && rsync -va build/* cm-api/cmail && mkdir -p releases/cranberrymail && rm -f releases/cmail_installer.zip && cd cm-api && cp -r . ../releases/cranberrymail && cd ../releases && rm -rf cranberrymail/cmail_settings/* rm -rf cranberrymail/cmail_settings/.env* && mkdir -p cranberrymail/storage/framework/cache cranberrymail/storage/framework/sessions cranberrymail/storage/framework/views && zip -q -r cmail_installer.zip cranberrymail && rm -rf cranberrymail",
     "clean": "rm -rf build; rm -f releases/cranberrymail-web-$npm_package_version.zip; rm -rf cm-api/cmail; mkdir -p cm-api/cmail; touch cm-api/cmail/.gitkeep"
   },
   "browserslist": [

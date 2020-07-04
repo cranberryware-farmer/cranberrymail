@@ -135,11 +135,27 @@ const useToolbarStyles = makeStyles(theme => ({
   },
 }));
 
+const camelCase = str => { 
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) 
+  { 
+    return word.toUpperCase(); 
+  }); 
+}
+
+const formatPath = str => {
+  let pathArr = str.split(/[./]+/);
+  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
+  str = camelCase(str);
+  return str;
+}
+
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
   const { numSelected, tableTitle } = props;
+
+  const tableHeader = formatPath(tableTitle);
   
-  let curFolder = (tableTitle!=undefined) ? tableTitle.toLowerCase(): '';
+  let curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
 
   return (
     <Toolbar
@@ -151,7 +167,7 @@ const EnhancedTableToolbar = props => {
         {numSelected > 0 ? (
           <Typography color="inherit">{numSelected} selected</Typography>
         ) : (
-          <Typography id="tableTitle">{tableTitle}</Typography>
+          <Typography id="tableTitle">{tableHeader}</Typography>
         )}
       </div>
       <div className={classes.spacer} />
@@ -271,8 +287,8 @@ const EnhancedTable = ({
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-  
- 
+
+  let curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
 
   const [rowsPerPage, setRowsPerPage] = React.useState(30);
   labelRowsPerPage = labelRowsPerPage ? labelRowsPerPage : 'Per page';
