@@ -100,6 +100,12 @@ class Sidebar extends React.Component {
           });
         }
       }
+    })
+    .catch(error => {
+      console.log("Invalid Auth", error);
+      Cookies.remove('app_auth');
+      Cookies.remove('app_email');
+      this.props.history.push('/login');
     });
 
   };

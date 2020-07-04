@@ -108,4 +108,39 @@ class HomeController extends Controller
             ], 200);
         }
     }
+
+    /**
+     * @param string $driver
+     */
+    private function controlSessionDriver($driver) {
+        $envPath = base_path() . '/cmail_settings/.env';
+        if(file_exists($envPath)){
+            $lines = file($envPath);
+            $result = '';
+
+            foreach($lines as $line) {
+                if(strpos($line, 'SESSION_DRIVER=') === 0) {
+                    $result .= "SESSION_DRIVER=" . $driver . "\n";
+                } else if(strpos($line, 'APP_ENV=') === 0) {
+                    $result .= "APP_ENV=local\n";
+                } else {
+                    $result .= $line;
+                }
+            }
+
+            file_put_contents($envPath, $result);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function ChangeSessionDriver(Request $request) {
+        $this->controlSessionDriver("file");
+        return response()->json([
+            "status" => 1,
+            "message" => "Session Driver is set to file."
+        ], 200);
+    }
 }

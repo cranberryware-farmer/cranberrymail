@@ -112,6 +112,8 @@ class WizardController extends Controller
             foreach($lines as $line) {
                 if(strpos($line, 'SESSION_DRIVER=') === 0) {
                     $result .= "SESSION_DRIVER=database\n";
+                } else if(strpos($line, 'APP_ENV=') === 0) {
+                    $result .= "APP_ENV=production\n";
                 } else {
                     $result .= $line;
                 }

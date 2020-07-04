@@ -64,21 +64,19 @@
         // return the smallest of them, this defines the real limit
         return min($max_upload, $max_post, $memory_limit);
     }
-    function rrmdir($src) {
-        $dir = opendir($src);
-        while(false !== ( $file = readdir($dir)) ) {
-            if (( $file != '.' ) && ( $file != '..' )) {
-                $full = $src . '/' . $file;
-                if ( is_dir($full) ) {
-                    rrmdir($full);
-                }
-                else {
-                    unlink($full);
+    function rrmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object))
+                    rrmdir($dir. DIRECTORY_SEPARATOR .$object);
+                else
+                    unlink($dir. DIRECTORY_SEPARATOR .$object);
                 }
             }
+            rmdir($dir);
         }
-        closedir($dir);
-        rmdir($src);
     }
 ?>
 <!doctype html>
@@ -94,9 +92,9 @@
     <body>
         <?php $step = (isset($_REQUEST['step'])) ? $_REQUEST['step'] : null;?>
         <nav class="navbar navbar-light bg-light">
-            <a class="navbar-brand" href="https://nettantra.com">
-                <img src="https://cdn.nettantra.net/wp-content/uploads/2019/10/nettantra-logo-2019.svg" width="25%" height="25%" class="d-inline-block align-top" alt="Nettantra">
-            </a>
+            <span class="navbar-brand">
+                <img src="https://cranberryware.com/images/cm-logo-web.png" width="25%" height="25%" class="d-inline-block align-top" alt="CranberryMail" />
+            </span>
         </nav>
         <?php if($step!=null) { ?>
 
@@ -180,10 +178,6 @@
                                 $missingDependencies[] = array($module);
                             }
                         }
-
-                        // if (terminal('php -r \'echo "test";\'') !== 'test') {
-                        //     $missingDependencies[] = array('PHP CLI');
-                        // }
 
                         $uplaod_size = max_file_upload_in_bytes();
                         if($uplaod_size < 41943040) {
@@ -684,7 +678,7 @@
                         </div>
 					</fieldset>
                     <input type="hidden" name="app_name" id="app_name" value="Cmail"  />
-					<input type="hidden" name="environment" id="environment" value="production" />
+					<input type="hidden" name="environment" id="environment" value="local" />
 					<input type="hidden" name="app_debug" id="app_debug_false" value=false />
 					<input type="hidden" name="app_log_level" id="app_log_level" value="error" />
 					<input type="hidden" name="broadcast_driver" id="broadcast_driver" value="log"  />
@@ -1013,26 +1007,32 @@
                                     text: "Creating new database",
                                     textAnimation: "fadein"
                                  });
-                                jQuery.post(_api+"/drop_create_db",{
-                                    conn: conn,
-                                    hostname: hostname,
-                                    db: db,
-                                    username: username,
-                                    password: password,
+                                 jQuery.post(_api+"/change_session_driver",{},
+                                 function(data){
+                                    jQuery.post(_api+"/drop_create_db",{
+                                        conn: conn,
+                                        hostname: hostname,
+                                        db: db,
+                                        username: username,
+                                        password: password,
+                                    },function(data){
+                                        jQuery.LoadingOverlay("hide");
 
-                                },function(data){
-                                    jQuery.LoadingOverlay("hide");
+                                        if(data.status!=1){
+                                            alertify.alert("CranberryMail",data.message);
+                                        }else{
+                                            jQuery("#env").submit();
+                                        }
 
-                                    if(data.status!=1){
-                                        alertify.alert("CranberryMail",data.message);
-                                    }else{
-                                        jQuery("#env").submit();
-                                    }
-
+                                    }).fail(function(){
+                                        jQuery.LoadingOverlay("hide");
+                                        alertify.alert("CranberryMail","Please delete and create the database manually");
+                                    });
                                 }).fail(function(){
                                     jQuery.LoadingOverlay("hide");
                                     alertify.alert("CranberryMail","Please delete and create the database manually");
                                 });
+                                
                             },
                             function(){
                                 alertify.alert("CranberryMail","Please change database name or installer will use the existing database");
