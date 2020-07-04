@@ -684,7 +684,7 @@
                         </div>
 					</fieldset>
                     <input type="hidden" name="app_name" id="app_name" value="Cmail"  />
-					<input type="hidden" name="environment" id="environment" value="local" />
+					<input type="hidden" name="environment" id="environment" value="production" />
 					<input type="hidden" name="app_debug" id="app_debug_false" value=false />
 					<input type="hidden" name="app_log_level" id="app_log_level" value="error" />
 					<input type="hidden" name="broadcast_driver" id="broadcast_driver" value="log"  />
