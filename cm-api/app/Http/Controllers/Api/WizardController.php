@@ -103,19 +103,22 @@ class WizardController extends Controller
     {
         Artisan::call('migrate');
         Artisan::call('db:seed');
-        $envPath = base_path() . '/cmail_settings/.env';
-        $lines = file($envPath);
-        $result = '';
+        $sess_driver = env('SESSION_DRIVER', 'file');
+        if($sess_driver !== 'database'){
+            $envPath = base_path() . '/cmail_settings/.env';
+            $lines = file($envPath);
+            $result = '';
 
-        foreach($lines as $line) {
-            if(strpos($line, 'SESSION_DRIVER=') === 0) {
-                $result .= "SESSION_DRIVER=database\n";
-            } else {
-                $result .= $line;
+            foreach($lines as $line) {
+                if(strpos($line, 'SESSION_DRIVER=') === 0) {
+                    $result .= "SESSION_DRIVER=database\n";
+                } else {
+                    $result .= $line;
+                }
             }
-        }
 
-        file_put_contents($envPath, $result);
+            file_put_contents($envPath, $result);
+        }
         $data=[
             "success" => true,
             "message" => "Migrations successfully completed."
