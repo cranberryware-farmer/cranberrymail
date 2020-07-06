@@ -761,7 +761,6 @@ class ImapController extends Controller
         $user = Auth::user();
         $oClient = $this->get_credentials($user);
 
-
         $mailbox = $request->input("folder");
 
         $thread_uids = explode(",",$request->input('thread_uids'));
@@ -771,18 +770,15 @@ class ImapController extends Controller
         $query->envelope();
         $query->structure();
 
-
         $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids));
-
 
         Log::info("Fetch messages from mailbox ".$mailbox ." by uids", ['file' => __FILE__, 'line' => __LINE__]);
 
         $results = [];
         foreach($messages as $message){
 
-        $envelope = $message->getEnvelope();
-        $structure = $message->getStructure();
-
+            $envelope = $message->getEnvelope();
+            $structure = $message->getStructure();
 
             $msghdr = new \StdClass;
             $msghdr->recipients = $envelope->to->bare_addresses;
@@ -792,65 +788,56 @@ class ImapController extends Controller
             $msghdr->subject    = $envelope->subject;
             $msghdr->timestamp  = $envelope->date->getTimestamp();
 
-
-
-            $query = new \Horde_Imap_Client_Fetch_Query();
-            $query->fullText();
-
-            $typemap = $structure->contentTypeMap();
-            foreach ($typemap as $part => $type) {
-                // The body of the part - attempt to decode it on the server.
-                $query->bodyPart($part, array(
-                    'decode' => true,
-                    'peek' => true,
-                ));
-                $query->bodyPartSize($part);
-            }
-
-            $id = new \Horde_Imap_Client_Ids($message->getUid());
-            $messagedata = $oClient->fetch($mailbox, $query, array('ids' => $id))->first();
-            $msgdata = new \StdClass;
-            $msgdata->id = $id;
-            $msgdata->contentplain = '';
-            $msgdata->contenthtml  = '';
-            $msgdata->attachments  = [];
-
             $plainpartid = $structure->findBody('plain');
             $htmlpartid  = $structure->findBody('html');
 
+            // dd($this->debugObject($structure));exit;
+
+            $html_data = $plain_data = '';
+
+            $htmlquery = new \Horde_Imap_Client_Fetch_Query();
+            $htmlquery->bodyPart($htmlpartid);
+
+            $id = new \Horde_Imap_Client_Ids($message->getUid());
+            $messagedata = $oClient->fetch($mailbox, $htmlquery, array('ids' => $id))->first();
+
+            $stream = $messagedata->getBodyPart($htmlpartid, true);
+            $htmldata = $structure->getPart($htmlpartid);
+            $htmldata->setContents($stream, array('usestream' => true));
+
+            $html_data = $htmldata->getContents();
+
+            if(empty($html_data)) {
+                $plainquery = new \Horde_Imap_Client_Fetch_Query();
+                $plainquery->bodyPart($plainpartid);
+
+                $plainmessagedata = $oClient->fetch($mailbox, $plainquery, array('ids' => $id))->first();
+
+                $plainstream = $plainmessagedata->getBodyPart($plainpartid, true);
+                $plaindata = $structure->getPart($plainpartid);
+                $plaindata->setContents($plainstream, array('usestream' => true));
+
+                $plain_data = $plaindata->getContents();
+                $html_data = $plain_data;
+            }
+
+            $typemap = $structure->contentTypeMap();
+
+            $has_attachment = 0;
+
+            $attachments = [];
             foreach ($typemap as $part => $type) {
-                // Get the message data from the body part, and combine it with the structure to give a fully-formed output.
-                $stream = $messagedata->getBodyPart($part, true);
-                $partdata = $structure->getPart($part);
-                $partdata->setContents($stream, array('usestream' => true));
-                if ($part == $plainpartid) {
-                    $msgdata->contentplain = $partdata->getContents();
-                } else if ($part == $htmlpartid) {
-                    $msgdata->contenthtml = $partdata->getContents();
-                } else if ($filename = $partdata->getName($part)) {
-                    $disposition = $partdata->getDisposition();
-                    $disposition = ($disposition == 'inline') ? 'inline' : 'attachment';
-                    $attachment = [];
-                    $attachment['name']    = $filename;
-                    $attachment['type']    = $partdata->getType();
-                    $attachment['content'] = $partdata->getContents();
-                    $attachment['size']    = strlen($attachment['content']);
-
-                    Storage::put($filename, $attachment['content']);
-                    $url = "/storage/app/".$filename;
-
-                    array_push($msgdata->attachments,[
-                        "url" => $url,
-                        "file" => $filename,
-                        "type" => $attachment['type'],
-                    ]);
-                    unset($attachment);
+                if(!in_array($part, [$plainpartid, $htmlpartid])){
+                    $has_attachment = 1;
+                    $attachments[] = [
+                        "file" => $mail_part->getName(),
+                        "type" => $mail_part->getType(),
+                        "part_id" => $part
+                    ];
                 }
             }
 
-
-
-            $data = [
+            $results[] = [
                 'uid' => implode("",$id->ids),
                 'from' => implode(",",$msghdr->senders),
                 'cc' => implode(",",$msghdr->cc),
@@ -858,25 +845,17 @@ class ImapController extends Controller
                 'to' => implode(",",$msghdr->recipients),
                 'date' => $msghdr->timestamp,
                 'subject' => $envelope->subject,
-                'hasAttachments' => count($msgdata->attachments) > 0 ? 1:0,
+                'body' => $html_data,
+                'hasAttachments' => $has_attachment,
                 'folder' => $mailbox,
                 'messageId' =>  $envelope->message_id,
-                'attachment' => $msgdata->attachments
+                'attachment' => $attachments
             ];
-
-            $data['body'] = empty($msgdata->contenthtml) ? $msgdata->contenttext: $msgdata->contenthtml;
-
-
-            array_push($results,$data);
-
-
-
         }
 
         Log::info("Iterate over messages and return the data in a formatted way", ['file' => __FILE__, 'line' => __LINE__]);
 
-       return response()->json($results, 200);
-
+        return response()->json($results, 200);
 
     }
 
