@@ -38,6 +38,8 @@ Route::prefix('v1')->group(function(){
 
          Route::post('search_emails','Api\ImapController@search_emails');
 
+         Route::post('download_attachment','Api\ImapController@downloadAttachment');
+
          Route::post('emails','Api\ImapController@get_emails');
          Route::post('email', 'Api\ImapController@get_email');
          Route::post("wizard/inviteadmin",'Api\WizardController@inviteAdmin');

@@ -102,8 +102,9 @@ class InboxPage extends React.Component {
       draftID: 0,
       attachmentURLs: []
     };
+    axios.defaults.headers.common['Authorization'] = props.location.state.token;
   }
-
+  
   handleAttachment = (ev) =>{
       const fileData = ev.target.files;
       this.setState({
@@ -1082,7 +1083,7 @@ class InboxPage extends React.Component {
             let erows = [];
             let threads = [];
             for (let i = 0; i < res.data.length; i++) {
-              let body = undefined; //res.data[i].body;
+              let body = undefined;
               let fdate = new Date(res.data[i].date).toLocaleDateString('en-GB', {
                 month: 'numeric',
                 day: 'numeric',
@@ -1101,9 +1102,7 @@ class InboxPage extends React.Component {
               );
              threads[i] = res.data[i].threads;
             }
-  
-            
-  
+
             if (erows.length > 0) {
               this.setState({
                 rows: erows,
@@ -1129,6 +1128,33 @@ class InboxPage extends React.Component {
   handleRefresh = () => {
     this.fetchEmails();
   };
+
+  attachmentDownload = (file_name, part_id) => {
+    const mailbox = this.props.curFolder;
+    // const currentFolderLower = mailbox.toString().toLowerCase();
+    if(mailbox !== '' || mailbox !== undefined) {
+      const message_id = 0;
+      const json_data = {
+        file_name,
+        part_id,
+        message_id,
+        mailbox
+      };
+      axios({
+        method: 'post',
+        url: window._api + '/download_attachment',
+        data: json_data,
+        responseType: 'stream'
+      })
+      .then(function (response) {
+        console.log(response);
+        // response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'))
+      })
+      .catch(error => {
+        console.log("Attachment Download Unsuccessful", error);
+      });
+    }
+  }
 
   render() {
    
@@ -1238,6 +1264,7 @@ class InboxPage extends React.Component {
                                               activeThread = {this.activeThread}
                                               closeEditors = {this.closeEditors}
                                               markdown={this.state.enableMarkdown}
+                                              attachmentDownload={this.attachmentDownload}
                                            />}
           {this.state.page === 'settings' && <SettingsPage
                                                 breakpoint = {this.state.breakpoint}

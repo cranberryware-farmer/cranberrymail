@@ -740,7 +740,7 @@ class ImapController extends Controller
                 'flags' => $flags
             ];
 
-           $i++;
+            $i++;
         }
         Log::info("Iterate over messages and return data array", ['file' => __FILE__, 'line' => __LINE__]);
 
@@ -863,15 +863,26 @@ class ImapController extends Controller
 
     }
 
+    public function downloadAttachment(Request $request) {
+        $user = Auth::user();
+        $oClient = $this->get_credentials($user);
+
+        $mailbox = $request->input("mailbox");
+        $file_name = $request->input("file_name");
+        $part_id = $request->input("part_id");
+        $mail_id = $request->input("mail_id");
+
+        $thread_id = new \Horde_Imap_Client_Ids($mail_id);
+    }
+
     /**
      * @param $bytes
      * @param int $decimals
      * @return string
      */
     private function humanFileSize($bytes, $decimals = 2) {
-        $size = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
-        $factor = floor((strlen($bytes) - 1) / 3);
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
+        for($i = 0; ($bytes / 1024) > 0.9; $i++, $bytes /= 1024) {}
+        return round($bytes, $decimals).['B','kB','MB','GB','TB','PB','EB','ZB','YB'][$i];
     }
 
 

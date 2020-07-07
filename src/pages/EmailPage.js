@@ -1,58 +1,74 @@
 import React from 'react';
 import {
-    FaTrash,
-    FaArrowLeft,
-    FaStar,
-    FaRegStar,
-    FaExclamationTriangle
-  } from 'react-icons/fa';
+  FaTrash,
+  FaArrowLeft,
+  FaStar,
+  FaRegStar,
+  FaExclamationTriangle
+} from 'react-icons/fa';
 
-  import {
-    Button as RButton,
-    Card,
-    CardBody,
-    CardHeader,
-    Col,
-    Row,
-    NavLink,
-  } from 'reactstrap';
+import {
+  Button as RButton,
+  Card,
+  CardBody,
+  CardHeader,
+  Col,
+  Row,
+  NavLink,
+} from 'reactstrap';
   
 import MessageEditor from '../components/MessageEditor';
 
 const emailPage = (props) => {
     
-    let floatDir = "float-right";
-    if(props.breakpoint==="xs"){
-      floatDir="float-left i-block";
+  let floatDir = "float-right";
+  if(props.breakpoint==="xs"){
+    floatDir="float-left i-block";
+  }
+  const attachementDownload = (file_name, part_id) => {
+    props.attachmentDownload(file_name, part_id);
+  }
+
+  const createAttachementInternal = attachments => {
+    const internalItems = [];
+    for(let i=0; i < attachments.length; i++){
+      internalItems.push(
+        <li>
+          <span 
+            className='cm-span-link'
+            onClick={attachementDownload(attachments[i]['file'], attachments[i]['part_id'])}
+          >
+            {attachments[i]['file']}
+          </span>
+          <span className='ml-1'>
+            {attachments[i]['size']}
+          </span>
+        </li>
+      );
     }
-
-    
-
-   return (
-        <Row className="email-pg">
-          <Col xl={9} lg={9} md={9} xs={9}>
-            { props.thread.map((el,index) => {
-              let emlBody = el.body;
-             if(el.hasAttachments===1){
-                emlBody+="<hr><p>Attachments:</p><ul>";
-                let path = window.location.pathname;
-                let arr = path.split("/");
-                let segment = arr.pop();
-                while(segment!=="cmail"){
-                  segment = arr.pop();
-                }
-                
-                path = arr.join("/");
-            
-                for(let i=0;i<el.attachment.length;i++){
-                  emlBody+="<li><a href='"+path+el.attachment[i]['url']+"' target='_blank' download>"+el.attachment[i]['file']+"</a></li>";
-                }
-                emlBody+="</ul>";
-
-              }
-             return (<React.Fragment key={el.uid}>
-            <Card className="mt-3">
-              <CardHeader>
+    return internalItems;
+  }
+  const getAttchmentComponent = attachments => {
+    const attachmentContent = <ul>
+      {createAttachementInternal(attachments)}
+    </ul>;
+    return attachmentContent;
+  }
+  return (
+    <Row className="email-pg">
+      <Col xl={9} lg={9} md={9} xs={9}>
+        { props.thread.map((el,index) => {
+          const emlBody = el.body;
+          let attachmentHead = '';
+          let attachmentBody = '';
+          if(el.hasAttachments===1){
+            attachmentHead = "<hr><p>Attachments:</p>";
+            attachmentBody = getAttchmentComponent(el.attachment);
+          }
+          return (
+            <React.Fragment key={el.uid}>
+              <Card className="mt-3">
+                <CardHeader>
                   <div className="clearfix">
                     <NavLink 
                       to="#url"
@@ -70,77 +86,85 @@ const emailPage = (props) => {
                     </NavLink>
                     <span className="eml-subject float-left">{el.subject}</span>
                     
-                  <NavLink 
-                    to="#" 
-                    className={`email-icons ${floatDir}`}
-                    title="Delete email"
-                      onClick={e => {
-                        e.preventDefault();
-                        let uid = el.uid;
-                        props.trashEmail(uid);
-                        props.setState({
-                          page: 'list',
-                        });
-                        props.fetchEmails();
-                      }}
-                  >
-                    <FaTrash />
-                  </NavLink>
-                  <NavLink 
-                    to="#" 
-                    className={`email-icons ${floatDir}`}
-                    title="Mark email as spam"
-                      onClick={e => {
-                        e.preventDefault();
-                        let uid = el.uid;
-                        props.spamEmail(uid);
-                        props.setState({
-                          page: 'list',
-                        });
-                        props.fetchEmails();
-                      }}
-                  >
-                    <FaExclamationTriangle />
-                  </NavLink>
-                  <NavLink 
+                    <NavLink 
+                      to="#" 
+                      className={`email-icons ${floatDir}`}
+                      title="Delete email"
+                        onClick={e => {
+                          e.preventDefault();
+                          let uid = el.uid;
+                          props.trashEmail(uid);
+                          props.setState({
+                            page: 'list',
+                          });
+                          props.fetchEmails();
+                        }}
+                    >
+                      <FaTrash />
+                    </NavLink>
+                    <NavLink 
+                      to="#" 
+                      className={`email-icons ${floatDir}`}
+                      title="Mark email as spam"
+                        onClick={e => {
+                          e.preventDefault();
+                          let uid = el.uid;
+                          props.spamEmail(uid);
+                          props.setState({
+                            page: 'list',
+                          });
+                          props.fetchEmails();
+                        }}
+                    >
+                      <FaExclamationTriangle />
+                    </NavLink>
+                    <NavLink 
                       to="#"
                       title={props.emailStarred ? "Unmark as starred": "Mark as starred"}
                       onClick={e => {
-                          e.preventDefault();
-                          let uid = el.uid;
-                          let nextStarredState = 0;
-                          
-                          if(props.emailStarred===1){
-                            nextStarredState = 0;
-                          }else{
-                            nextStarredState = 1;
-                          }
-                          
-                          props.setState({
-                            isEmailStarred: nextStarredState
-                          });
-  
-                          props.starEmail(uid,nextStarredState);
-                        }}
+                        e.preventDefault();
+                        let uid = el.uid;
+                        let nextStarredState = 0;
+                        
+                        if(props.emailStarred===1){
+                          nextStarredState = 0;
+                        }else{
+                          nextStarredState = 1;
+                        }
+                        
+                        props.setState({
+                          isEmailStarred: nextStarredState
+                        });
+
+                        props.starEmail(uid,nextStarredState);
+                      }}
                       className={`email-icons ${floatDir}`}
                     >
-                    
                       {props.emailStarred ? <FaStar />:<FaRegStar />} 
-                    
-                  </NavLink>
+                    </NavLink>
                   </div>
                   <div className="clearfix">
                     <span className="float-left eml-from" >{el.from}</span>
                     <span className={`${floatDir}`}>{props.displayDate(el.date)}</span>
                   </div>
-              </CardHeader>
-              <CardBody
-                dangerouslySetInnerHTML={{
-                  __html: `${emlBody}`
-                }}
-              />
-            </Card>
-            <Card className="mt-3">
+                </CardHeader>
+                <CardBody>
+                  <Row>
+                    <Col 
+                      dangerouslySetInnerHTML={{
+                        __html: `${emlBody}`
+                      }}
+                    />
+                  </Row>
+                  <div 
+                    dangerouslySetInnerHTML={{
+                      __html: `${attachmentHead}`
+                    }}
+                  />
+                  {attachmentBody}
+                </CardBody>
+              </Card>
+              <Card className="mt-3">
               <CardBody>
                 <Row className="editor-container">
                   {el['editor'] ? (
@@ -208,11 +232,12 @@ const emailPage = (props) => {
                 </Row>
               </CardBody>
             </Card>
-            </React.Fragment>);
-            })} 
-          </Col>
-        </Row>
-      );
+            </React.Fragment>
+          );
+        })}
+      </Col>
+    </Row>
+  );
 };
 
 export default emailPage;
