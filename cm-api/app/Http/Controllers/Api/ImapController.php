@@ -791,47 +791,53 @@ class ImapController extends Controller
             $plainpartid = $structure->findBody('plain');
             $htmlpartid  = $structure->findBody('html');
 
+            $id = new \Horde_Imap_Client_Ids($message->getUid());
+
+            $typemap = $structure->contentTypeMap();
+
             $html_data = $plain_data = '';
+            $has_attachment = 0;
+            $attachments = [];
 
             $htmlquery = new \Horde_Imap_Client_Fetch_Query();
             $htmlquery->bodyPart($htmlpartid);
 
-            $id = new \Horde_Imap_Client_Ids($message->getUid());
-            $messagedata = $oClient->fetch($mailbox, $htmlquery, array('ids' => $id))->first();
+            $htmlmessagedata = $oClient->fetch($mailbox, $htmlquery, array('ids' => $id))->first();
+            if(!empty($htmlmessagedata)) {
+                $htmlstream = $htmlmessagedata->getBodyPart($htmlpartid, true);
 
-            $stream = $messagedata->getBodyPart($htmlpartid, true);
-            $htmldata = $structure->getPart($htmlpartid);
-            $htmldata->setContents($stream, array('usestream' => true));
-
-            $html_data = $htmldata->getContents();
+                $htmldata = $structure->getPart($htmlpartid);
+                $htmldata->setContents($htmlstream, array('usestream' => true));
+                $html_data = $htmldata->getContents();
+            }
 
             if(empty($html_data)) {
                 $plainquery = new \Horde_Imap_Client_Fetch_Query();
                 $plainquery->bodyPart($plainpartid);
 
                 $plainmessagedata = $oClient->fetch($mailbox, $plainquery, array('ids' => $id))->first();
+                if(!empty($plainmessagedata)) {
+                    $plainstream = $plainmessagedata->getBodyPart($plainpartid, true);
 
-                $plainstream = $plainmessagedata->getBodyPart($plainpartid, true);
-                $plaindata = $structure->getPart($plainpartid);
-                $plaindata->setContents($plainstream, array('usestream' => true));
-
-                $plain_data = $plaindata->getContents();
-                $html_data = $plain_data;
+                    $plaindata = $structure->getPart($htmlpartid);
+                    $plaindata->setContents($plainstream, array('usestream' => true));
+                    $html_data = $plaindata->getContents();
+                }
             }
 
-            $typemap = $structure->contentTypeMap();
-
-            $has_attachment = 0;
-
-            $attachments = [];
-            foreach ($typemap as $part => $type) {
-                if(!in_array($part, [$plainpartid, $htmlpartid])){
-                    $has_attachment = 1;
-                    $attachments[] = [
-                        "file" => $mail_part->getName(),
-                        "type" => $mail_part->getType(),
-                        "part_id" => $part
-                    ];
+            foreach($typemap as $part => $type) {
+                if(!in_array($part, [$htmlpartid, $plainpartid])){
+                    $partdata = $structure->getPart($part);
+                    if($file_name = $partdata->getName($part)){
+                        $has_attachment = 1;
+                        $byte_size = $partdata->getBytes();
+                        $attachments[] = [
+                            "file" => $file_name,
+                            "type" => $partdata->getType(),
+                            "size" => $this->humanFileSize($byte_size),
+                            "part_id" => $part
+                        ];
+                    }
                 }
             }
 
@@ -855,6 +861,17 @@ class ImapController extends Controller
 
         return response()->json($results, 200);
 
+    }
+
+    /**
+     * @param $bytes
+     * @param int $decimals
+     * @return string
+     */
+    private function humanFileSize($bytes, $decimals = 2) {
+        $size = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $factor = floor((strlen($bytes) - 1) / 3);
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
     }
 
 
