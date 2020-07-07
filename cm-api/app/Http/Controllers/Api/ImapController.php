@@ -520,6 +520,7 @@ class ImapController extends Controller
         Log::info("Retrieved search results as threads", ['file' => __FILE__, 'line' => __LINE__]);
 
         $emailThread = [];
+        $i=0;
         $uids = [];
 
 
@@ -530,7 +531,9 @@ class ImapController extends Controller
            $emailThread[$i]['uids'] = implode(",",$curThread);
            $emailThread[$i]['count'] = $threadCount;
 
-           $uids[] = $curThread[$threadCount-1];
+           $i++;
+
+           array_push($uids,$curThread[$threadCount-1]);
         }
 
         Log::info("Retrieved latest message of each unique thread", ['file' => __FILE__, 'line' => __LINE__]);
@@ -544,6 +547,7 @@ class ImapController extends Controller
         $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids)); //$results['match']
 
         $data = [];
+        $i=0;
 
         $indexes = $uids->ids;
 
@@ -562,7 +566,7 @@ class ImapController extends Controller
             $msghdr->subject    = $envelope->subject;
             $msghdr->timestamp  = $envelope->date->getTimestamp();
 
-            $data[] = [
+            $data[$i] = [
                 'uid' => $message->getUid(),
                 'from' => implode(",",$msghdr->senders),
                 'cc' => implode(",",$msghdr->cc),
@@ -576,6 +580,8 @@ class ImapController extends Controller
                 'messageId' =>  $envelope->message_id,
                 'thread' => $emailThread[$i]
             ];
+
+           $i++;
         }
 
         Log::info("Iterated over fetched messages", ['file' => __FILE__, 'line' => __LINE__]);
@@ -671,6 +677,7 @@ class ImapController extends Controller
         $allThreads = $thread->getThreads();
 
         $emailThread = [];
+        $i=0;
         $uids = [];
 
         Log::info("Fetch thread in mailbox ".$mailbox, ['file' => __FILE__, 'line' => __LINE__]);
@@ -682,7 +689,9 @@ class ImapController extends Controller
            $emailThread[$i]['uids'] = implode(",",$curThread);
            $emailThread[$i]['count'] = $threadCount;
 
-           $uids[] = $curThread[$threadCount-1];
+           $i++;
+
+           array_push($uids,$curThread[$threadCount-1]);
         }
 
         Log::info("Iterate over all threads and return latest message in the threads", ['file' => __FILE__, 'line' => __LINE__]);
@@ -696,6 +705,7 @@ class ImapController extends Controller
         $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids));
 
         $data = [];
+        $i=0;
 
         $indexes = $uids->ids;
 
@@ -714,7 +724,7 @@ class ImapController extends Controller
             $msghdr->subject    = $envelope->subject;
             $msghdr->timestamp  = $envelope->date->getTimestamp();
 
-            $data[] = [
+            $data[$i] = [
                 'uid' => $message->getUid(),
                 'from' => implode(",",$msghdr->senders),
                 'cc' => implode(",",$msghdr->cc),
@@ -729,6 +739,8 @@ class ImapController extends Controller
                 'thread' => $emailThread[$i],
                 'flags' => $flags
             ];
+
+           $i++;
         }
         Log::info("Iterate over messages and return data array", ['file' => __FILE__, 'line' => __LINE__]);
 
@@ -778,8 +790,6 @@ class ImapController extends Controller
 
             $plainpartid = $structure->findBody('plain');
             $htmlpartid  = $structure->findBody('html');
-
-            // dd($this->debugObject($structure));exit;
 
             $html_data = $plain_data = '';
 

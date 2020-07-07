@@ -210,6 +210,9 @@ class InboxPage extends React.Component {
         }else{
           toast(res.data.message);
         }
+      })
+      .catch(error => {
+        console.log("Reply Email Unsuccessful", error);
       });
   };
   starEmail = (uid,emailState) => {
@@ -259,10 +262,10 @@ class InboxPage extends React.Component {
             toast('Unable to mark email as starred');
           }
         }
-
-
-        
-      });  
+      })
+      .catch(error => {
+        console.log("StarEmail Unsuccessful", error);
+      });
     }
   };
 
@@ -312,6 +315,9 @@ class InboxPage extends React.Component {
         }
         
       }
+    })
+    .catch(error => {
+      console.log("Untrash Unsuccessful", error);
     });
   };
 
@@ -360,8 +366,10 @@ class InboxPage extends React.Component {
           }else{
             toast('Email has been deleted');
           }
-          
         }
+      })
+      .catch(error => {
+        console.log("TrashEmail Unsuccessful", error);
       });  
     }
     
@@ -412,9 +420,11 @@ class InboxPage extends React.Component {
           }else{
             toast('Email marked as spam');
           }
-          
         }
-      });  
+      })
+      .catch(error => {
+        console.log("SpamEmails Unsuccessful", error);
+      }); 
     }
     
   };
@@ -463,8 +473,10 @@ class InboxPage extends React.Component {
         }else{
           toast('Email has been restored');
         }
-        
       }
+    })
+    .catch(error => {
+      console.log("Unspam Emails Unsuccessful", error);
     });
   };
 
@@ -562,6 +574,9 @@ class InboxPage extends React.Component {
           });
           // toast(res.message);
         }
+      })
+      .catch(error => {
+        console.log("Save Draft Unsuccessful", error);
       });
   };
 
@@ -659,6 +674,9 @@ class InboxPage extends React.Component {
           });
           toast(res.data.message);
         }
+      })
+      .catch(error => {
+        console.log("Send Email Unsuccessful", error);
       });
   };
 
@@ -910,7 +928,10 @@ class InboxPage extends React.Component {
             });
             this.fetchEmails();
           }
-        });  
+        })
+        .catch(error => {
+          console.log("Email Content Fetch Unsuccessful", error);
+        });
     }
   };
 
@@ -1027,6 +1048,9 @@ class InboxPage extends React.Component {
               });
             }
           }
+        })
+        .catch(error => {
+          console.log("Email Threads fetch Unsuccessful", error);
         });
     }
     
@@ -1094,7 +1118,10 @@ class InboxPage extends React.Component {
               });
             }
           }
-        });  
+        })
+        .catch(error => {
+          console.log("Email Search Unsuccessful", error);
+        });
     }
     
   };
