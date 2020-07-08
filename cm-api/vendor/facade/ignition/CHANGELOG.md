@@ -2,6 +2,37 @@
 
 All notable changes to `ignition` will be documented in this file
 
+## 2.0.7 - 2020-06-07
+
+- Fix `DefaultDbNameSolutionProvider` (#277)
+
+## 2.0.6 - 2020-06-01
+
+- remove ability to fix variable names
+
+## 2.0.5 - 2020-05-29
+
+- blacklist certain variable names when fixing variable names
+
+## 2.0.4 - 2020-05-18
+
+- handle exceptions in case the request doesn't have a user (#274)
+
+## 2.0.3 - 2020-04-07
+
+- support Laravel 8
+
+## 2.0.2 - 2020-03-18
+
+- fix execute solution route not defined (#265)
+
+## 2.0.0 - 2020-02-02
+
+- adds support for Laravel 7
+- drop support for Laravel 6 and below
+- git information won't be collected by default anymore (if you need this set `collect_git_information` to `true` in the `flare` config file)
+- `MissingPackageSolutionProvider` was added to the `ignored_solution_providers` because it potentially could be slow.
+
 ## 1.16.0 - 2020-01-21
 
 - add named routes (#197)

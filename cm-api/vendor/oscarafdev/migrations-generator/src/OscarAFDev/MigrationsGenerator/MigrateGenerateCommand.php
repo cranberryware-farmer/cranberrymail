@@ -396,7 +396,7 @@ class MigrateGenerateCommand extends GeneratorCommand {
 		$excludes = ['migrations'];
 		$ignore = $this->option('ignore');
 		if ( ! empty($ignore)) {
-			return array_merge($excludes, explode(',', $ignore));
+			return array_merge($excludes, preg_split('/[,\s]+/', $ignore));
 		}
 
 		return $excludes;

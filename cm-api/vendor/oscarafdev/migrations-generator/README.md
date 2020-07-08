@@ -1,4 +1,4 @@
-# Laravel Migrations Generator Laravel 6
+# Laravel Migrations Generator Laravel 6+
 
 
 [![Latest Stable Version](https://poser.pugx.org/oscarafdev/migrations-generator/v/stable)](https://packagist.org/packages/oscarafdev/migrations-generator)
@@ -13,7 +13,7 @@ Generate Laravel Migrations from an existing database, including indexes and for
 The recommended way to install this is through composer:
 
 ```bash
-composer require oscarafdev/migrations-generator 2.0.16
+composer require oscarafdev/migrations-generator 2.0.19
 ```
 
 In Laravel 5.5+ the service providers will automatically get registered. 
@@ -35,6 +35,9 @@ Check out Chung Tran's blog post for a quick step by step introduction: [Generat
 ## Changelog
 
 Changelog for Laravel Migrations Generator
+
+### May 2020: v2.0.19
+* Support for Laravel 7
 
 ### 10 December 2019: v2.0.12
 * Support for Laravel 6
@@ -87,7 +90,10 @@ Thanks to Jeffrey Way for his amazing Laravel-4-Generators package. This package
 ## Contributors
 
 Bernhard Breytenbach ([@BBreyten](https://twitter.com/BBreyten))
+
 Oscar Fernandez ([@oscarafdev](https://www.linkedin.com/in/oscarafdev/))
+
+ofernandez@sofrecom.com.ar
 
 ## License
 

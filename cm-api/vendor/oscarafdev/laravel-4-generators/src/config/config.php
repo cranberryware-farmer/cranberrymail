@@ -8,19 +8,19 @@ return [
     |--------------------------------------------------------------------------
     |
     */
-    'model_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/model.txt'),
+    'model_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/model.txt'),
 
-    'scaffold_model_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/scaffolding/model.txt'),
+    'scaffold_model_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/scaffolding/model.txt'),
 
-    'controller_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/controller.txt'),
+    'controller_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/controller.txt'),
 
-    'scaffold_controller_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/scaffolding/controller.txt'),
+    'scaffold_controller_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/scaffolding/controller.txt'),
 
-    'migration_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/migration.txt'),
+    'migration_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/migration.txt'),
 
-    'seed_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/seed.txt'),
+    'seed_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/seed.txt'),
 
-    'view_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/templates/view.txt'),
+    'view_template_path' => base_path('vendor/oscarafdev/laravel-4-generators/src/Way/Generators/Templates/view.txt'),
 
 
     /*

@@ -185,7 +185,7 @@ class DebugClassLoader
         ];
 
         if (!isset(self::$caseCheck)) {
-            $file = file_exists(__FILE__) ? __FILE__ : rtrim(realpath('.'), \DIRECTORY_SEPARATOR);
+            $file = is_file(__FILE__) ? __FILE__ : rtrim(realpath('.'), \DIRECTORY_SEPARATOR);
             $i = strrpos($file, \DIRECTORY_SEPARATOR);
             $dir = substr($file, 0, 1 + $i);
             $file = substr($file, 1 + $i);
@@ -401,13 +401,12 @@ class DebugClassLoader
         if (
             'Symfony\Bridge\PhpUnit\Legacy\SymfonyTestsListenerForV7' === $class
             || 'Symfony\Bridge\PhpUnit\Legacy\SymfonyTestsListenerForV6' === $class
-            || 'Test\Symfony\Component\Debug\Tests' === $refl->getNamespaceName()
         ) {
             return [];
         }
         $deprecations = [];
 
-        $className = isset($class[15]) && "\0" === $class[15] && 0 === strpos($class, "class@anonymous\x00") ? get_parent_class($class).'@anonymous' : $class;
+        $className = false !== strpos($class, "@anonymous\0") ? (get_parent_class($class) ?: key(class_implements($class)) ?: 'class').'@anonymous' : $class;
 
         // Don't trigger deprecations for classes in the same vendor
         if ($class !== $className) {
@@ -757,7 +756,7 @@ class DebugClassLoader
         }
 
         if (isset($dirFiles[$file])) {
-            return $real .= $dirFiles[$file];
+            return $real.$dirFiles[$file];
         }
 
         $kFile = strtolower($file);
@@ -776,7 +775,7 @@ class DebugClassLoader
             self::$darwinCache[$kDir][1] = $dirFiles;
         }
 
-        return $real .= $dirFiles[$kFile];
+        return $real.$dirFiles[$kFile];
     }
 
     /**
@@ -905,7 +904,7 @@ class DebugClassLoader
         static $patchedMethods = [];
         static $useStatements = [];
 
-        if (!file_exists($file = $method->getFileName()) || isset($patchedMethods[$file][$startLine = $method->getStartLine()])) {
+        if (!is_file($file = $method->getFileName()) || isset($patchedMethods[$file][$startLine = $method->getStartLine()])) {
             return;
         }
 
@@ -1003,7 +1002,7 @@ EOTXT;
         $useMap = [];
         $useOffset = 0;
 
-        if (!file_exists($file)) {
+        if (!is_file($file)) {
             return [$namespace, $useOffset, $useMap];
         }
 
@@ -1046,7 +1045,7 @@ EOTXT;
             return;
         }
 
-        if (!file_exists($file = $method->getFileName())) {
+        if (!is_file($file = $method->getFileName())) {
             return;
         }
 

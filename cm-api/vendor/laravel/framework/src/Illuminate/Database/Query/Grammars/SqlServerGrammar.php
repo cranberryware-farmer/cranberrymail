@@ -4,6 +4,7 @@ namespace Illuminate\Database\Query\Grammars;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class SqlServerGrammar extends Grammar
 {
@@ -233,6 +234,23 @@ class SqlServerGrammar extends Grammar
     }
 
     /**
+     * Compile a delete statement without joins into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  string  $table
+     * @param  string  $where
+     * @return string
+     */
+    protected function compileDeleteWithoutJoins(Builder $query, $table, $where)
+    {
+        $sql = parent::compileDeleteWithoutJoins($query, $table, $where);
+
+        return ! is_null($query->limit) && $query->limit > 0 && $query->offset <= 0
+                        ? Str::replaceFirst('delete', 'delete top ('.$query->limit.')', $sql)
+                        : $sql;
+    }
+
+    /**
      * Compile the random statement into SQL.
      *
      * @param  string  $seed
@@ -303,6 +321,19 @@ class SqlServerGrammar extends Grammar
         $existsQuery->columns = [];
 
         return $this->compileSelect($existsQuery->selectRaw('1 [exists]')->limit(1));
+    }
+
+    /**
+     * Compile an insert and get ID statement into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
+     * @param  string  $sequence
+     * @return string
+     */
+    public function compileInsertGetId(Builder $query, $values, $sequence)
+    {
+        return 'set nocount on;'.$this->compileInsert($query, $values).';select scope_identity() as '.$this->wrap($sequence ?: 'id');
     }
 
     /**
