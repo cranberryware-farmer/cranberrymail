@@ -25,18 +25,18 @@ const emailPage = (props) => {
   if(props.breakpoint==="xs"){
     floatDir="float-left i-block";
   }
-  const attachementDownload = (file_name, part_id) => {
-    props.attachmentDownload(file_name, part_id);
+  const attachementDownload = (file_name, part_id, mail_uid) => {
+    props.attachmentDownload(file_name, part_id, mail_uid);
   }
 
-  const createAttachementInternal = attachments => {
+  const createAttachementInternal = (attachments, mail_uid) => {
     const internalItems = [];
     for(let i=0; i < attachments.length; i++){
       internalItems.push(
         <li>
           <span 
             className='cm-span-link'
-            onClick={attachementDownload(attachments[i]['file'], attachments[i]['part_id'])}
+            onClick={() => {attachementDownload(attachments[i]['file'], attachments[i]['part_id'], mail_uid)}}
           >
             {attachments[i]['file']}
           </span>
@@ -48,9 +48,9 @@ const emailPage = (props) => {
     }
     return internalItems;
   }
-  const getAttchmentComponent = attachments => {
+  const getAttchmentComponent = (attachments, mail_uid) => {
     const attachmentContent = <ul>
-      {createAttachementInternal(attachments)}
+      {createAttachementInternal(attachments, mail_uid)}
     </ul>;
     return attachmentContent;
   }
@@ -63,7 +63,7 @@ const emailPage = (props) => {
           let attachmentBody = '';
           if(el.hasAttachments===1){
             attachmentHead = "<hr><p>Attachments:</p>";
-            attachmentBody = getAttchmentComponent(el.attachment);
+            attachmentBody = getAttchmentComponent(el.attachment, el.uid);
           }
           return (
             <React.Fragment key={el.uid}>

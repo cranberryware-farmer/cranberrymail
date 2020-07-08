@@ -102,7 +102,9 @@ class InboxPage extends React.Component {
       draftID: 0,
       attachmentURLs: []
     };
-    axios.defaults.headers.common['Authorization'] = props.location.state.token;
+    if(props.location.state !== undefined && props.location.state.hasOwnProperty('token')){
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + props.location.state.token;
+    }
   }
   
   handleAttachment = (ev) =>{
@@ -850,8 +852,6 @@ class InboxPage extends React.Component {
     thread[index].editor = true;
 
     this.setEmailNode(thread[index]);
-    
-
   };
   
   getRowIndex = (uid) => {
@@ -867,9 +867,9 @@ class InboxPage extends React.Component {
   };
 
   showSettings = () => {
-      this.setState({
-        page: "settings"
-      });
+    this.setState({
+      page: "settings"
+    });
   };
 
   showEmail = uid => {
@@ -1129,7 +1129,7 @@ class InboxPage extends React.Component {
     this.fetchEmails();
   };
 
-  attachmentDownload = (file_name, part_id) => {
+  attachmentDownload = (file_name, part_id, mail_uid) => {
     const mailbox = this.props.curFolder;
     // const currentFolderLower = mailbox.toString().toLowerCase();
     if(mailbox !== '' || mailbox !== undefined) {
@@ -1138,17 +1138,30 @@ class InboxPage extends React.Component {
         file_name,
         part_id,
         message_id,
-        mailbox
+        mailbox,
+        mail_uid
       };
       axios({
         method: 'post',
         url: window._api + '/download_attachment',
         data: json_data,
-        responseType: 'stream'
+        responseType: 'blob'
       })
       .then(function (response) {
         console.log(response);
-        // response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'))
+        console.log(response.headers['content-type']);
+        const element = document.createElement("a");
+        const file = new Blob([response.data], {type: response.headers['content-type']});
+        const blobURL = URL.createObjectURL(file);
+        element.href = blobURL;
+        element.download = file_name;
+        document.body.appendChild(element);
+        element.click();
+        setTimeout(function() {
+          document.body.removeChild(element);
+          window.URL.revokeObjectURL(blobURL);
+        }, 200);
+        // response.data.pipe(console.log(response));
       })
       .catch(error => {
         console.log("Attachment Download Unsuccessful", error);

@@ -870,9 +870,60 @@ class ImapController extends Controller
         $mailbox = $request->input("mailbox");
         $file_name = $request->input("file_name");
         $part_id = $request->input("part_id");
-        $mail_id = $request->input("mail_id");
+        $mail_uid = $request->input("mail_uid");
 
-        $thread_id = new \Horde_Imap_Client_Ids($mail_id);
+        $thread_id = new \Horde_Imap_Client_Ids($mail_uid);
+
+        $query = new \Horde_Imap_Client_Fetch_Query();
+        $query->structure();
+
+        $messages = $oClient->fetch($mailbox, $query, array('ids' => $thread_id));
+
+        foreach($messages as $message){
+            $structure = $message->getStructure();
+
+            $partdata = $structure->getPart($part_id);
+
+            $result = [
+                'success' => false,
+                'message' => 'File could not be found.'
+            ];
+
+            $file_content = '';
+
+            if($mail_file_name = $partdata->getName($part_id)){
+                if($mail_file_name == $file_name) {
+                    $contentquery = new \Horde_Imap_Client_Fetch_Query();
+                    $contentquery->fullText();
+                    $contentquery->bodyPart($part_id, array(
+                        'decode' => true,
+                        'peek' => true,
+                    ));
+                    $contentquery->bodyPartSize($part_id);
+                    $filedata = $oClient->fetch($mailbox, $contentquery, array('ids' => $thread_id))->first();
+                    if(!empty($filedata)) {
+                        $stream = $filedata->getBodyPart($part_id, true);
+                        $partdata->setContents($stream, array('usestream' => true));
+
+                        $file_type = $partdata->getType();
+                        $file_content = $partdata->getContents();
+
+                        // $result = [
+                        //     'file_content' => $partdata->getContents(),
+                        //     'file_name' => $file_name,
+                        //     'file_type' => $partdata->getType(),
+                        //     'success' => true,
+                        //     'message' => 'File content fetched successfully.'
+                        // ];
+                    }
+                }
+            }
+        }
+        
+        return response($file_content, 200, [
+            'Content-type'        => $file_type,
+            'Content-Disposition' => 'attachment; filename="' . $file_name . '"',
+        ]);
     }
 
     /**
