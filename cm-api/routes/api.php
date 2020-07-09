@@ -23,9 +23,9 @@ Route::prefix('v1')->group(
         Route::post('reg', 'Api\AuthController@register');
         Route::post('wizard/emailsettings', 'Api\WizardController@index');
         Route::post('wizard/migrate', 'Api\WizardController@cranMigrate');
-        Route::post('db_check', 'HomeController@db_check');
-        Route::post('drop_create_db', 'HomeController@drop_create_db');
-        Route::post('change_session_driver', 'HomeController@ChangeSessionDriver');
+        Route::post('db_check', 'HomeController@dbCheck');
+        Route::post('drop_create_db', 'HomeController@dropCreateDB');
+        Route::post('change_session_driver', 'HomeController@changeSessionDriver');
 
         Route::group(
             ['middleware' => ['auth:api', 'cranberryAuth','cors']],

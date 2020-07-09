@@ -1,23 +1,31 @@
 <?php
-
+/**
+ * Home Controller
+ * 
+ * PHP Version 7.3
+ * 
+ * @category Controller
+ * @package  CranberryMail
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
+ * @license  GNU AGPL-3.0
+ * @link     https://cranberrymail.com
+ */
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Home Controller
+ * 
+ * @category Class
+ * @package  Cranberrymail
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
+ * @license  GNU AGPL-3.0
+ * @link     https://cranberrymail.com
+ */
 class HomeController extends Controller
 {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -25,15 +33,22 @@ class HomeController extends Controller
      */
     public function index()
     {
-            Log::info("Moving to login screen",['file' => __FILE__, 'line' => __LINE__]);
-            return view('reactidx');
+        Log::info(
+            "Moving to login screen",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
+        return view('reactidx');
     }
 
     /**
-     * @param Request $request
+     * Checks DB
+     * 
+     * @param Request $request Laravel Request
+     * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function db_check(Request $request){
+    public function dbCheck(Request $request)
+    {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
         $db = $_POST['db'];
@@ -42,46 +57,51 @@ class HomeController extends Controller
         $flag = 0;
 
         try {
-            $pdo = new \PDO("$conn:host=$servername;dbname=$db", $username, $password);
+            $pdo = new \PDO(
+                "$conn:host=$servername;dbname=$db", $username, $password
+            );
             // set the PDO error mode to exception
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            return response()->json([
-                "status" => 0,
-                "message" => "Please click on OK to drop existing database. Click on Cancel to choose new database or use existing database."
-            ], 200);
+            return response()->json(
+                [
+                    "status" => 0,
+                    "message" => "Please click on OK to drop existing database. \
+                        Click on Cancel to choose new database or \
+                        use existing database."
+                ], 200
+            );
         } catch(\PDOException $e) {
             $flag = 1;
         }
 
-        if($flag==1){
+        if ($flag==1) {
             try {
                 $pdo = new \PDO("$conn:host=".$servername, $username, $password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                $db = "`".str_replace("`","``",$db)."`";
+                $db = "`" . str_replace("`", "``", $db) . "`";
                 $pdo->query("CREATE DATABASE IF NOT EXISTS $db");
                 $pdo->query("use $db");
-                return response()->json([
-                    "status" => 1,
-                    "message" => "DB created"
-                ], 200);
+                return response()->json(
+                    ["status" => 1, "message" => "DB created"], 200
+                );
             } catch(\PDOException $e) {
-                return response()->json([
-                    "status" => 0,
-                    "message" => "No DB found"
-                ], 200);
+                return response()->json(
+                    ["status" => 0, "message" => "No DB found"], 200
+                );
             }
-
-
         }
     }
 
     /**
-     * @param Request $request
+     * Drops a Database and recreates it
+     * 
+     * @param Request $request Laravel Request
+     * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function drop_create_db(Request $request){
-
+    public function dropCreateDB(Request $request)
+    {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
         $db = $_POST['db'];
@@ -92,31 +112,36 @@ class HomeController extends Controller
             $pdo = new \PDO("$conn:host=$servername", $username, $password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-            $db = "`".str_replace("`","``",$db)."`";
+            $db = "`" . str_replace("`", "``", $db) . "`";
             $pdo->query("DROP DATABASE $db");
             $pdo->query("CREATE DATABASE IF NOT EXISTS $db");
             $pdo->query("use $db");
-            return response()->json([
-                "status" => 1,
-                "message" => "New database has been created"
-            ], 200);
+            return response()->json(
+                ["status" => 1, "message" => "New database has been created"], 200
+            );
         } catch(\PDOException $e) {
-            return response()->json([
-                "status" => 0,
-                "message" => "Unable to delete database. Please delete and create new database manually to proceed."
-            ], 200);
+            return response()->json(
+                [
+                    "status" => 0,
+                    "message" => "Unable to delete database. Please delete \
+                        and create new database manually to proceed."
+                ], 200
+            );
         }
     }
 
     /**
-     * @param Request $request
+     * Changes session driver
+     * 
+     * @param Request $request Laravel Request
+     * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function ChangeSessionDriver(Request $request) {
+    public function changeSessionDriver(Request $request)
+    {
         $this->controlSessionDriver("file", "local");
-        return response()->json([
-            "status" => 1,
-            "message" => "Session Driver is set to file."
-        ], 200);
+        return response()->json(
+            ["status" => 1, "message" => "Session Driver is set to file."], 200
+        );
     }
 }
