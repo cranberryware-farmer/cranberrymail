@@ -25,23 +25,23 @@ Route::prefix('v1')->group(function(){
 
     Route::group(['middleware' => ['auth:api', 'cranberryAuth','cors']], function() {
          Route::post('getUser', 'Api\AuthController@getUser');
-         Route::post('folders','Api\ImapController@get_folders');
-         Route::post('star_emails','Api\ImapController@star_emails');
+         Route::post('folders','Api\ImapController@getFolders');
+         Route::post('star_emails','Api\ImapController@starEmails');
 
-         Route::post('trash_emails','Api\ImapController@trash_emails');
-         Route::post('untrash_emails','Api\ImapController@untrash_emails');
+         Route::post('trash_emails','Api\ImapController@trashEmails');
+         Route::post('untrash_emails','Api\ImapController@unTrashEmails');
 
          Route::post('save_draft','Api\ImapController@saveDraft');
 
-         Route::post('spam_emails','Api\ImapController@spam_emails');
-         Route::post('unspam_emails','Api\ImapController@unspam_emails');
+         Route::post('spam_emails','Api\ImapController@spamEmails');
+         Route::post('unspam_emails','Api\ImapController@unSpamEmails');
 
-         Route::post('search_emails','Api\ImapController@search_emails');
+         Route::post('search_emails','Api\ImapController@searchEmails');
 
          Route::post('download_attachment','Api\ImapController@downloadAttachment');
 
-         Route::post('emails','Api\ImapController@get_emails');
-         Route::post('email', 'Api\ImapController@get_email');
+         Route::post('emails','Api\ImapController@getEmails');
+         Route::post('email', 'Api\ImapController@getEmail');
          Route::post("wizard/inviteadmin",'Api\WizardController@inviteAdmin');
 
          Route::post("smtp/sendEmail",'Api\SmtpController@sendEmail');
