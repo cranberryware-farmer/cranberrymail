@@ -96,31 +96,19 @@ class WizardController extends Controller
     }
 
     /**
-     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function cranMigrate(Request $request)
+    public function cranMigrate()
     {
         Artisan::call('migrate');
         Artisan::call('db:seed');
         $sess_driver = env('SESSION_DRIVER', 'file');
+
         if($sess_driver !== 'database'){
-            $envPath = base_path() . '/cmail_settings/.env';
-            $lines = file($envPath);
-            $result = '';
-
-            foreach($lines as $line) {
-                if(strpos($line, 'SESSION_DRIVER=') === 0) {
-                    $result .= "SESSION_DRIVER=database\n";
-                } else if(strpos($line, 'APP_ENV=') === 0) {
-                    $result .= "APP_ENV=production\n";
-                } else {
-                    $result .= $line;
-                }
-            }
-
-            file_put_contents($envPath, $result);
+            $this->controlSessionDriver("database", "production");
         }
+
         $data=[
             "success" => true,
             "message" => "Migrations successfully completed."

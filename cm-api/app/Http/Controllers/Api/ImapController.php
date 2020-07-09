@@ -12,30 +12,22 @@ use Mail_mime;
 
 class ImapController extends Controller
 {
-
+    private $oClient;
+    private $user;
 
     /**
      * Create a new controller instance.
      *
      * @return void
-     */
-    public function __construct()
-    {}
-
-
-    /**
-     * Initiate imap email client
-     *
-     * @param $user
-     * @return \Horde_Imap_Client_Socket
      * @throws \Horde_Imap_Client_Exception
      */
-    public function get_credentials($user){
-
+    public function __construct(){
+        $user = Auth::user();
+        $this->user = $user;
         $email = $user->email;
         $password=Crypt::decryptString($user->key);
 
-        $oClient = new \Horde_Imap_Client_Socket([
+        $client = new \Horde_Imap_Client_Socket([
             'username' => $email,
             'password' => $password,
             'hostspec' => env('IMAP_HOST'),
@@ -43,10 +35,10 @@ class ImapController extends Controller
             'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
         ]);
         Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
-        $oClient->login();
+        $client->login();
         Log::info("Login with oClient", ['file' => __FILE__, 'line' => __LINE__]);
 
-        return $oClient;
+        $this->oClient =  $client;
     }
 
     /**
@@ -67,10 +59,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function get_folders(Request $request){
-
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function get_folders(Request $request) {
+        $oClient = $this->oClient;
 
         $mailBoxes = $this->getMailBoxes($oClient);
         Log::info("Got mailboxes", ['file' => __FILE__, 'line' => __LINE__]);
@@ -146,10 +136,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function untrash_emails(Request $request)
-    {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function untrash_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $trash = $this->getMailBox($oClient,$request->input("trash"));
         $inbox = $this->getMailBox($oClient,$request->input("curfolder"));
@@ -182,11 +170,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
 
-    public function trash_emails(Request $request)
-    {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
-
+    public function trash_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $trashFolder = $this->getMailBox($oClient,$request->input("trash"));
         $curFolder = $this->getMailBox($oClient,$request->input("curfolder"));
@@ -250,10 +235,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function unspam_emails(Request $request)
-    {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function unspam_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $spam = $this->getMailBox($oClient,$request->input("spam"));
         $inbox = $this->getMailBox($oClient,$request->input("curfolder"));
@@ -285,10 +268,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function saveDraft(Request $request)
-    {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function saveDraft(Request $request) {
+        $oClient = $this->oClient;
 
         $draft_folder = $request->session()->get('draft_folder', '');
 
@@ -321,7 +302,7 @@ class ImapController extends Controller
         $mail_mime->addCc($ccs);
         $mail_mime->addBcc($bccs);
         $mail_mime->setSubject($subject);
-        $mail_mime->setFrom($user->email);
+        $mail_mime->setFrom($this->user->email);
 
         $mail_mime->setHTMLBody($body);
 
@@ -349,7 +330,7 @@ class ImapController extends Controller
         );
         $draft = $draft->ids;
 
-        $data=[
+        $data = [
             "success" => true,
             "draft" => $draft[0]
         ];
@@ -368,10 +349,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function spam_emails(Request $request)
-    {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function spam_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $spamFolder = $this->getMailBox($oClient,$request->input("spam"));
         $curFolder = $this->getMailBox($oClient,$request->input("curfolder"));
@@ -410,11 +389,8 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      */
 
-    public function star_emails(Request $request)
-    {
-
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function star_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $curFolder = $request->input("curFolder");
         $starEmail = $request->input("emailState");
@@ -488,17 +464,11 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-
-
-    public function search_emails(Request $request)
-    {
-
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+    public function search_emails(Request $request) {
+        $oClient = $this->oClient;
 
         $mailbox = $request->input("curfolder");
         $sparam = $request->input("sterm");
-
 
         $query = new \Horde_Imap_Client_Search_Query();
         $query->intervalSearch(
@@ -508,7 +478,6 @@ class ImapController extends Controller
         $query->text($sparam);
 
         Log::info("Defined query parameters", ['file' => __FILE__, 'line' => __LINE__]);
-
 
         $thread = $oClient->thread($mailbox,[
             'criteria' => \Horde_Imap_Client::THREAD_ORDEREDSUBJECT,
@@ -522,7 +491,6 @@ class ImapController extends Controller
         $emailThread = [];
         $i=0;
         $uids = [];
-
 
         foreach($allThreads as $uthread){
            $curThread = array_keys($uthread);
@@ -595,8 +563,7 @@ class ImapController extends Controller
      * @param $oClient
      * @return mixed
      */
-    private function getMailBoxes($oClient){
-
+    private function getMailBoxes($oClient) {
         $mailBoxes = $oClient->listMailboxes("*");
         Log::info("Get all mailboxes", ['file' => __FILE__, 'line' => __LINE__]);
         return $mailBoxes;
@@ -607,8 +574,7 @@ class ImapController extends Controller
      * @param $ref
      * @return mixed|string
      */
-    private function getMailBox($oClient, $ref){
-
+    private function getMailBox($oClient, $ref) {
         $mailBoxes = $this->getMailBoxes($oClient);
         $flag=0;
         $ref1 = strtolower($ref);
@@ -657,11 +623,9 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-
     public function get_emails(Request $request)
     {
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+        $oClient = $this->oClient;
 
         $mailbox = $request->input("folder");
         $query = new \Horde_Imap_Client_Search_Query();
@@ -758,8 +722,7 @@ class ImapController extends Controller
      */
 
     public function get_email(Request $request){
-        $user = Auth::user();
-        $oClient = $this->get_credentials($user);
+        $oClient = $this->oClient;
 
         $mailbox = $request->input("folder");
 
