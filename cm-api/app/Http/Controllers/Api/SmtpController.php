@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Implements calls to SMTP server
+ * 
+ * PHP Version 7.3
+ * 
+ * @category Controller
+ * @package  CranberryMail
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
+ * @license  GNU AGPL-3.0
+ * @link     https://cranberrymail.com
+ */
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -9,72 +19,99 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
 
-
+/**
+ * Implements all required methods for SMTP calls
+ * 
+ * @category Class
+ * @package  Cranberrymail
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
+ * @license  GNU AGPL-3.0
+ * @link     https://cranberrymail.com
+ */
 class SmtpController extends Controller
 {
-
-     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
+     * Loads SMTP configs
+     * 
      * @return array
      */
-    public function getSmtp(){
+    public function getSmtp()
+    {
         $smtp = [
             "host" => env("SMTP_HOST"),
             "port" => env("SMTP_PORT"),
             "encryption" => env("SMTP_ENCRYPTION")
         ];
-        Log::info("Return smtp values from .env", ['file' => __FILE__, 'line' => __LINE__]);
+        Log::info(
+            "Return smtp values from .env",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
         return $smtp;
     }
 
     /**
-     * @param $emails
-     * @return false|string[]
+     * Separate string to multiple emails
+     * 
+     * @param string $emails Concatenated email list
+     * 
+     * @return string|string[]
      */
-    private function sepEmails($emails){
-        if(stripos($emails,",")){
+    private function _sepEmails($emails)
+    {
+        if (stripos($emails, ",")) {
             $result = explode(',', $emails);
-            Log::info("Convert emails into an array", ['file' => __FILE__, 'line' => __LINE__]);
+            Log::info(
+                "Convert emails into an array",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
 
-        }else{
+        } else {
             $result = $emails;
-            Log::info("No change in emails", ['file' => __FILE__, 'line' => __LINE__]);
+            Log::info(
+                "No change in emails",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
         }
         return $result;
     }
 
     /**
-     * @param Request $request
+     * Sends an email through SMTP server
+     * 
+     * @param Request $request Laravel Request
+     * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendEmail(Request $request){
+    public function sendEmail(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'to'=>'required',
+                'cc'=>'nullable',
+                'bcc' => 'nullable',
+                'subject' => 'required',
+                'body' => 'required',
+                'attachment' => 'nullable|max:20000'
+            ]
+        );
 
-        $validator = Validator::make($request->all(),[
-            'to'=>'required',
-            'cc'=>'nullable',
-            'bcc' => 'nullable',
-            'subject' => 'required',
-            'body' => 'required',
-            'attachment' => 'nullable|max:20000'
-        ]);
+        Log::info(
+            "Validate input parameters",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
 
-        Log::info("Validate input parameters", ['file' => __FILE__, 'line' => __LINE__]);
-
-        if($validator->fails()) {
-            Log::error("Please check the size of your attachment", ['file' => __FILE__, 'line' => __LINE__]);
-            return response()->json(array(
-                "result" => 0,
-                "message" => "Error: please check the size of your attachment."
-            ), 200);
+        if ($validator->fails()) {
+            Log::error(
+                "Please check the size of your attachment",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json(
+                [
+                    "result" => 0,
+                    "message" => "Error: please check the size of your attachment."
+                ], 200
+            );
         }
 
         try{
@@ -83,7 +120,7 @@ class SmtpController extends Controller
             $password=Crypt::decryptString($user->key);
 
             $tos = $request->input("to");
-            $to = $this->sepEmails($tos);
+            $to = $this->_sepEmails($tos);
             $ccs = $request->input("cc");
             $bccs = $request->input("bcc");
             $subject = $request->input("subject");
@@ -91,134 +128,153 @@ class SmtpController extends Controller
             $msgId=$request->input('messageId');
             $draft_id = $request->input('draft_id');
 
-            if($draft_id) {
+            if ($draft_id) {
                 $draft_folder = $request->session()->get('draft_folder', '');
                 $user = Auth::user();
                 $email = $user->email;
                 $password=Crypt::decryptString($user->key);
 
-                $oClient = new \Horde_Imap_Client_Socket([
-                    'username' => $email,
-                    'password' => $password,
-                    'hostspec' => env('IMAP_HOST'),
-                    'port' => env('IMAP_PORT'),
-                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
-                ]);
-                Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
+                $oClient = new \Horde_Imap_Client_Socket(
+                    [
+                        'username' => $email,
+                        'password' => $password,
+                        'hostspec' => env('IMAP_HOST'),
+                        'port' => env('IMAP_PORT'),
+                        'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
+                    ]
+                );
+                Log::info(
+                    "oClient created",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
                 $oClient->login();
-                Log::info("Login with oClient", ['file' => __FILE__, 'line' => __LINE__]);
+                Log::info(
+                    "Login with oClient",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
 
                 $ids = new \Horde_Imap_Client_Ids($draft_id);
-                $oClient->store($draft_folder, array(
-                    'ids' => $ids,
-                    'add' => '\deleted',
-                ));
+                $oClient->store(
+                    $draft_folder,
+                    ['ids' => $ids, 'add' => '\deleted']
+                );
 
-                Log::info("Added deleted flag to given emails in trash folder",['file' => __FILE__, 'line' => __LINE__]);
+                Log::info(
+                    "Added deleted flag to given emails in trash folder",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
 
-                $draft_deleted = $oClient->expunge($draft_folder,[
-                    'ids' => $ids,
-                    'list' => true
-                ]);
+                $draft_deleted = $oClient->expunge(
+                    $draft_folder, ['ids' => $ids,'list' => true]
+                );
             }
 
             $smtp = $this->getSmtp();
 
-            $name = explode("@",$from);
+            $name = explode("@", $from);
 
             $flag=0;
             $env=env("APP_ENV");
-            if($smtp['encryption']=="starttls"){
-
+            if ($smtp['encryption'] == "starttls") {
                 $smtp['encryption'] = "tls";
                 $flag=1;
-                Log::info("Encryption from starttls to tls", ['file' => __FILE__, 'line' => __LINE__]);
+                Log::info(
+                    "Encryption from starttls to tls",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
             }
 
 
-            $transport = new \Swift_SmtpTransport($smtp['host'], $smtp['port'],$smtp['encryption']);
+            $transport = new \Swift_SmtpTransport(
+                $smtp['host'], $smtp['port'], $smtp['encryption']
+            );
             $transport->setUsername($from);
             $transport->setPassword($password);
 
-            if($flag==1 || $env=='local'){
-                $transport->setStreamOptions(array('ssl' => array('allow_self_signed' => true, 'verify_peer' => false)));
-                Log::info("Allow self signed certificate in swiftmailer", ['file' => __FILE__, 'line' => __LINE__]);
+            if ($flag == 1 || $env == 'local') {
+                $transport->setStreamOptions(
+                    ['ssl' => ['allow_self_signed' => true, 'verify_peer' => false]]
+                );
+                Log::info(
+                    "Allow self signed certificate in swiftmailer",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
             }
 
             $swift_mailer = new \Swift_Mailer($transport);
-            if($request->hasFile('attachment')){
+            if ($request->hasFile('attachment')) {
 
                 $msg = (new \Swift_Message($subject))
-                ->setFrom([ $from => $name[0]])
-                ->setTo($to);
+                    ->setFrom([ $from => $name[0]])
+                    ->setTo($to);
 
                 $files = $request->file('attachment');
-                foreach($files as $file){
-                    $msg->attach(\Swift_Attachment::fromPath($file->getPathName())->setFilename($file->getClientOriginalName()));
+                foreach ($files as $file) {
+                    $msg->attach(
+                        \Swift_Attachment::fromPath($file->getPathName())
+                            ->setFilename($file->getClientOriginalName())
+                    );
                 }
-                Log::info("Attach files to email", ['file' => __FILE__, 'line' => __LINE__]);
-
-            } else if($request->input("attachmentURLs")) {
+                Log::info(
+                    "Attach files to email",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
+            } else if ($request->input("attachmentURLs")) {
                 $msg = (new \Swift_Message($subject))
                     ->setFrom([ $from => $name[0]])
                     ->setTo($to);
                 $attached_urls = $request->input("attachmentURLs");
                 $urls_arr = json_decode($attached_urls, true);
-                foreach($urls_arr as $file){
+                foreach ($urls_arr as $file) {
                     $file_path = storage_path('app/') . $file["file"];
-                    $msg->attach(\Swift_Attachment::fromPath($file_path)->setFilename($file["file"]));
+                    $msg->attach(
+                        \Swift_Attachment::fromPath($file_path)
+                            ->setFilename($file["file"])
+                    );
                 }
             } else {
-
                 $msg = (new \Swift_Message($subject))
-                ->setFrom([ $from => $name[0]])
-                ->setTo($to);
-
-                Log::info("No file attachments", ['file' => __FILE__, 'line' => __LINE__]);
+                    ->setFrom([ $from => $name[0]])
+                    ->setTo($to);
+                Log::info(
+                    "No file attachments",
+                    ['file' => __FILE__, 'line' => __LINE__]
+                );
             }
 
-
-            if(!empty($ccs)){
-                $cc = $this->sepEmails($ccs);
+            if (!empty($ccs)) {
+                $cc = $this->_sepEmails($ccs);
                 $msg->setCc($cc);
                 Log::info("Set CC", ['file' => __FILE__, 'line' => __LINE__]);
             }
 
-            if(!empty($bccs)){
-                $bcc = $this->sepEmails($bccs);
+            if (!empty($bccs)) {
+                $bcc = $this->_sepEmails($bccs);
                 $msg->setBcc($bcc);
                 Log::info("Set BCC", ['file' => __FILE__, 'line' => __LINE__]);
             }
 
-            $msg->setBody($body,'text/html');
-            $msg->addPart(strip_tags($body),"text/plain");
+            $msg->setBody($body, 'text/html');
+            $msg->addPart(strip_tags($body), "text/plain");
 
-            if(!empty($msgId)){
+            if (!empty($msgId)) {
                 $headers = $msg->getHeaders();
-                $headers->addTextHeader('In-Reply-To',$msgId);
-                $headers->addTextHeader('References',$msgId);
+                $headers->addTextHeader('In-Reply-To', $msgId);
+                $headers->addTextHeader('References', $msgId);
                 Log::info("Set Headers", ['file' => __FILE__, 'line' => __LINE__]);
             }
-
 
             $result = $swift_mailer->send($msg);
             $msg = "Success, email sent";
 
             Log::info("Email Sent", ['file' => __FILE__, 'line' => __LINE__]);
-
         } catch (\Exception $e) {
             report($e);
             $result = -1;
             $msg = $e->getMessage();
             Log::error($msg, ['file' => __FILE__, 'line' => __LINE__]);
-
         }
 
-        return response()->json(array(
-            "result" => $result,
-            "message" => $msg
-        ), 200);
-
-
+        return response()->json(["result" => $result, "message" => $msg], 200);
     }
 }
