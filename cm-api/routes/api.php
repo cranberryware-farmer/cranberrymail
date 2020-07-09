@@ -1,54 +1,68 @@
 <?php
+/**
+ * ------------------------------------------------------------------------
+ * API Routes
+ * ------------------------------------------------------------------------
+ * Here is where you can register API routes for your application. These
+ * routes are loaded by the RouteServiceProvider within a group which
+ * is assigned the "api" middleware group. Enjoy building your API!
+ * 
+ * PHP Version 7.3
+ * 
+ * @category Router
+ * @package  CranberryMail
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
+ * @license  GNU AGPL-3.0
+ * @link     https://cranberrymail.com
+ */
 
-use Illuminate\Http\Request;
+Route::prefix('v1')->group(
+    function () {
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+        Route::post('login', 'Api\AuthController@login');
+        Route::post('reg', 'Api\AuthController@register');
+        Route::post('wizard/emailsettings', 'Api\WizardController@index');
+        Route::post('wizard/migrate', 'Api\WizardController@cranMigrate');
+        Route::post('db_check', 'HomeController@db_check');
+        Route::post('drop_create_db', 'HomeController@drop_create_db');
+        Route::post('change_session_driver', 'HomeController@ChangeSessionDriver');
 
-Route::prefix('v1')->group(function(){
+        Route::group(
+            ['middleware' => ['auth:api', 'cranberryAuth','cors']],
+            function () {
+                Route::post('getUser', 'Api\AuthController@getUser');
+                Route::post('folders', 'Api\ImapController@getFolders');
+                Route::post('star_emails', 'Api\ImapController@starEmails');
 
-    Route::post('login', 'Api\AuthController@login');
-    Route::post('reg', 'Api\AuthController@register');
-    Route::post('wizard/emailsettings', 'Api\WizardController@index');
-    Route::post('wizard/migrate', 'Api\WizardController@cranMigrate');
-    Route::post('db_check', 'HomeController@db_check');
-    Route::post('drop_create_db', 'HomeController@drop_create_db');
-    Route::post('change_session_driver', 'HomeController@ChangeSessionDriver');
+                Route::post('trash_emails', 'Api\ImapController@trashEmails');
+                Route::post('untrash_emails', 'Api\ImapController@unTrashEmails');
 
-    Route::group(['middleware' => ['auth:api', 'cranberryAuth','cors']], function() {
-         Route::post('getUser', 'Api\AuthController@getUser');
-         Route::post('folders','Api\ImapController@getFolders');
-         Route::post('star_emails','Api\ImapController@starEmails');
+                Route::post('save_draft', 'Api\ImapController@saveDraft');
 
-         Route::post('trash_emails','Api\ImapController@trashEmails');
-         Route::post('untrash_emails','Api\ImapController@unTrashEmails');
+                Route::post('spam_emails', 'Api\ImapController@spamEmails');
+                Route::post('unspam_emails', 'Api\ImapController@unSpamEmails');
 
-         Route::post('save_draft','Api\ImapController@saveDraft');
+                Route::post('search_emails', 'Api\ImapController@searchEmails');
 
-         Route::post('spam_emails','Api\ImapController@spamEmails');
-         Route::post('unspam_emails','Api\ImapController@unSpamEmails');
+                Route::post(
+                    'download_attachment',
+                    'Api\ImapController@downloadAttachment'
+                );
 
-         Route::post('search_emails','Api\ImapController@searchEmails');
+                Route::post('emails', 'Api\ImapController@getEmails');
+                Route::post('email', 'Api\ImapController@getEmail');
+                Route::post(
+                    "wizard/inviteadmin",
+                    'Api\WizardController@inviteAdmin'
+                );
 
-         Route::post('download_attachment','Api\ImapController@downloadAttachment');
+                Route::post("smtp/sendEmail", 'Api\SmtpController@sendEmail');
 
-         Route::post('emails','Api\ImapController@getEmails');
-         Route::post('email', 'Api\ImapController@getEmail');
-         Route::post("wizard/inviteadmin",'Api\WizardController@inviteAdmin');
-
-         Route::post("smtp/sendEmail",'Api\SmtpController@sendEmail');
-
-         Route::post('logout', 'Api\AuthController@logout');
-     });
- });
+                Route::post('logout', 'Api\AuthController@logout');
+            }
+        );
+    }
+);
 
 
 
