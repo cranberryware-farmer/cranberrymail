@@ -24,7 +24,7 @@ use Mail_mime;
  * 
  * @category Class
  * @package  Cranberrymail
- * @author   Ayus MOhanty <ayus.mohanty@nettantra.net>
+ * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
  * @license  GNU AGPL-3.0
  * @link     https://cranberrymail.com
  */
