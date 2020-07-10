@@ -83,8 +83,9 @@ class ImapController extends Controller
      *
      * @return Boolean
      */
-    private function _moveToFolder($oClient,$sourceFolder,$uid,$destinationFolder): bool
-    {
+    private function _moveToFolder(
+        $oClient,$sourceFolder,$uid,$destinationFolder
+    ): bool {
         $params = [
             "ids" => $uid,
             "move" => true
@@ -99,7 +100,8 @@ class ImapController extends Controller
             return true;
         }
         Log::error(
-            "Unable to move email from ".$sourceFolder." to folder ".$destinationFolder,
+            "Unable to move email from ".$sourceFolder
+                ." to folder ".$destinationFolder,
             ['file' => __FILE__, 'line' => __LINE__]
         );
         return false;
@@ -115,8 +117,9 @@ class ImapController extends Controller
      *
      * @return Boolean
      */
-    private function _copyToFolder($oClient,$sourceFolder,$uid,$destinationFolder): bool
-    {
+    private function _copyToFolder(
+        $oClient,$sourceFolder,$uid,$destinationFolder
+    ): bool {
         $params = [
             "create" => true,
             "ids" => $uid
@@ -126,12 +129,18 @@ class ImapController extends Controller
         if (!empty($result)) {
             $message = "Copied email from ". $sourceFolder
                 . " to folder " . $destinationFolder;
-            Log::info($message, ['file' => __FILE__, 'line' => __LINE__]);
+            Log::info(
+                "Copied email from ". $sourceFolder
+                    . " to folder " . $destinationFolder,
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
             return true;
         }
-        $message = "Unable to copy email from " . $sourceFolder
-            . " to folder " . $destinationFolder;
-        Log::error($message, ['file' => __FILE__, 'line' => __LINE__]);
+        Log::error(
+            "Unable to copy email from " . $sourceFolder
+                . " to folder " . $destinationFolder,
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
         return false;
     }
 
@@ -744,7 +753,8 @@ class ImapController extends Controller
                 }
             }
             Log::info(
-                "Iterate once again on existing mailboxes and retrieve mailbox ".$ref,
+                "Iterate once again on existing mailboxes and retrieve mailbox "
+                    .$ref,
                 ['file' => __FILE__, 'line' => __LINE__]
             );
         }

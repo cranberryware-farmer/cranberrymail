@@ -55,10 +55,7 @@ class WizardController extends Controller
 
         $max = count($whitelist);
 
-        $data = [
-            "index" => 0,
-            "length" => 0
-        ];
+        $data = ["index" => 0, "length" => 0];
 
         if (isset($mx_records_arr[1])) {
             for ($i=0;$i<$max;$i++) {
@@ -84,7 +81,8 @@ class WizardController extends Controller
             return response()->json(
                 [
                     "status" => 0,
-                    "msg" => "Email provider not found. Please fill the values manually."
+                    "msg" => "Email provider not found. \
+                        Please fill the values manually."
                 ], 200
             );
         } else {
