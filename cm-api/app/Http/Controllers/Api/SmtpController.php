@@ -130,28 +130,8 @@ class SmtpController extends Controller
 
             if ($draft_id) {
                 $draft_folder = $request->session()->get('draft_folder', '');
-                $user = Auth::user();
-                $email = $user->email;
-                $password=Crypt::decryptString($user->key);
 
-                $oClient = new \Horde_Imap_Client_Socket(
-                    [
-                        'username' => $email,
-                        'password' => $password,
-                        'hostspec' => env('IMAP_HOST'),
-                        'port' => env('IMAP_PORT'),
-                        'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
-                    ]
-                );
-                Log::info(
-                    "oClient created",
-                    ['file' => __FILE__, 'line' => __LINE__]
-                );
-                $oClient->login();
-                Log::info(
-                    "Login with oClient",
-                    ['file' => __FILE__, 'line' => __LINE__]
-                );
+                $oClient = $this->getIMAPCredential();
 
                 $ids = new \Horde_Imap_Client_Ids($draft_id);
                 $oClient->store(

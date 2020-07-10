@@ -1,9 +1,9 @@
 <?php
 /**
  * Main Controller
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -16,10 +16,13 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Main Controller from which all controller should be inherited
- * 
+ *
  * @category Controller
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -29,6 +32,8 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    protected $user;
 
     /**
      * Rewrites ENV variables in the process of installation and upgrade
@@ -57,5 +62,40 @@ class Controller extends BaseController
 
             file_put_contents($envPath, $result);
         }
+    }
+
+    /**
+     * Create IMAP Object
+     * 
+     * @return bool|\Horde_Imap_Client_Socket
+     * @throws \Horde_Imap_Client_Exception
+     */
+    protected function getIMAPCredential()
+    {
+        $user = Auth::user();
+        if ($user && isset($user->email)) {
+            $this->user = $user;
+            $email = $user->email;
+            $password=Crypt::decryptString($user->key);
+
+            $client = new \Horde_Imap_Client_Socket(
+                [
+                    'username' => $email,
+                    'password' => $password,
+                    'hostspec' => env('IMAP_HOST'),
+                    'port' => env('IMAP_PORT'),
+                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
+                ]
+            );
+            Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
+            $client->login();
+            Log::info(
+                "Login with oClient",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+
+            return $client;
+        }
+        return false;
     }
 }
