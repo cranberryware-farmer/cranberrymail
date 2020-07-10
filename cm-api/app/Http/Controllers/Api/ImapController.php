@@ -34,7 +34,7 @@ class ImapController extends Controller
 
     /**
      * Creates IMAP Client Object Using Horde Socket
-     * 
+     *
      * @return bool|\Horde_Imap_Client_Socket
      * @throws \Horde_Imap_Client_Exception
      */
@@ -589,8 +589,6 @@ class ImapController extends Controller
      */
     public function searchEmails(Request $request)
     {
-        $oClient = $this->_getCredential();
-
         $mailbox = $request->input("curfolder");
         $sparam = $request->input("sterm");
 
@@ -602,39 +600,62 @@ class ImapController extends Controller
         $query->text($sparam);
 
         Log::info(
-            "Defined query parameters",
+            "Search Emails Defined query parameters",
             ['file' => __FILE__, 'line' => __LINE__]
         );
+
+        $data = $this->_fetchMailQuery("search", $mailbox, $query);
+
+        Log::info(
+            "Mail Search Complete",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
+
+        return response()->json($data, 200);
+    }
+
+    /**
+     * Fetchs mail list for listing and searching
+     * 
+     * @param string                         $type      Type of request
+     * @param string                         $mailbox   Mailbox name
+     * @param Horde_Imap_Client_Search_Query $searchqry Search Query Object
+     * 
+     * @return array
+     * @throws \Horde_Imap_Client_Exception
+     * @throws \Horde_Imap_Client_Exception_NoSupportExtension
+     */
+    private function _fetchMailQuery($type, $mailbox, $searchqry)
+    {
+        $oClient = $this->_getCredential();
 
         $thread = $oClient->thread(
             $mailbox,
             [
                 'criteria' => \Horde_Imap_Client::THREAD_ORDEREDSUBJECT,
-                "search" => $query
+                "search" => $searchqry
             ]
         );
 
         $allThreads = $thread->getThreads();
 
         Log::info(
-            "Retrieved search results as threads",
+            "Retrieved results as threads",
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
         $emailThread = [];
-        $i=0;
         $uids = [];
 
         foreach ($allThreads as $uthread) {
             $curThread = array_keys($uthread);
             $threadCount = count($curThread);
 
-            $emailThread[$i]['uids'] = implode(",", $curThread);
-            $emailThread[$i]['count'] = $threadCount;
-
-            $i++;
-
-            array_push($uids, $curThread[$threadCount-1]);
+            $emailThread[] = [
+                "uids" => implode(",", $curThread),
+                "count" => $threadCount
+            ];
+            $uids[] = $curThread[$threadCount-1];
         }
 
         Log::info(
@@ -650,44 +671,42 @@ class ImapController extends Controller
 
         $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids));
 
-        $data = [];
-        $i=0;
-
-        $indexes = $uids->ids;
-
         Log::info(
             "Fetched messages with envelope and structure",
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
+        $data = [];
+        $index = 0;
+
         foreach ($messages as $message) {
             $envelope = $message->getEnvelope();
             $part = $message->getStructure();
 
-            $msghdr = new \StdClass;
-            $msghdr->recipients = $envelope->to->bare_addresses;
-            $msghdr->senders    = $envelope->from->bare_addresses;
-            $msghdr->cc         = $envelope->cc->bare_addresses;
-            $msghdr->bcc         = $envelope->bcc->bare_addresses;
-            $msghdr->subject    = $envelope->subject;
-            $msghdr->timestamp  = $envelope->date->getTimestamp();
+            $recipients = $envelope->to->bare_addresses;
+            $senders    = $envelope->from->bare_addresses;
+            $cc         = $envelope->cc->bare_addresses;
+            $bcc        = $envelope->bcc->bare_addresses;
+            $subject    = $envelope->subject;
+            $timestamp  = $envelope->date->getTimestamp();
 
-            $data[$i] = [
+            $data[$index] = [
                 'uid' => $message->getUid(),
-                'from' => implode(",", $msghdr->senders),
-                'cc' => implode(",", $msghdr->cc),
-                'bcc' => implode(",", $msghdr->bcc),
-                'to' => implode(",", $msghdr->recipients),
-                'date' => $msghdr->timestamp,
-                'subject' => $envelope->subject,
+                'from' => implode(",", $senders),
+                'cc' => implode(",", $cc),
+                'bcc' => implode(",", $bcc),
+                'to' => implode(",", $recipients),
+                'date' => $timestamp,
+                'subject' => $subject,
                 'hasAttachments' => $part->getDisposition(),
                 'folder' => $mailbox,
                 'body' => '',
                 'messageId' =>  $envelope->message_id,
-                'thread' => $emailThread[$i]
+                'thread' => $emailThread[$index],
+                'flags' => $message->getFlags()
             ];
 
-            $i++;
+            $index++;
         }
 
         Log::info(
@@ -695,8 +714,7 @@ class ImapController extends Controller
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
-        return response()->json($data, 200);
-
+        return $data;
     }
 
 
@@ -794,92 +812,15 @@ class ImapController extends Controller
             \Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
         );
 
-        $thread = $oClient->thread(
-            $mailbox,
-            [
-                'criteria' => \Horde_Imap_Client::THREAD_ORDEREDSUBJECT,
-                "search" => $query
-            ]
-        );
-        $allThreads = $thread->getThreads();
-
-        $emailThread = [];
-        $i=0;
-        $uids = [];
-
         Log::info(
-            "Fetch thread in mailbox ".$mailbox,
+            "List Emails Defined query parameters",
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
-        foreach ($allThreads as $uthread) {
-            $curThread = array_keys($uthread);
-            $threadCount = count($curThread);
-
-            $emailThread[$i]['uids'] = implode(",", $curThread);
-            $emailThread[$i]['count'] = $threadCount;
-
-            $i++;
-
-            array_push($uids, $curThread[$threadCount-1]);
-        }
+        $data = $this->_fetchMailQuery("list", $mailbox, $query);
 
         Log::info(
-            "Iterate over all threads and return latest message in the threads",
-            ['file' => __FILE__, 'line' => __LINE__]
-        );
-
-        $uids = new \Horde_Imap_Client_Ids($uids);
-
-        $query = new \Horde_Imap_Client_Fetch_Query();
-        $query->envelope();
-        $query->structure();
-
-        $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids));
-
-        $data = [];
-        $i=0;
-
-        $indexes = $uids->ids;
-
-        Log::info(
-            "Fetch messages by unique thread",
-            ['file' => __FILE__, 'line' => __LINE__]
-        );
-        foreach ($messages as $message) {
-            $envelope = $message->getEnvelope();
-            $part = $message->getStructure();
-
-            $flags = $message->getFlags();
-
-            $msghdr = new \StdClass;
-            $msghdr->recipients = $envelope->to->bare_addresses;
-            $msghdr->senders    = $envelope->from->bare_addresses;
-            $msghdr->cc         = $envelope->cc->bare_addresses;
-            $msghdr->bcc         = $envelope->bcc->bare_addresses;
-            $msghdr->subject    = $envelope->subject;
-            $msghdr->timestamp  = $envelope->date->getTimestamp();
-
-            $data[$i] = [
-                'uid' => $message->getUid(),
-                'from' => implode(",", $msghdr->senders),
-                'cc' => implode(",", $msghdr->cc),
-                'bcc' => implode(",", $msghdr->bcc),
-                'to' => implode(",", $msghdr->recipients),
-                'date' => $msghdr->timestamp,
-                'subject' => $envelope->subject,
-                'hasAttachments' => $part->getDisposition(),
-                'folder' => $mailbox,
-                'body' => '',
-                'messageId' =>  $envelope->message_id,
-                'thread' => $emailThread[$i],
-                'flags' => $flags
-            ];
-
-            $i++;
-        }
-        Log::info(
-            "Iterate over messages and return data array",
+            "List Emails data fetched",
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
@@ -921,13 +862,12 @@ class ImapController extends Controller
             $envelope = $message->getEnvelope();
             $structure = $message->getStructure();
 
-            $msghdr = new \StdClass;
-            $msghdr->recipients = $envelope->to->bare_addresses;
-            $msghdr->senders    = $envelope->from->bare_addresses;
-            $msghdr->cc         = $envelope->cc->bare_addresses;
-            $msghdr->bcc         = $envelope->bcc->bare_addresses;
-            $msghdr->subject    = $envelope->subject;
-            $msghdr->timestamp  = $envelope->date->getTimestamp();
+            $recipients = $envelope->to->bare_addresses;
+            $senders    = $envelope->from->bare_addresses;
+            $cc         = $envelope->cc->bare_addresses;
+            $bcc         = $envelope->bcc->bare_addresses;
+            $subject    = $envelope->subject;
+            $timestamp  = $envelope->date->getTimestamp();
 
             $plainpartid = $structure->findBody('plain');
             $htmlpartid  = $structure->findBody('html');
@@ -988,12 +928,12 @@ class ImapController extends Controller
 
             $results[] = [
                 'uid' => implode("", $id->ids),
-                'from' => implode(",", $msghdr->senders),
-                'cc' => implode(",", $msghdr->cc),
-                'bcc' => implode(",", $msghdr->bcc),
-                'to' => implode(",", $msghdr->recipients),
-                'date' => $msghdr->timestamp,
-                'subject' => $envelope->subject,
+                'from' => implode(",", $senders),
+                'cc' => implode(",", $cc),
+                'bcc' => implode(",", $bcc),
+                'to' => implode(",", $recipients),
+                'date' => $timestamp,
+                'subject' => $subject,
                 'body' => $html_data,
                 'hasAttachments' => $has_attachment,
                 'folder' => $mailbox,
@@ -1002,7 +942,10 @@ class ImapController extends Controller
             ];
         }
 
-        Log::info("Iterate over messages and return the data in a formatted way", ['file' => __FILE__, 'line' => __LINE__]);
+        Log::info(
+            "Iterate over messages and return the data in a formatted way",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
 
         return response()->json($results, 200);
 

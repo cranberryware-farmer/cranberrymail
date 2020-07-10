@@ -204,6 +204,7 @@ class InboxPage extends React.Component {
             });
             toast('Email has been sent');
             this.resetSubject();
+            this.closeModal();
             this.closeEditors();
             const currentFolder = this.props.curFolder;
             const currentFolderLower = currentFolder.toString().toLowerCase();
