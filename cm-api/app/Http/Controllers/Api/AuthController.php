@@ -1,9 +1,9 @@
 <?php
 /**
  * Implements Authentication functionality
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -21,7 +21,7 @@ use Validator;
 
 /**
  * Implements all methods related to Authentication
- * 
+ *
  * @category Controller
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -32,26 +32,26 @@ class AuthController extends Controller
 {
     /**
      * Success status variable
-     * 
+     *
      * @var int
      */
     public $successStatus = 200;
 
     /**
      * Unauthorized status variable
-     * 
+     *
      * @var int
      */
     public $unAuthStatus = 401;
 
     /**
      * Implements login
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): \Illuminate\Http\JsonResponse
     {
         Log::info(
             "Entered login function",
@@ -105,19 +105,10 @@ class AuthController extends Controller
             $input = $request->all();
 
             try {
-                $horde_login_creds = [
-                    'username' => $input["email"],
-                    'password' => $input["password"],
-                    'hostspec' => env('IMAP_HOST'),
-                    'port' => env('IMAP_PORT'),
-                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
-                ];
-                $oClient = new \Horde_Imap_Client_Socket($horde_login_creds);
-                Log::info(
-                    "Authenticating with IMAP server",
-                    ['file' => __FILE__, 'line' => __LINE__]
+                $oClient = $this->loginIMAPClient(
+                    $input["email"],
+                    $input["password"]
                 );
-                $oClient->login();
             } catch(\Exception $e) {
                 return response()->json(
                     ['error'=>'Invalid email or password', "status" => 0],
@@ -145,10 +136,10 @@ class AuthController extends Controller
 
     /**
      * Gets Current User
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getUser()
+    public function getUser(): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
         Log::info(
@@ -163,12 +154,12 @@ class AuthController extends Controller
 
     /**
      * Logs out a user from the application
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
     {
         Log::info(
             "Logout function called",

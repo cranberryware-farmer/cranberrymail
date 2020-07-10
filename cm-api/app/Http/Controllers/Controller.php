@@ -66,7 +66,7 @@ class Controller extends BaseController
 
     /**
      * Create IMAP Object
-     * 
+     *
      * @return bool|\Horde_Imap_Client_Socket
      * @throws \Horde_Imap_Client_Exception
      */
@@ -78,24 +78,38 @@ class Controller extends BaseController
             $email = $user->email;
             $password=Crypt::decryptString($user->key);
 
-            $client = new \Horde_Imap_Client_Socket(
-                [
-                    'username' => $email,
-                    'password' => $password,
-                    'hostspec' => env('IMAP_HOST'),
-                    'port' => env('IMAP_PORT'),
-                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
-                ]
-            );
-            Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
-            $client->login();
-            Log::info(
-                "Login with oClient",
-                ['file' => __FILE__, 'line' => __LINE__]
-            );
-
-            return $client;
+            return $this->loginIMAPClient($email, $password);
         }
         return false;
+    }
+
+    /**
+     * Logs in to IMAP
+     * 
+     * @param string $email    IMAP email id
+     * @param string $password Password
+     * 
+     * @return \Horde_Imap_Client_Socket
+     * @throws \Horde_Imap_Client_Exception
+     */
+    protected function loginIMAPClient($email, $password): \Horde_Imap_Client_Socket
+    {
+        $client = new \Horde_Imap_Client_Socket(
+            [
+                'username' => $email,
+                'password' => $password,
+                'hostspec' => env('IMAP_HOST'),
+                'port' => env('IMAP_PORT'),
+                'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
+            ]
+        );
+        Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
+        $client->login();
+        Log::info(
+            "Login with oClient",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
+
+        return $client;
     }
 }

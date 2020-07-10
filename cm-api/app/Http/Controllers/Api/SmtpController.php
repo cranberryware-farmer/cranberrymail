@@ -1,9 +1,9 @@
 <?php
 /**
  * Implements calls to SMTP server
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Crypt;
 
 /**
  * Implements all required methods for SMTP calls
- * 
+ *
  * @category Controller
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -32,10 +32,10 @@ class SmtpController extends Controller
 {
     /**
      * Loads SMTP configs
-     * 
+     *
      * @return array
      */
-    public function getSmtp()
+    public function getSmtp(): array
     {
         $smtp = [
             "host" => env("SMTP_HOST"),
@@ -51,9 +51,9 @@ class SmtpController extends Controller
 
     /**
      * Separate string to multiple emails
-     * 
+     *
      * @param string $emails Concatenated email list
-     * 
+     *
      * @return string|string[]
      */
     private function _sepEmails($emails)
@@ -77,12 +77,12 @@ class SmtpController extends Controller
 
     /**
      * Sends an email through SMTP server
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendEmail(Request $request)
+    public function sendEmail(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make(
             $request->all(),

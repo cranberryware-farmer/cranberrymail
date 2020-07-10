@@ -1,9 +1,9 @@
 <?php
 /**
  * Home Controller
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Home Controller
- * 
+ *
  * @category Controller
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -31,7 +31,7 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\Support\Renderable
     {
         Log::info(
             "Moving to login screen",
@@ -42,12 +42,12 @@ class HomeController extends Controller
 
     /**
      * Checks DB
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function dbCheck(Request $request)
+    public function dbCheck(Request $request): \Illuminate\Http\JsonResponse
     {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
@@ -95,12 +95,12 @@ class HomeController extends Controller
 
     /**
      * Drops a Database and recreates it
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function dropCreateDB(Request $request)
+    public function dropCreateDB(Request $request): \Illuminate\Http\JsonResponse
     {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
@@ -132,12 +132,12 @@ class HomeController extends Controller
 
     /**
      * Changes session driver
-     * 
+     *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function changeSessionDriver(Request $request)
+    public function changeSessionDriver(Request $request): \Illuminate\Http\JsonResponse
     {
         $this->controlSessionDriver("file", "local");
         return response()->json(

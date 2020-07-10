@@ -1,9 +1,9 @@
 <?php
 /**
  * Implements Miscallenous API calls
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Artisan;
 
 /**
  * Implements all methods required for IMAP calls
- * 
+ *
  * @category Controller
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -34,10 +34,10 @@ class WizardController extends Controller
      * Get imap and smtp settings for an email address
      *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         $whitelist = $this->_getValidMailDomains();
         Log::info(
@@ -115,7 +115,7 @@ class WizardController extends Controller
                         "port" => isset($smtp[0]['port']) ?
                             $smtp[0]['port'] : $smtp['port'],
                         "encryption" => isset($smtp[0]['socketType']) ?
-                            strtolower($smtp[0]['socketType']) 
+                            strtolower($smtp[0]['socketType'])
                             : strtolower($smtp['socketType'])
                     ],
                     "status" => 1,
@@ -127,10 +127,10 @@ class WizardController extends Controller
 
     /**
      * Migrates the Migration script for Laravel
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function cranMigrate()
+    public function cranMigrate(): \Illuminate\Http\JsonResponse
     {
         Artisan::call('migrate');
         Artisan::call('db:seed');
@@ -152,7 +152,7 @@ class WizardController extends Controller
      *
      * @return array of email providers
      */
-    private function _getValidMailDomains()
+    private function _getValidMailDomains(): array
     {
         $contents = file_get_contents("https://autoconfig.thunderbird.net/v1.1");
         preg_match_All("|href=[\"'](.*?)[\"']|", $contents, $response);
@@ -167,10 +167,10 @@ class WizardController extends Controller
      * Converts XML to Array
      *
      * @param $xml xml data
-     * 
+     *
      * @return array
      */
-    private function _convertXmlToArray($xml)
+    private function _convertXmlToArray($xml): array
     {
         $xml = simplexml_load_string($xml);
         $json = json_encode($xml);
@@ -186,10 +186,10 @@ class WizardController extends Controller
      * Fetches mail domain's smtp and imap data
      *
      * @param string $mail_domain Mail Domain
-     * 
+     *
      * @return array of smtp and imap configuration
      */
-    private function _getMailServerSettings($mail_domain)
+    private function _getMailServerSettings($mail_domain): array
     {
         $client = new Client();
         $res = $client->request(
@@ -208,10 +208,10 @@ class WizardController extends Controller
      * Gets the MX record for the given email
      *
      * @param string $email Email
-     * 
+     *
      * @return string of mx records
      */
-    private function _getMxRecords($email)
+    private function _getMxRecords($email): string
     {
         $email = explode("@", $email);
         $command = 'dig +nocmd '.escapeshellarg($email[1])." mx +short";

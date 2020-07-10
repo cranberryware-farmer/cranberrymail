@@ -35,7 +35,7 @@ class ImapController extends Controller
      *
      * @return string
      */
-    private function _formatFolderName($folder_name)
+    private function _formatFolderName($folder_name): string
     {
         $folder_arr = preg_split('/[.\/]+/', $folder_name);
         $folder_name = count($folder_arr) > 0 ? end($folder_arr) : $folder_name;
@@ -50,7 +50,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function getFolders(Request $request)
+    public function getFolders(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -83,7 +83,7 @@ class ImapController extends Controller
      *
      * @return Boolean
      */
-    private function _moveToFolder($oClient,$sourceFolder,$uid,$destinationFolder)
+    private function _moveToFolder($oClient,$sourceFolder,$uid,$destinationFolder): bool
     {
         $params = [
             "ids" => $uid,
@@ -115,7 +115,7 @@ class ImapController extends Controller
      *
      * @return Boolean
      */
-    private function _copyToFolder($oClient,$sourceFolder,$uid,$destinationFolder)
+    private function _copyToFolder($oClient,$sourceFolder,$uid,$destinationFolder): bool
     {
         $params = [
             "create" => true,
@@ -143,7 +143,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function unTrashEmails(Request $request)
+    public function unTrashEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -184,7 +184,7 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    public function trashEmails(Request $request)
+    public function trashEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -276,7 +276,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function unSpamEmails(Request $request)
+    public function unSpamEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -315,7 +315,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function saveDraft(Request $request)
+    public function saveDraft(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -404,7 +404,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function spamEmails(Request $request)
+    public function spamEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -456,7 +456,7 @@ class ImapController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      */
-    public function starEmails(Request $request)
+    public function starEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -548,7 +548,7 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    public function searchEmails(Request $request)
+    public function searchEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $mailbox = $request->input("curfolder");
         $sparam = $request->input("sterm");
@@ -577,16 +577,16 @@ class ImapController extends Controller
 
     /**
      * Fetchs mail list for listing and searching
-     * 
+     *
      * @param string                         $type      Type of request
      * @param string                         $mailbox   Mailbox name
      * @param Horde_Imap_Client_Search_Query $searchqry Search Query Object
-     * 
+     *
      * @return array
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    private function _fetchMailQuery($type, $mailbox, $searchqry)
+    private function _fetchMailQuery($type, $mailbox, $searchqry): array
     {
         $oClient = $this->getIMAPCredential();
 
@@ -762,7 +762,7 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    public function getEmails(Request $request)
+    public function getEmails(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -797,7 +797,7 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    public function getEmail(Request $request)
+    public function getEmail(Request $request): \Illuminate\Http\JsonResponse
     {
         $oClient = $this->getIMAPCredential();
 
@@ -921,7 +921,7 @@ class ImapController extends Controller
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    public function downloadAttachment(Request $request)
+    public function downloadAttachment(Request $request): \Illuminate\Http\Response
     {
         $oClient = $this->getIMAPCredential();
 
@@ -981,7 +981,7 @@ class ImapController extends Controller
      *
      * @return string
      */
-    private function _humanFileSize($bytes, $decimals = 2)
+    private function _humanFileSize($bytes, $decimals = 2): string
     {
         for ($i = 0; ($bytes / 1024) > 0.9; $i++, $bytes /= 1024) {
         }
