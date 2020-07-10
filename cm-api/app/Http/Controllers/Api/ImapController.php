@@ -1,14 +1,14 @@
 <?php
 /**
  * Implements calls to IMAP server
- * 
+ *
  * PHP Version 7.3
- * 
- * @category Controller
+ *
+ * @category Productivity
  * @package  CranberryMail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 namespace App\Http\Controllers\Api;
 
@@ -21,45 +21,50 @@ use Mail_mime;
 
 /**
  * Implements all methods required for IMAP calls
- * 
- * @category Class
+ *
+ * @category Controller
  * @package  Cranberrymail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 class ImapController extends Controller
 {
-    private $_oClient;
-    private $_user;
+    private $_user = '';
 
     /**
-     * Create a new controller instance.
-     *
-     * @return void
+     * Creates IMAP Client Object Using Horde Socket
+     * 
+     * @return bool|\Horde_Imap_Client_Socket
      * @throws \Horde_Imap_Client_Exception
      */
-    public function __construct()
+    private function _getCredential()
     {
         $user = Auth::user();
-        $this->_user = $user;
-        $email = $user->email;
-        $password=Crypt::decryptString($user->key);
+        if ($user && isset($user->email)) {
+            $this->_user = $user;
+            $email = $user->email;
+            $password=Crypt::decryptString($user->key);
 
-        $client = new \Horde_Imap_Client_Socket(
-            [
-                'username' => $email,
-                'password' => $password,
-                'hostspec' => env('IMAP_HOST'),
-                'port' => env('IMAP_PORT'),
-                'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
-            ]
-        );
-        Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
-        $client->login();
-        Log::info("Login with oClient", ['file' => __FILE__, 'line' => __LINE__]);
+            $client = new \Horde_Imap_Client_Socket(
+                [
+                    'username' => $email,
+                    'password' => $password,
+                    'hostspec' => env('IMAP_HOST'),
+                    'port' => env('IMAP_PORT'),
+                    'secure' => env("IMAP_ENCRYPTION") //ssl,tls etc
+                ]
+            );
+            Log::info("oClient created", ['file' => __FILE__, 'line' => __LINE__]);
+            $client->login();
+            Log::info(
+                "Login with oClient",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
 
-        $this->_oClient =  $client;
+            return $client;
+        }
+        return false;
     }
 
     /**
@@ -86,7 +91,7 @@ class ImapController extends Controller
      */
     public function getFolders(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $mailBoxes = $this->_getMailBoxes($oClient);
         Log::info("Got mailboxes", ['file' => __FILE__, 'line' => __LINE__]);
@@ -179,7 +184,7 @@ class ImapController extends Controller
      */
     public function unTrashEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $trash = $this->_getMailBox($oClient, $request->input("trash"));
         $inbox = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -220,7 +225,7 @@ class ImapController extends Controller
      */
     public function trashEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $trashFolder = $this->_getMailBox($oClient, $request->input("trash"));
         $curFolder = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -312,7 +317,7 @@ class ImapController extends Controller
      */
     public function unSpamEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $spam = $this->_getMailBox($oClient, $request->input("spam"));
         $inbox = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -351,7 +356,7 @@ class ImapController extends Controller
      */
     public function saveDraft(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $draft_folder = $request->session()->get('draft_folder', '');
 
@@ -440,7 +445,7 @@ class ImapController extends Controller
      */
     public function spamEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $spamFolder = $this->_getMailBox($oClient, $request->input("spam"));
         $curFolder = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -492,7 +497,7 @@ class ImapController extends Controller
      */
     public function starEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $curFolder = $request->input("curFolder");
         $starEmail = $request->input("emailState");
@@ -584,7 +589,7 @@ class ImapController extends Controller
      */
     public function searchEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $mailbox = $request->input("curfolder");
         $sparam = $request->input("sterm");
@@ -780,7 +785,7 @@ class ImapController extends Controller
      */
     public function getEmails(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $mailbox = $request->input("folder");
         $query = new \Horde_Imap_Client_Search_Query();
@@ -885,14 +890,14 @@ class ImapController extends Controller
      * Fetch email by uid.
      *
      * @param Request $request Laravel Request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
     public function getEmail(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $mailbox = $request->input("folder");
 
@@ -1005,7 +1010,7 @@ class ImapController extends Controller
 
     /**
      * Download Attachment
-     * 
+     *
      * @param Request $request Laravel Request
      *
      * @return \Illuminate\Http\Response
@@ -1014,7 +1019,7 @@ class ImapController extends Controller
      */
     public function downloadAttachment(Request $request)
     {
-        $oClient = $this->_oClient;
+        $oClient = $this->_getCredential();
 
         $mailbox = $request->input("mailbox");
         $file_name = $request->input("file_name");
@@ -1085,9 +1090,9 @@ class ImapController extends Controller
     // return an array of superclasses
     /**
      * Get Lineage
-     * 
+     *
      * @param $object Object
-     * 
+     *
      * @return array|mixed
      * @throws \ReflectionException
      */
@@ -1109,9 +1114,9 @@ class ImapController extends Controller
 
     /**
      * Parent object to get children from
-     * 
+     *
      * @param $object parent object
-     * 
+     *
      * @return array
      * @throws \ReflectionException
      */
@@ -1136,9 +1141,9 @@ class ImapController extends Controller
 
     /**
      * Extract callable methods from object
-     * 
+     *
      * @param $object Object
-     * 
+     *
      * @return \ReflectionMethod[]
      * @throws \ReflectionException
      */
@@ -1150,9 +1155,9 @@ class ImapController extends Controller
 
     /**
      * Extract Properties from Object
-     * 
+     *
      * @param $object Object
-     * 
+     *
      * @return \ReflectionProperty[]
      * @throws \ReflectionException
      */
@@ -1164,9 +1169,9 @@ class ImapController extends Controller
 
     /**
      * Debug Object
-     * 
+     *
      * @param $object Object
-     * 
+     *
      * @return void
      * @throws \ReflectionException
      */

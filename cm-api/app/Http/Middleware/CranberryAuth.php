@@ -4,11 +4,11 @@
  * 
  * PHP Version 7.3
  * 
- * @category Middleware
+ * @category Productivity
  * @package  CranberryMail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 namespace App\Http\Middleware;
 
@@ -17,11 +17,11 @@ use Closure;
 /**
  * Middleware Class
  * 
- * @category Class
+ * @category MiddleWare
  * @package  Cranberrymail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 class CranberryAuth
 {
@@ -29,7 +29,7 @@ class CranberryAuth
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request Laravel Request
-     * @param \Closure                 $next    Passon variable
+     * @param \Closure                 $next    Pass-on variable
      * 
      * @return mixed
      */

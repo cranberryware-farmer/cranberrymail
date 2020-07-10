@@ -4,11 +4,11 @@
  * 
  * PHP Version 7.3
  * 
- * @category Controller
+ * @category Productivity
  * @package  CranberryMail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 namespace App\Http\Controllers;
 
@@ -18,11 +18,11 @@ use Illuminate\Support\Facades\Log;
 /**
  * Home Controller
  * 
- * @category Class
+ * @category Controller
  * @package  Cranberrymail
- * @author   Ayus Mohanty <ayus.mohanty@nettantra.net>
- * @license  GNU AGPL-3.0
- * @link     https://cranberrymail.com
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
  */
 class HomeController extends Controller
 {
