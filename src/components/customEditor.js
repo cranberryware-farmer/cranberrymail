@@ -1,8 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { Component } from 'react';
-
 import Editor from 'draft-js-plugins-editor';
-
 import createToolbarPlugin, { Separator } from 'draft-js-static-toolbar-plugin';
 import 'draft-js-static-toolbar-plugin/lib/plugin.css';
 import createUndoPlugin from 'draft-js-undo-plugin';
@@ -78,7 +76,6 @@ export default class CustomToolbarEditor extends Component {
   };
 
   render() {
-
     return (
       <div>
         <div className='editor' onClick={this.focus}>

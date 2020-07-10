@@ -4,7 +4,6 @@ import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
 import {stateFromHTML} from 'draft-js-import-html';
-
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { Button as RButton, Form, FormGroup, Label, Input, Col,FormText } from 'reactstrap';
 import { FaTrash } from 'react-icons/fa';
@@ -26,11 +25,8 @@ class MessageEditor extends Component {
     }else{
       contentState = stateFromHTML(this.props.fwdMsg);
     }
-    
     let editorState = EditorState.createWithContent(contentState);
     this.state = {editorState: editorState};
-    
-
   }
 
   componentDidMount(){
@@ -42,7 +38,6 @@ class MessageEditor extends Component {
       if(this.state.isBcc){
         document.getElementById("bcc").value="";
       }
-      
     }
     if(this.props.orCc.length > 0 && this.state.isCc===false){
       this.setState({
@@ -65,8 +60,6 @@ class MessageEditor extends Component {
 
   render() {
     const { editorState } = this.state;
-    
-    
     return (
       <div>
         <div>
@@ -80,12 +73,10 @@ class MessageEditor extends Component {
                   id="staticEmail"
                   defaultValue={this.props.orFrom}
                   placeholder = "To"
-
                 />
                 <FormText color="muted"> Email addresses to be separated by ,</FormText>
               </Col>
             </FormGroup>
-          
           {this.state.isCc ? (
             <FormGroup row>
               <Label for="cc" sm={2}>Cc</Label>
@@ -99,8 +90,8 @@ class MessageEditor extends Component {
               />
               <FormText color="muted"> Email addresses to be separated by ,</FormText>
               </Col>
-          </FormGroup>
-            
+            </FormGroup>
+
           ) : (
             <a
               href="#cc"
@@ -114,20 +105,20 @@ class MessageEditor extends Component {
           <span>&nbsp;</span>
           {this.state.isBcc ? (
             <FormGroup row>
-            <Label for="bcc" sm={2}>Bcc</Label>
-            <Col sm={10}>
-            <Input
-              label="Bcc"
-              type="text"
-              className="form-control-plaintext border-bottom"
-              id="bcc"
-              placeholder="Bcc"
-              defaultValue={this.props.isEmailFwd ? '': this.props.orBcc}
-            />
-            <FormText color="muted"> Email addresses to be separated by ,</FormText>
-            </Col>
+              <Label for="bcc" sm={2}>Bcc</Label>
+              <Col sm={10}>
+              <Input
+                label="Bcc"
+                type="text"
+                className="form-control-plaintext border-bottom"
+                id="bcc"
+                placeholder="Bcc"
+                defaultValue={this.props.isEmailFwd ? '': this.props.orBcc}
+              />
+              <FormText color="muted"> Email addresses to be separated by ,</FormText>
+              </Col>
             </FormGroup>
-            
+
           ) : (
             <a
               href="#bcc"
@@ -151,7 +142,7 @@ class MessageEditor extends Component {
             />
             </Col>
           </FormGroup>
-          
+
           </Form>
         </div>
         <span>&nbsp;</span>
@@ -170,16 +161,19 @@ class MessageEditor extends Component {
             history: { inDropdown: true },
           }}
         />
-        <div>  <MdAttachFile /> &nbsp; <input
-                            type="file"
-                            name="attachment"
-                            id="attachment"
-                            multiple
-                            onChange={ (ev) => {
-                              this.props.handleAttachment(ev);
-                            }}
-                          />
-                          <p className="text-muted">Maximum allowed file size 20MB</p>
+        <div>  
+          <MdAttachFile />
+          &nbsp;
+          <input
+            type="file"
+            name="attachment"
+            id="attachment"
+            multiple
+            onChange={ (ev) => {
+              this.props.handleAttachment(ev);
+            }}
+          />
+          <p className="text-muted">Maximum allowed file size 20MB</p>
         </div>
         <RButton
           className="mr-2"
@@ -191,9 +185,7 @@ class MessageEditor extends Component {
             }else{
               email = draftToHtml(convertToRaw(content));
             }
-
             this.props.replyEmail(email);
-            
           }}
         >
           Send

@@ -4,25 +4,22 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { 
-  Button, 
-  Form, 
-  FormGroup, 
-  Input, 
+import {
+  Button,
+  Form,
+  FormGroup,
+  Input,
   Label,
   InputGroup,
   InputGroupAddon,
-  Spinner 
+  Spinner
 } from 'reactstrap';
-
 import {
   FaEye,
   FaEyeSlash
 } from 'react-icons/fa';
-
-import {  withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
-
 
 class AuthForm extends React.Component {
   constructor(props){
@@ -65,7 +62,7 @@ class AuthForm extends React.Component {
   handleSubmit = event => {
     event.preventDefault();
     this.setState({isLoading : true});
-    
+
     if(this.isLogin){
       const fields = {
         email: this.state.email,
@@ -83,13 +80,13 @@ class AuthForm extends React.Component {
         return Promise.reject(error);
       });
 
-      axios.post(window._api+"/login",fields).then(res => { 
+      axios.post(window._api+"/login",fields).then(res => {
         if(res.data.status===1){
           this.setState({
             token: res.data.success.token
           });
           this.setState({isLoading : false});
-          
+
           this.props.history.push({
             pathname: '/',
             state: {
@@ -97,7 +94,7 @@ class AuthForm extends React.Component {
               email: this.state.email,
               token: res.data.success.token
             }
-          }); 
+          });
           Cookies.set('app_auth', res.data.success.token);
           Cookies.set('app_email', this.state.email);
         }
@@ -106,8 +103,6 @@ class AuthForm extends React.Component {
         console.log("Invalid Creds", error);
       });
     }
-
-    
   };
 
   renderButtonText() {
@@ -143,7 +138,7 @@ class AuthForm extends React.Component {
               onClick={onLogoClick}
             />
           </div>
-          
+
         )}
         <FormGroup>
           <Label for={usernameLabel}>{usernameLabel}</Label>
@@ -156,10 +151,10 @@ class AuthForm extends React.Component {
             <InputGroupAddon addonType="append">
         <Button onClick={ e => this.togglePassword(e) }>{this.state.ptype==="password" ? <FaEye />:<FaEyeSlash />}</Button>
             </InputGroupAddon>
-            
+
           </InputGroup>
         </FormGroup>
-               
+
         <hr />
         <Button
           size="lg"
@@ -168,14 +163,11 @@ class AuthForm extends React.Component {
           onClick={!this.state.isLoading ? this.handleSubmit : null}
           disabled={this.state.isLoading}>
           {this.renderButtonText()}
-          {this.state.isLoading ? < Spinner 
+          {this.state.isLoading ? < Spinner
             type = "grow"
-            color = "light" 
+            color = "light"
           /> : null}
         </Button>
-
-        
-
         {children}
       </Form>
     );

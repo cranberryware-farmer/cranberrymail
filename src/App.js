@@ -20,7 +20,7 @@ class App extends React.Component {
       password: '',
       token: ''
     },
-    
+
     mail:{
       curFolder: '',
       folders: {},
@@ -82,7 +82,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <BrowserRouter basename={getBasename(window.location.pathname)}> 
+      <BrowserRouter basename={getBasename(window.location.pathname)}>
         <GAListener>
           <Switch>
             <LayoutRoute
@@ -93,23 +93,22 @@ class App extends React.Component {
                 <AuthPage {...props} authState={STATE_LOGIN} saveUser={this.setUser} />
               )}
             />
-            
-            <MainLayout 
-              breakpoint={this.props.breakpoint} 
-              saveCurFolder={this.setCurFolder} 
-              saveFolders={this.setFolders} 
-              mail={this.state.mail} 
-              handleSearch={this.handleSearch} >
 
-               <React.Suspense fallback={<PageSpinner />}>
-                 <Route exact 
-                  path="/" 
-                  render = {(props) => <InboxPage {...props} 
-                                            curFolder={this.state.mail.curFolder} 
-                                            searchTerm={this.state.searchTerm}
-                                            breakpoint={this.props.breakpoint}
-                                            />} 
-                  />
+            <MainLayout
+              breakpoint={this.props.breakpoint}
+              saveCurFolder={this.setCurFolder}
+              saveFolders={this.setFolders}
+              mail={this.state.mail}
+              handleSearch={this.handleSearch} >
+              <React.Suspense fallback={<PageSpinner />}>
+                <Route exact
+                  path="/"
+                  render = {(props) => <InboxPage {...props}
+                                          curFolder={this.state.mail.curFolder}
+                                          searchTerm={this.state.searchTerm}
+                                          breakpoint={this.props.breakpoint}
+                                        />}
+                />
               </React.Suspense>
             </MainLayout>
             <Redirect to="/login" />

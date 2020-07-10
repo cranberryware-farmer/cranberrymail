@@ -76,7 +76,6 @@ class Header extends React.Component {
   handleSidebarControlButton = event => {
     event.preventDefault();
     event.stopPropagation();
-
     document.querySelector('.cr-sidebar').classList.toggle('cr-sidebar--open');
   };
 
@@ -84,14 +83,14 @@ class Header extends React.Component {
     if(this.props.location.state!==undefined){
       this.setState({
         name: this.props.location.state.name,
-        email: this.props.location.state.email  
+        email: this.props.location.state.email
       });
     }
     if(!this.state.email){
       const app_email = Cookies.get("app_email") ? Cookies.get("app_email") : "";
       if(app_email) {
         this.setState({
-          email: app_email  
+          email: app_email
         });
       }
     }
@@ -104,7 +103,7 @@ class Header extends React.Component {
       const NEmailExtract = email.split('@');
       EmailName =  NEmailExtract[0].toString().replace(/[._]/g," ");
     }
-    
+
     return (
       <Navbar light expand className={bem.b('bg-white')}>
         <Nav navbar className="mr-2">
@@ -201,12 +200,11 @@ class Header extends React.Component {
                           Cookies.remove('app_auth');
                           Cookies.remove('app_email');
                           this.props.triggerCentralLoading(false);
-                          el.props.history.push('/login');  
+                          el.props.history.push('/login');
                         })
                         .catch(error => {
                           console.log("Logout Unsuccessful", error);
                         });
-                        
                       }}><MdExitToApp /> Signout</span>
                     </ListGroupItem>
                   </ListGroup>

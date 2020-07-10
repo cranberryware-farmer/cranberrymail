@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import {
   ListGroup,
   ListGroupItem,

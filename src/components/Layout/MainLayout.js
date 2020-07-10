@@ -4,11 +4,10 @@ import { withRouter } from 'react-router-dom';
 import { Spinner } from 'reactstrap';
 
 class MainLayout extends React.Component {
-
   state = {
     isCentralLoading: false,
   };
-  
+
   static isSidebarOpen() {
     return document
       .querySelector('.cr-sidebar')
@@ -72,17 +71,17 @@ class MainLayout extends React.Component {
     return (
       <main className="cr-app bg-light">
         {this.state.isCentralLoading === true && <div className='cm-page-loader cr-page-spinner'>
-                                                    <Spinner 
-                                                      color = "secondary" 
+                                                    <Spinner
+                                                      color = "secondary"
                                                       className='cm-main-loader'
                                                     />
                                                   </div>}
-        <Sidebar 
-          saveCurFolder={this.props.saveCurFolder} 
+        <Sidebar
+          saveCurFolder={this.props.saveCurFolder}
           saveFolders={this.props.saveFolders}
         />
         <Content fluid onClick={this.handleContentClick}>
-          <Header 
+          <Header
             search={this.props.handleSearch}
             triggerCentralLoading={this.triggerCentralLoading}
           />

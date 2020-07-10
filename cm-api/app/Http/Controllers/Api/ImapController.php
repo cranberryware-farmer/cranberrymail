@@ -84,7 +84,7 @@ class ImapController extends Controller
      * @return Boolean
      */
     private function _moveToFolder(
-        $oClient,$sourceFolder,$uid,$destinationFolder
+        $oClient, $sourceFolder, $uid, $destinationFolder
     ): bool {
         $params = [
             "ids" => $uid,
@@ -118,7 +118,7 @@ class ImapController extends Controller
      * @return Boolean
      */
     private function _copyToFolder(
-        $oClient,$sourceFolder,$uid,$destinationFolder
+        $oClient, $sourceFolder, $uid, $destinationFolder
     ): bool {
         $params = [
             "create" => true,

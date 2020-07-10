@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import ReactGA from 'react-ga';
-
 const hasGAId = !!process.env.REACT_APP_GOOGLE_ANALYTICS;
 
 if (hasGAId) {

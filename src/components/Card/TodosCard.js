@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import { Card, CardImg, CardImgOverlay, CardTitle, CardText } from 'reactstrap';
-
 import Todos, { propTypes as TodosPropTypes } from 'components/Todos';
-
 import backgroundImage from 'assets/img/bg/background_1920-2.jpg';
 
 const TodosCard = ({ image, title, subtitle, todos, ...restProps }) => {

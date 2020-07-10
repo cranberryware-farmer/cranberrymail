@@ -6,7 +6,6 @@ import {
   FaRegStar,
   FaExclamationTriangle
 } from 'react-icons/fa';
-
 import {
   Button as RButton,
   Card,
@@ -16,11 +15,9 @@ import {
   Row,
   NavLink,
 } from 'reactstrap';
-  
 import MessageEditor from '../components/MessageEditor';
 
 const emailPage = (props) => {
-    
   let floatDir = "float-right";
   if(props.breakpoint==="xs"){
     floatDir="float-left i-block";
@@ -34,7 +31,7 @@ const emailPage = (props) => {
     for(let i=0; i < attachments.length; i++){
       internalItems.push(
         <li>
-          <span 
+          <span
             className='cm-span-link'
             onClick={() => {attachementDownload(attachments[i]['file'], attachments[i]['part_id'], mail_uid)}}
           >
@@ -70,7 +67,7 @@ const emailPage = (props) => {
               <Card className="mt-3">
                 <CardHeader>
                   <div className="clearfix">
-                    <NavLink 
+                    <NavLink
                       to="#url"
                       title="Back to mailbox"
                       onClick={e => {
@@ -85,9 +82,9 @@ const emailPage = (props) => {
                         <FaArrowLeft />
                     </NavLink>
                     <span className="eml-subject float-left">{el.subject}</span>
-                    
-                    <NavLink 
-                      to="#" 
+
+                    <NavLink
+                      to="#"
                       className={`email-icons ${floatDir}`}
                       title="Delete email"
                         onClick={e => {
@@ -102,8 +99,8 @@ const emailPage = (props) => {
                     >
                       <FaTrash />
                     </NavLink>
-                    <NavLink 
-                      to="#" 
+                    <NavLink
+                      to="#"
                       className={`email-icons ${floatDir}`}
                       title="Mark email as spam"
                         onClick={e => {
@@ -118,20 +115,20 @@ const emailPage = (props) => {
                     >
                       <FaExclamationTriangle />
                     </NavLink>
-                    <NavLink 
+                    <NavLink
                       to="#"
                       title={props.emailStarred ? "Unmark as starred": "Mark as starred"}
                       onClick={e => {
                         e.preventDefault();
                         let uid = el.uid;
                         let nextStarredState = 0;
-                        
+
                         if(props.emailStarred===1){
                           nextStarredState = 0;
                         }else{
                           nextStarredState = 1;
                         }
-                        
+
                         props.setState({
                           isEmailStarred: nextStarredState
                         });
@@ -140,7 +137,7 @@ const emailPage = (props) => {
                       }}
                       className={`email-icons ${floatDir}`}
                     >
-                      {props.emailStarred ? <FaStar />:<FaRegStar />} 
+                      {props.emailStarred ? <FaStar />:<FaRegStar />}
                     </NavLink>
                   </div>
                   <div className="clearfix">
@@ -150,13 +147,13 @@ const emailPage = (props) => {
                 </CardHeader>
                 <CardBody>
                   <Row>
-                    <Col 
+                    <Col
                       dangerouslySetInnerHTML={{
                         __html: `${emlBody}`
                       }}
                     />
                   </Row>
-                  <div 
+                  <div
                     dangerouslySetInnerHTML={{
                       __html: `${attachmentHead}`
                     }}
@@ -220,7 +217,7 @@ const emailPage = (props) => {
                               editor: true,
                               orSubject: subject,
                               subject: subject,
-                              isEmailFwd: true  
+                              isEmailFwd: true
                             });
                           }}
                         >

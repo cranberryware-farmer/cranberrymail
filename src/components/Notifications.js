@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import { Media } from 'reactstrap';
-
 import CAvatar from 'components/CAvatar';
 
 const Notifications = ({ notificationsData }) => {
