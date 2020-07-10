@@ -18,6 +18,7 @@
 cm-api/cmail_settings/.env
 cm-api/cmail_settings/.env-gmail
 cm-api/cmail_settings/.env-bkp
+cm-api/cmail/*
 /mysql
 
 .env.local
