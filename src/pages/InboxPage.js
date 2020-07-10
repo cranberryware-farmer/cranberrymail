@@ -102,8 +102,11 @@ class InboxPage extends React.Component {
       draftID: 0,
       attachmentURLs: []
     };
+    if(props.location.state !== undefined && props.location.state.hasOwnProperty('token')){
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + props.location.state.token;
+    }
   }
-
+  
   handleAttachment = (ev) =>{
       const fileData = ev.target.files;
       this.setState({
@@ -210,6 +213,9 @@ class InboxPage extends React.Component {
         }else{
           toast(res.data.message);
         }
+      })
+      .catch(error => {
+        console.log("Reply Email Unsuccessful", error);
       });
   };
   starEmail = (uid,emailState) => {
@@ -259,10 +265,10 @@ class InboxPage extends React.Component {
             toast('Unable to mark email as starred');
           }
         }
-
-
-        
-      });  
+      })
+      .catch(error => {
+        console.log("StarEmail Unsuccessful", error);
+      });
     }
   };
 
@@ -312,6 +318,9 @@ class InboxPage extends React.Component {
         }
         
       }
+    })
+    .catch(error => {
+      console.log("Untrash Unsuccessful", error);
     });
   };
 
@@ -360,8 +369,10 @@ class InboxPage extends React.Component {
           }else{
             toast('Email has been deleted');
           }
-          
         }
+      })
+      .catch(error => {
+        console.log("TrashEmail Unsuccessful", error);
       });  
     }
     
@@ -412,9 +423,11 @@ class InboxPage extends React.Component {
           }else{
             toast('Email marked as spam');
           }
-          
         }
-      });  
+      })
+      .catch(error => {
+        console.log("SpamEmails Unsuccessful", error);
+      }); 
     }
     
   };
@@ -463,8 +476,10 @@ class InboxPage extends React.Component {
         }else{
           toast('Email has been restored');
         }
-        
       }
+    })
+    .catch(error => {
+      console.log("Unspam Emails Unsuccessful", error);
     });
   };
 
@@ -562,6 +577,9 @@ class InboxPage extends React.Component {
           });
           // toast(res.message);
         }
+      })
+      .catch(error => {
+        console.log("Save Draft Unsuccessful", error);
       });
   };
 
@@ -659,6 +677,9 @@ class InboxPage extends React.Component {
           });
           toast(res.data.message);
         }
+      })
+      .catch(error => {
+        console.log("Send Email Unsuccessful", error);
       });
   };
 
@@ -831,8 +852,6 @@ class InboxPage extends React.Component {
     thread[index].editor = true;
 
     this.setEmailNode(thread[index]);
-    
-
   };
   
   getRowIndex = (uid) => {
@@ -848,9 +867,9 @@ class InboxPage extends React.Component {
   };
 
   showSettings = () => {
-      this.setState({
-        page: "settings"
-      });
+    this.setState({
+      page: "settings"
+    });
   };
 
   showEmail = uid => {
@@ -910,7 +929,10 @@ class InboxPage extends React.Component {
             });
             this.fetchEmails();
           }
-        });  
+        })
+        .catch(error => {
+          console.log("Email Content Fetch Unsuccessful", error);
+        });
     }
   };
 
@@ -1027,6 +1049,9 @@ class InboxPage extends React.Component {
               });
             }
           }
+        })
+        .catch(error => {
+          console.log("Email Threads fetch Unsuccessful", error);
         });
     }
     
@@ -1058,7 +1083,7 @@ class InboxPage extends React.Component {
             let erows = [];
             let threads = [];
             for (let i = 0; i < res.data.length; i++) {
-              let body = undefined; //res.data[i].body;
+              let body = undefined;
               let fdate = new Date(res.data[i].date).toLocaleDateString('en-GB', {
                 month: 'numeric',
                 day: 'numeric',
@@ -1077,9 +1102,7 @@ class InboxPage extends React.Component {
               );
              threads[i] = res.data[i].threads;
             }
-  
-            
-  
+
             if (erows.length > 0) {
               this.setState({
                 rows: erows,
@@ -1094,7 +1117,10 @@ class InboxPage extends React.Component {
               });
             }
           }
-        });  
+        })
+        .catch(error => {
+          console.log("Email Search Unsuccessful", error);
+        });
     }
     
   };
@@ -1102,6 +1128,46 @@ class InboxPage extends React.Component {
   handleRefresh = () => {
     this.fetchEmails();
   };
+
+  attachmentDownload = (file_name, part_id, mail_uid) => {
+    const mailbox = this.props.curFolder;
+    // const currentFolderLower = mailbox.toString().toLowerCase();
+    if(mailbox !== '' || mailbox !== undefined) {
+      const message_id = 0;
+      const json_data = {
+        file_name,
+        part_id,
+        message_id,
+        mailbox,
+        mail_uid
+      };
+      axios({
+        method: 'post',
+        url: window._api + '/download_attachment',
+        data: json_data,
+        responseType: 'blob'
+      })
+      .then(function (response) {
+        console.log(response);
+        console.log(response.headers['content-type']);
+        const element = document.createElement("a");
+        const file = new Blob([response.data], {type: response.headers['content-type']});
+        const blobURL = URL.createObjectURL(file);
+        element.href = blobURL;
+        element.download = file_name;
+        document.body.appendChild(element);
+        element.click();
+        setTimeout(function() {
+          document.body.removeChild(element);
+          window.URL.revokeObjectURL(blobURL);
+        }, 200);
+        // response.data.pipe(console.log(response));
+      })
+      .catch(error => {
+        console.log("Attachment Download Unsuccessful", error);
+      });
+    }
+  }
 
   render() {
    
@@ -1211,6 +1277,7 @@ class InboxPage extends React.Component {
                                               activeThread = {this.activeThread}
                                               closeEditors = {this.closeEditors}
                                               markdown={this.state.enableMarkdown}
+                                              attachmentDownload={this.attachmentDownload}
                                            />}
           {this.state.page === 'settings' && <SettingsPage
                                                 breakpoint = {this.state.breakpoint}

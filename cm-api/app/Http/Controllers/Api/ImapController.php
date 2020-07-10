@@ -740,7 +740,7 @@ class ImapController extends Controller
                 'flags' => $flags
             ];
 
-           $i++;
+            $i++;
         }
         Log::info("Iterate over messages and return data array", ['file' => __FILE__, 'line' => __LINE__]);
 
@@ -761,7 +761,6 @@ class ImapController extends Controller
         $user = Auth::user();
         $oClient = $this->get_credentials($user);
 
-
         $mailbox = $request->input("folder");
 
         $thread_uids = explode(",",$request->input('thread_uids'));
@@ -771,18 +770,15 @@ class ImapController extends Controller
         $query->envelope();
         $query->structure();
 
-
         $messages = $oClient->fetch($mailbox, $query, array('ids' => $uids));
-
 
         Log::info("Fetch messages from mailbox ".$mailbox ." by uids", ['file' => __FILE__, 'line' => __LINE__]);
 
         $results = [];
         foreach($messages as $message){
 
-        $envelope = $message->getEnvelope();
-        $structure = $message->getStructure();
-
+            $envelope = $message->getEnvelope();
+            $structure = $message->getStructure();
 
             $msghdr = new \StdClass;
             $msghdr->recipients = $envelope->to->bare_addresses;
@@ -792,65 +788,60 @@ class ImapController extends Controller
             $msghdr->subject    = $envelope->subject;
             $msghdr->timestamp  = $envelope->date->getTimestamp();
 
-
-
-            $query = new \Horde_Imap_Client_Fetch_Query();
-            $query->fullText();
-
-            $typemap = $structure->contentTypeMap();
-            foreach ($typemap as $part => $type) {
-                // The body of the part - attempt to decode it on the server.
-                $query->bodyPart($part, array(
-                    'decode' => true,
-                    'peek' => true,
-                ));
-                $query->bodyPartSize($part);
-            }
-
-            $id = new \Horde_Imap_Client_Ids($message->getUid());
-            $messagedata = $oClient->fetch($mailbox, $query, array('ids' => $id))->first();
-            $msgdata = new \StdClass;
-            $msgdata->id = $id;
-            $msgdata->contentplain = '';
-            $msgdata->contenthtml  = '';
-            $msgdata->attachments  = [];
-
             $plainpartid = $structure->findBody('plain');
             $htmlpartid  = $structure->findBody('html');
 
-            foreach ($typemap as $part => $type) {
-                // Get the message data from the body part, and combine it with the structure to give a fully-formed output.
-                $stream = $messagedata->getBodyPart($part, true);
-                $partdata = $structure->getPart($part);
-                $partdata->setContents($stream, array('usestream' => true));
-                if ($part == $plainpartid) {
-                    $msgdata->contentplain = $partdata->getContents();
-                } else if ($part == $htmlpartid) {
-                    $msgdata->contenthtml = $partdata->getContents();
-                } else if ($filename = $partdata->getName($part)) {
-                    $disposition = $partdata->getDisposition();
-                    $disposition = ($disposition == 'inline') ? 'inline' : 'attachment';
-                    $attachment = [];
-                    $attachment['name']    = $filename;
-                    $attachment['type']    = $partdata->getType();
-                    $attachment['content'] = $partdata->getContents();
-                    $attachment['size']    = strlen($attachment['content']);
+            $id = new \Horde_Imap_Client_Ids($message->getUid());
 
-                    Storage::put($filename, $attachment['content']);
-                    $url = "/storage/app/".$filename;
+            $typemap = $structure->contentTypeMap();
 
-                    array_push($msgdata->attachments,[
-                        "url" => $url,
-                        "file" => $filename,
-                        "type" => $attachment['type'],
-                    ]);
-                    unset($attachment);
+            $html_data = $plain_data = '';
+            $has_attachment = 0;
+            $attachments = [];
+
+            $htmlquery = new \Horde_Imap_Client_Fetch_Query();
+            $htmlquery->bodyPart($htmlpartid);
+
+            $htmlmessagedata = $oClient->fetch($mailbox, $htmlquery, array('ids' => $id))->first();
+            if(!empty($htmlmessagedata)) {
+                $htmlstream = $htmlmessagedata->getBodyPart($htmlpartid, true);
+
+                $htmldata = $structure->getPart($htmlpartid);
+                $htmldata->setContents($htmlstream, array('usestream' => true));
+                $html_data = $htmldata->getContents();
+            }
+
+            if(empty($html_data)) {
+                $plainquery = new \Horde_Imap_Client_Fetch_Query();
+                $plainquery->bodyPart($plainpartid);
+
+                $plainmessagedata = $oClient->fetch($mailbox, $plainquery, array('ids' => $id))->first();
+                if(!empty($plainmessagedata)) {
+                    $plainstream = $plainmessagedata->getBodyPart($plainpartid, true);
+
+                    $plaindata = $structure->getPart($htmlpartid);
+                    $plaindata->setContents($plainstream, array('usestream' => true));
+                    $html_data = $plaindata->getContents();
                 }
             }
 
+            foreach($typemap as $part => $type) {
+                if(!in_array($part, [$htmlpartid, $plainpartid])){
+                    $partdata = $structure->getPart($part);
+                    if($file_name = $partdata->getName($part)){
+                        $has_attachment = 1;
+                        $byte_size = $partdata->getBytes();
+                        $attachments[] = [
+                            "file" => $file_name,
+                            "type" => $partdata->getType(),
+                            "size" => $this->humanFileSize($byte_size),
+                            "part_id" => $part
+                        ];
+                    }
+                }
+            }
 
-
-            $data = [
+            $results[] = [
                 'uid' => implode("",$id->ids),
                 'from' => implode(",",$msghdr->senders),
                 'cc' => implode(",",$msghdr->cc),
@@ -858,26 +849,91 @@ class ImapController extends Controller
                 'to' => implode(",",$msghdr->recipients),
                 'date' => $msghdr->timestamp,
                 'subject' => $envelope->subject,
-                'hasAttachments' => count($msgdata->attachments) > 0 ? 1:0,
+                'body' => $html_data,
+                'hasAttachments' => $has_attachment,
                 'folder' => $mailbox,
                 'messageId' =>  $envelope->message_id,
-                'attachment' => $msgdata->attachments
+                'attachment' => $attachments
             ];
-
-            $data['body'] = empty($msgdata->contenthtml) ? $msgdata->contenttext: $msgdata->contenthtml;
-
-
-            array_push($results,$data);
-
-
-
         }
 
         Log::info("Iterate over messages and return the data in a formatted way", ['file' => __FILE__, 'line' => __LINE__]);
 
-       return response()->json($results, 200);
+        return response()->json($results, 200);
 
+    }
 
+    public function downloadAttachment(Request $request) {
+        $user = Auth::user();
+        $oClient = $this->get_credentials($user);
+
+        $mailbox = $request->input("mailbox");
+        $file_name = $request->input("file_name");
+        $part_id = $request->input("part_id");
+        $mail_uid = $request->input("mail_uid");
+
+        $thread_id = new \Horde_Imap_Client_Ids($mail_uid);
+
+        $query = new \Horde_Imap_Client_Fetch_Query();
+        $query->structure();
+
+        $messages = $oClient->fetch($mailbox, $query, array('ids' => $thread_id));
+
+        foreach($messages as $message){
+            $structure = $message->getStructure();
+
+            $partdata = $structure->getPart($part_id);
+
+            $result = [
+                'success' => false,
+                'message' => 'File could not be found.'
+            ];
+
+            $file_content = '';
+
+            if($mail_file_name = $partdata->getName($part_id)){
+                if($mail_file_name == $file_name) {
+                    $contentquery = new \Horde_Imap_Client_Fetch_Query();
+                    $contentquery->fullText();
+                    $contentquery->bodyPart($part_id, array(
+                        'decode' => true,
+                        'peek' => true,
+                    ));
+                    $contentquery->bodyPartSize($part_id);
+                    $filedata = $oClient->fetch($mailbox, $contentquery, array('ids' => $thread_id))->first();
+                    if(!empty($filedata)) {
+                        $stream = $filedata->getBodyPart($part_id, true);
+                        $partdata->setContents($stream, array('usestream' => true));
+
+                        $file_type = $partdata->getType();
+                        $file_content = $partdata->getContents();
+
+                        // $result = [
+                        //     'file_content' => $partdata->getContents(),
+                        //     'file_name' => $file_name,
+                        //     'file_type' => $partdata->getType(),
+                        //     'success' => true,
+                        //     'message' => 'File content fetched successfully.'
+                        // ];
+                    }
+                }
+            }
+        }
+        
+        return response($file_content, 200, [
+            'Content-type'        => $file_type,
+            'Content-Disposition' => 'attachment; filename="' . $file_name . '"',
+        ]);
+    }
+
+    /**
+     * @param $bytes
+     * @param int $decimals
+     * @return string
+     */
+    private function humanFileSize($bytes, $decimals = 2) {
+        for($i = 0; ($bytes / 1024) > 0.9; $i++, $bytes /= 1024) {}
+        return round($bytes, $decimals).['B','kB','MB','GB','TB','PB','EB','ZB','YB'][$i];
     }
 
 
