@@ -93,7 +93,6 @@ class Sidebar extends React.Component {
       Cookies.remove('app_email');
       this.props.history.push('/login');
     });
-
   };
 
   handleClick = name => () => {
@@ -104,7 +103,6 @@ class Sidebar extends React.Component {
       };
     });
   };
-
 
   render() {
     return (

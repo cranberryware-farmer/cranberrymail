@@ -34,8 +34,8 @@ class App extends React.Component {
         port: '',
         encryption: ''
       },
-      searchTerm: ''
-    }
+    },
+    searchTerm: ''
   };
 
   setUser = (user) => {
@@ -61,7 +61,8 @@ class App extends React.Component {
   setCurFolder = (curFolder) => {
     this.setState({
       mail: {
-        curFolder: curFolder
+        curFolder: curFolder,
+        searchTerm: ''
       }
     })
   };

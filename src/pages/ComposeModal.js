@@ -208,11 +208,12 @@ const composeModal = (props) => {
                 className='send-spinner'
               /> : <RiSendPlaneLine /> }
             </RButton>
-            <Label for="attachment" className='float-right'><MdAttachFile /></Label>
-            <FaSave
-              className='float-right'
-              onClick={() => props.saveDraft()}
-            />
+            <Label for="attachment" className='float-right'>
+              <MdAttachFile />
+            </Label>
+            <label className='float-right'>
+              <FaSave onClick={() => props.saveDraft()}/>
+            </label>
             <Input
               type="file"
               name="attachment"

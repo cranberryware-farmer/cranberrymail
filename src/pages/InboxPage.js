@@ -3,21 +3,13 @@ import Page from 'components/Page';
 import EnhancedTable from 'components/Cranberry/EnhancedTable';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
-import { Container, Button } from 'react-floating-action-button';
-import {
-  FaPen,
-  FaTools
-} from 'react-icons/fa';
-import {
-  Button as CButton,
-  Card,
-  Row,
-} from 'reactstrap';
-import { ToastContainer, toast } from 'react-toastify';
+import { Button as CButton, Card, Row, Spinner } from 'reactstrap';
+import { Button, Container } from 'react-floating-action-button';
+import { FaPen, FaTools } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { draftToMarkdown } from 'markdown-draft-js';
-import { EditorState, convertToRaw } from 'draft-js';
+import { convertToRaw, EditorState } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import ComposeModal from './ComposeModal';
@@ -142,7 +134,7 @@ class InboxPage extends React.Component {
     const subject = document.getElementById('subject').value;
     const messageId = this.state.messageId;
 
-    if(this.state.attachment){
+    if (this.state.attachment) {
       data = new FormData();
 
       let i=0;
@@ -163,7 +155,7 @@ class InboxPage extends React.Component {
         data.append('cc',bcc.value);
       }
       config.headers['Content-Type']= 'multipart/form-data';
-    }else{
+    } else {
       data = {
         to,
         subject,
@@ -200,7 +192,7 @@ class InboxPage extends React.Component {
           if(currentFolderLower.match('draft') !== null){
             this.fetchEmails();
           }
-        }else{
+        } else {
           toast(res.data.message);
         }
       })
@@ -209,7 +201,7 @@ class InboxPage extends React.Component {
       });
   };
 
-  starEmail = (uid,emailState) => {
+  starEmail = (uid, emailState) => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
       const config = this.getAxiosConfig();
 
@@ -224,27 +216,23 @@ class InboxPage extends React.Component {
         .post(window._api + '/star_emails', data, config)
         .then(res => {
           if (res.data.result > 0) {
-            if(emailState===0){
+            if(emailState === 0){
               toast('Email moved to Inbox');
-            }else{
+            } else {
               toast('Email moved to Starred');
             }
 
-            if(this.state.page === 'list'){
+            if (this.state.page === 'list') {
               let rows = this.state.rows;
               rows = rows.filter((row) => {
-                if(row.id===uid){
-                  return false;
-                }else{
-                  return true;
-                }
+                return row.id !== uid;
               });
               this.setState({rows});
             }
-          }else{
-            if(emailState===0){
+          } else {
+            if (emailState === 0) {
               toast('Email still marked as starred');
-            }else{
+            } else {
               toast('Unable to mark email as starred');
             }
           }
@@ -255,30 +243,32 @@ class InboxPage extends React.Component {
     }
   };
 
-  untrashEmail = (uid) => {
+  selectGridRows = uuid => {
     let flag = 0;
-
-    const config = this.getAxiosConfig();
-
-    if(Array.isArray(uid)){
+    if(Array.isArray(uuid)){
       let rows = this.state.rows;
-      uid.sort();
+      uuid.sort();
 
       let i = 0;
       rows = rows.filter((row) => {
-        if(row.id===uid[i]){
+        if (row.id === uuid[i]) {
           i++;
           return false;
-        }else{
+        } else {
           return true;
         }
       });
 
       this.setState({rows});
-      uid = JSON.stringify(uid);
+      uuid = JSON.stringify(uuid);
       flag = 1;
     }
+    return {'uid': uuid, flag};
+  }
 
+  untrashEmail = uuid => {
+    const config = this.getAxiosConfig();
+    const { uid, flag } = this.selectGridRows(uuid);
     const data = {
       curfolder: 'inbox',
       trash: 'trash',
@@ -289,12 +279,11 @@ class InboxPage extends React.Component {
     .post(window._api + '/untrash_emails', data, config)
     .then(res => {
       if (res.data.result > 0) {
-        if(flag===1){
+        if (flag === 1) {
           toast("Emails have been restored");
-        }else{
+        } else {
           toast('Email has been restored');
         }
-
       }
     })
     .catch(error => {
@@ -302,30 +291,11 @@ class InboxPage extends React.Component {
     });
   };
 
-  trashEmail = (uid) => {
+  trashEmail = uuid => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
-      let flag = 0;
+
       const config = this.getAxiosConfig();
-
-      if(Array.isArray(uid)){
-        let rows = this.state.rows;
-        uid.sort();
-
-        let i = 0;
-        rows = rows.filter((row) => {
-            if(row.id===uid[i]){
-              i++;
-              return false;
-            }else{
-              return true;
-            }
-        });
-
-        this.setState({rows});
-        uid = JSON.stringify(uid);
-        flag = 1;
-      }
-
+      const { uid, flag } = this.selectGridRows(uuid);
       const data = {
         curfolder: this.props.curFolder,
         trash: 'trash',
@@ -336,9 +306,9 @@ class InboxPage extends React.Component {
         .post(window._api + '/trash_emails', data, config)
         .then(res => {
           if (res.data.result > 0) {
-            if(flag===1){
+            if (flag === 1) {
               toast("Emails have been deleted");
-            }else{
+            } else {
               toast('Email has been deleted');
             }
           }
@@ -350,29 +320,10 @@ class InboxPage extends React.Component {
 
   };
 
-  spamEmail = uid => {
+  spamEmail = uuid => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
-      let flag = 0;
       const config = this.getAxiosConfig();
-
-      if(Array.isArray(uid)){
-        let rows = this.state.rows;
-        uid.sort();
-
-        let i = 0;
-        rows = rows.filter((row) => {
-            if(row.id===uid[i]){
-              i++;
-              return false;
-            }else{
-              return true;
-            }
-        });
-
-        this.setState({rows});
-        uid = JSON.stringify(uid);
-        flag = 1;
-      }
+      const { uid, flag } = this.selectGridRows(uuid);
 
       const data = {
         curfolder: this.props.curFolder,
@@ -384,9 +335,9 @@ class InboxPage extends React.Component {
         .post(window._api + '/spam_emails', data, config)
         .then(res => {
           if (res.data.result > 0) {
-            if(flag===1){
+            if (flag === 1) {
               toast("Emails marked as spam");
-            }else{
+            } else {
               toast('Email marked as spam');
             }
           }
@@ -397,29 +348,9 @@ class InboxPage extends React.Component {
     }
   };
 
-  unspamEmail = uid => {
-    let flag = 0;
+  unspamEmail = uuid => {
     const config = this.getAxiosConfig();
-
-    if(Array.isArray(uid)){
-      let rows = this.state.rows;
-      uid.sort();
-
-      let i = 0;
-      rows = rows.filter((row) => {
-        if(row.id===uid[i]){
-          i++;
-          return false;
-        }else{
-          return true;
-        }
-      });
-
-      this.setState({rows});
-      uid = JSON.stringify(uid);
-      flag = 1;
-    }
-
+    const { uid, flag } = this.selectGridRows(uuid);
     const data = {
       curfolder: 'inbox',
       spam: 'spam',
@@ -430,9 +361,9 @@ class InboxPage extends React.Component {
       .post(window._api + '/unspam_emails', data, config)
       .then(res => {
         if (res.data.result > 0) {
-          if(flag===1){
+          if (flag === 1) {
             toast("Emails have been restored");
-          }else{
+          } else {
             toast('Email has been restored');
           }
         }
@@ -441,7 +372,6 @@ class InboxPage extends React.Component {
         console.log("Unspam Emails Unsuccessful", error);
       });
   };
-
 
   mailBodyWithAttachment = type => {
     let config = this.getAxiosConfig();
@@ -459,9 +389,9 @@ class InboxPage extends React.Component {
     let body;
     const content = this.state.modalEditorState.getCurrentContent();
 
-    if(this.state.enableMarkdown){
+    if (this.state.enableMarkdown) {
       body = draftToMarkdown(convertToRaw(content));
-    }else{
+    } else {
       body = draftToHtml(convertToRaw(content));
     }
 
@@ -472,33 +402,31 @@ class InboxPage extends React.Component {
 
     let data;
 
-    if(this.state.attachment){
-      let i=0;
+    if (this.state.attachment) {
       data = new FormData();
+      const fileData = this.state.attachment;
 
-      let fileData = this.state.attachment;
-
-      for(;i<fileData.length;i++){
+      for(let i=0;i<fileData.length;i++){
         data.append('attachment[]',fileData[i]);
       }
 
-      data.append('to',to);
-      data.append('subject',subject);
-      data.append('body',body);
+      data.append('to', to);
+      data.append('subject', subject);
+      data.append('body', body);
 
       if(cc !== null){
-        data.append('cc',cc.value);
+        data.append('cc', cc.value);
       }
       if(bcc!== null){
-        data.append('bcc',bcc.value);
+        data.append('bcc', bcc.value);
       }
-      data.append('draft_id',this.state.draftID);
+      data.append('draft_id', this.state.draftID);
 
       if(this.state.attachmentURLs.length >0) {
-        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
+        data.append('attachmentURLs', JSON.stringify(this.state.attachmentURLs));
       }
-      config.headers['Content-Type']= 'multipart/form-data';
-    }else{
+      config.headers['Content-Type'] = 'multipart/form-data';
+    } else {
       data = {
         to,
         subject,
@@ -518,7 +446,7 @@ class InboxPage extends React.Component {
     return {data, config};
   }
 
-  saveDraft = (e) => {
+  saveDraft = () => {
     const { data, config } = this.mailBodyWithAttachment('draft');
 
     axios
@@ -535,7 +463,7 @@ class InboxPage extends React.Component {
             this.fetchEmails();
           }
           toast('Email has been saved to draft');
-        }else{
+        } else {
           this.setState({
             savingDraft: false
           });
@@ -547,7 +475,7 @@ class InboxPage extends React.Component {
       });
   };
 
-  sendEmail = (e) => {
+  sendEmail = () => {
     const { data, config } = this.mailBodyWithAttachment('send');
 
     axios
@@ -565,7 +493,7 @@ class InboxPage extends React.Component {
             isSending: false
           });
           toast('Email has been sent');
-        }else{
+        } else {
           this.setState({
             isSending: false
           });
@@ -617,33 +545,43 @@ class InboxPage extends React.Component {
     });
   };
 
-  resizeDock = dockstate => {
-    let cc =  document.getElementById('cc').value;
-    let bcc = document.getElementById('bcc').value;
-    let to = document.getElementById('to').value;
-    let subject = document.getElementById('subject').value;
-    let attachmentContent = document.getElementById('attachment').files;
+  resizeDock = dockState => {
+    const ccCompose =  document.getElementById('cc').value;
+    const bccCompose = document.getElementById('bcc').value;
+    const toCompose = document.getElementById('to').value;
+    const subjectCompose = document.getElementById('subject').value;
+    const attachmentContent = document.getElementById('attachment').files;
     this.setState({
-      dockState: dockstate,
-      toCompose: to,
-      ccCompose: cc,
-      bccCompose: bcc,
-      subjectCompose: subject,
+      dockState,
+      toCompose,
+      ccCompose,
+      bccCompose,
+      subjectCompose,
       attachmentContent
     });
   };
 
+  renderDateFormatted = givenDate => {
+    const months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const year = givenDate.getFullYear();
+    const month = months_arr[givenDate.getMonth()];
+    const day = givenDate.getDate();
+    const hours = givenDate.getHours();
+    const minutes = "0" + givenDate.getMinutes();
+    return day+'-'+month+'-'+year+' '+hours + ':' + minutes.substr(-2);
+  }
+
   setEmailNode = node => {
-    let cc = '';
-    let bcc = '';
-    let from = '';
-    let to = '';
-    let orTo = '';
-    let orCc = '';
-    let orBcc = '';
-    let orFrom = '';
-    let body = '';
-    let subject = '';
+    let cc = '',
+      bcc = '',
+      from = '',
+      to = '',
+      orTo = '',
+      orCc = '',
+      orBcc = '',
+      orFrom = '',
+      body = '',
+      subject = '';
 
     if(node){
       cc= node.cc;
@@ -671,14 +609,7 @@ class InboxPage extends React.Component {
         fwdMsg += "Bcc: "+bcc+"<br>";
       }
 
-      let months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      let date = new Date(node.date*1000);
-      let year = date.getFullYear();
-      let month = months_arr[date.getMonth()];
-      let day = date.getDate();
-      let hours = date.getHours();
-      let minutes = "0" + date.getMinutes();
-      date = day+'-'+month+'-'+year+' '+hours + ':' + minutes.substr(-2);
+      const date = this.renderDateFormatted(new Date(node.date*1000));
 
       fwdMsg+= "Date: "+date+"<br>";
       fwdMsg+= "Subject: "+subject+"<br>";
@@ -687,9 +618,12 @@ class InboxPage extends React.Component {
       fwdMsg+=node.body;
       if(node.hasAttachments===1){
         fwdMsg+="<hr><ul>";
-        let i=0;
-        for(i=0;i<node.attachment.length;i++){
-          fwdMsg+="<li><a href='"+window.location.origin+node.attachment[i]['url']+"' target='_blank'>"+node.attachment[i]['file']+"</a></li>";
+        for(let i=0;i<node.attachment.length;i++){
+          fwdMsg+="<li>" +
+            "<a href='"+window.location.origin+node.attachment[i]['url']+"' target='_blank'>" +
+              node.attachment[i]['file'] +
+            "</a>" +
+          "</li>";
         }
         fwdMsg+="</ul>";
       }
@@ -717,7 +651,7 @@ class InboxPage extends React.Component {
 
   closeEditors = () => {
     let { thread } = this.state;
-    let threadMax = thread.length;
+    const threadMax = thread.length;
 
     for(let i=0;i<threadMax;i++){
       thread[i].editor = false;
@@ -730,7 +664,7 @@ class InboxPage extends React.Component {
 
   activeThread = index =>{
     let { thread } = this.state;
-    let threadMax = thread.length;
+    const threadMax = thread.length;
 
     for(let i=0;i<threadMax;i++){
       thread[i].editor = false;
@@ -746,7 +680,7 @@ class InboxPage extends React.Component {
     let max = rows.length;
     let i =0;
     for(;i<max;i++){
-      if(this.state.emailThreads[i].uids.indexOf(uid)>=0){
+      if (this.state.emailThreads[i].uids.indexOf(uid) >= 0) {
         break;
       }
     }
@@ -774,7 +708,6 @@ class InboxPage extends React.Component {
       }
 
       const config = this.getAxiosConfig();
-
       const data = {
         folder: currentFolder,
         thread_uids: this.state.emailThreads[row_index]['uids'],
@@ -785,7 +718,7 @@ class InboxPage extends React.Component {
         .post(window._api + '/email', data, config)
         .then(res => {
           if (res.status === 200 && res.data.length > 0) {
-            if(currentFolderLower.match("draft") !== null){
+            if (currentFolderLower.match("draft") !== null) {
               const {body, to, uid, cc, bcc, subject, attachment} = res.data[0];
               this.setState({
                 modal: true,
@@ -805,7 +738,7 @@ class InboxPage extends React.Component {
               });
               this.closeEditors();
             }
-          }else{
+          } else {
             this.setState({
               page: 'list',
             });
@@ -838,24 +771,17 @@ class InboxPage extends React.Component {
       });
 
       let term = this.props.searchTerm;
-      this.searchEmails(term);
+      if(term) {
+        this.searchEmails(term);
+      } else {
+        this.fetchEmails();
+      }
     }
   }
 
   displayDate = (curDate) => {
-    let months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    let date = new Date(curDate*1000);
-    let year = date.getFullYear();
-    let month = months_arr[date.getMonth()];
-    let day = date.getDate();
-    let hours = date.getHours();
-    let minutes = "0" + date.getMinutes();
-    date = day+'-'+month+'-'+year+' '+hours + ':' + minutes.substr(-2);
-
-    let eDate= date;
-
-    let result = `${eDate}`;
-    return result;
+    const date = this.renderDateFormatted(new Date(curDate*1000));
+    return `${date}`;
   };
 
   fetchEmails = () => {
@@ -866,7 +792,6 @@ class InboxPage extends React.Component {
       });
 
       const config = this.getAxiosConfig();
-
       const data = {
         folder: this.props.curFolder,
         has_thread: 1
@@ -876,41 +801,31 @@ class InboxPage extends React.Component {
         .post(window._api + '/emails', data, config)
         .then(res => {
           if (res.status === 200) {
-
-            let erows = [];
-            let threads = [];
-            let starred = 0;
-            let curFolder = this.props.curFolder;
-            curFolder = curFolder.toLowerCase();
+            let erows = [],
+              threads = [],
+              starred = 0,
+              curFolder = this.props.curFolder.toString().toLowerCase();
             if(curFolder.search("starred") > 0){
               starred = 1;
             }
 
             for (let i = 0; i < res.data.length; i++) {
-              let body = undefined;
-              let months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              let date = new Date(res.data[i].date*1000);
-              let year = date.getFullYear();
-              let month = months_arr[date.getMonth()];
-              let day = date.getDate();
-              let hours = date.getHours();
-              let minutes = "0" + date.getMinutes();
-              let fdate = day+'-'+month+'-'+year+' '+hours + ':' + minutes.substr(-2);
+              const fdate = this.renderDateFormatted(new Date(res.data[i].date*1000));
+              const isAttached = res.data[i].hasAttachments ? 1 : 0;
 
-              let isAttached = res.data[i].hasAttachments ? 1 : 0;
               erows[i] = createData(
                 res.data[i].uid,
                 starred,
                 res.data[i].from,
                 res.data[i].subject,
-                body,
+                undefined, //body
                 isAttached,
                 fdate,
               );
              threads[i] = res.data[i].thread;
             }
 
-           if (erows.length > 0) {
+            if (erows.length > 0) {
               this.setState({
                 rows: erows,
                 emailThreads: threads,
@@ -940,7 +855,6 @@ class InboxPage extends React.Component {
       });
 
       const config = this.getAxiosConfig();
-
       const data = {
         curfolder: this.props.curFolder,
         sterm: term
@@ -953,24 +867,23 @@ class InboxPage extends React.Component {
             let erows = [];
             let threads = [];
             for (let i = 0; i < res.data.length; i++) {
-              let body = undefined;
-              let fdate = new Date(res.data[i].date).toLocaleDateString('en-GB', {
+              const fdate = new Date(res.data[i].date).toLocaleDateString('en-GB', {
                 month: 'numeric',
                 day: 'numeric',
                 year: 'numeric',
               });
+              const isAttached = res.data[i].hasAttachments ? 1 : 0;
 
-              let isAttached = res.data[i].hasAttachments ? 1 : 0;
               erows[i] = createData(
                 res.data[i].uid,
                 0,
                 res.data[i].from[0].mail,
                 res.data[i].subject,
-                body,
+                undefined, //body
                 isAttached,
                 fdate,
               );
-             threads[i] = res.data[i].threads;
+              threads[i] = res.data[i].threads;
             }
 
             if (erows.length > 0) {
