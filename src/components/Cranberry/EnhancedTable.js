@@ -19,7 +19,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import { FaTrashRestore, FaTrash, FaExclamationTriangle, FaInbox } from "react-icons/fa";
-import { formatPath } from 'helpers/folder-render';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -140,9 +139,7 @@ const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
   const { numSelected, tableTitle } = props;
 
-  const tableHeader = formatPath(tableTitle);
-
-  let curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
+  const curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
 
   return (
     <Toolbar
@@ -154,7 +151,7 @@ const EnhancedTableToolbar = props => {
         {numSelected > 0 ? (
           <Typography color="inherit">{numSelected} selected</Typography>
         ) : (
-          <Typography id="tableTitle">{tableHeader}</Typography>
+          <Typography id="tableTitle">{tableTitle}</Typography>
         )}
       </div>
       <div className={classes.spacer} />
@@ -289,8 +286,6 @@ const EnhancedTable = ({
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-
-  let curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
 
   const [rowsPerPage, setRowsPerPage] = React.useState(30);
   labelRowsPerPage = labelRowsPerPage ? labelRowsPerPage : 'Per page';
