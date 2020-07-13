@@ -17,7 +17,7 @@ class MessageEditor extends Component {
   };
   constructor(props){
     super(props);
-    let contentState = {};
+    let contentState;
     if(this.props.markdown){
       const markdownString = this.props.fwdMsg;
       const rawData = markdownToDraft(markdownString);
@@ -161,7 +161,7 @@ class MessageEditor extends Component {
             history: { inDropdown: true },
           }}
         />
-        <div>  
+        <div>
           <MdAttachFile />
           &nbsp;
           <input
@@ -178,7 +178,7 @@ class MessageEditor extends Component {
         <RButton
           className="mr-2"
           onClick={() => {
-            let email = {};
+            let email;
             let content = editorState.getCurrentContent();
             if(this.props.markdown){
               email = draftToMarkdown(convertToRaw(content));

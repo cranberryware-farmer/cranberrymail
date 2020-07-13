@@ -25,7 +25,7 @@ class MainLayout extends React.Component {
   }
 
   // close sidebar when
-  handleContentClick = event => {
+  handleContentClick = () => {
     // close sidebar if sidebar is open and screen size is less than `md`
     if (
       MainLayout.isSidebarOpen() &&

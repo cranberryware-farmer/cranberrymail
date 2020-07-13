@@ -19,6 +19,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import { FaTrashRestore, FaTrash, FaExclamationTriangle, FaInbox } from "react-icons/fa";
+import { formatPath } from 'helpers/folder-render';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -134,20 +135,6 @@ const useToolbarStyles = makeStyles(theme => ({
     flex: '0 0 auto',
   },
 }));
-
-const camelCase = str => {
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index)
-  {
-    return word.toUpperCase();
-  });
-}
-
-const formatPath = str => {
-  let pathArr = str.split(/[./]+/);
-  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
-  str = camelCase(str);
-  return str;
-}
 
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();

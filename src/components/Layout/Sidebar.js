@@ -24,21 +24,9 @@ import {
   toast
 } from 'react-toastify';
 import { folderMaps } from 'constants/folderMapping';
+import { formatPath } from 'helpers/folder-render';
 
 const bem = bn.create('sidebar');
-
-const camelCase = str => {
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
-    return word.toUpperCase();
-  });
-}
-
-const formatPath = str => {
-  let pathArr = str.split(/[./]+/);
-  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
-  str = camelCase(str);
-  return str;
-}
 
 class Sidebar extends React.Component {
   state = {
@@ -94,7 +82,7 @@ class Sidebar extends React.Component {
           this.props.saveFolders(folders);
           this.props.saveCurFolder(items[0].name);
           this.setState({
-              navItems: items
+            navItems: items
           });
         }
       }
@@ -111,7 +99,6 @@ class Sidebar extends React.Component {
   handleClick = name => () => {
     this.setState(prevState => {
       const isOpen = prevState[`isOpen${name}`];
-
       return {
         [`isOpen${name}`]: !isOpen,
       };

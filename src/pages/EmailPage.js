@@ -46,10 +46,9 @@ const emailPage = (props) => {
     return internalItems;
   }
   const getAttchmentComponent = (attachments, mail_uid) => {
-    const attachmentContent = <ul>
+    return <ul>
       {createAttachementInternal(attachments, mail_uid)}
     </ul>;
-    return attachmentContent;
   }
   return (
     <Row className="email-pg">
@@ -122,13 +121,9 @@ const emailPage = (props) => {
                         e.preventDefault();
                         let uid = el.uid;
                         let nextStarredState = 0;
-
-                        if(props.emailStarred===1){
-                          nextStarredState = 0;
-                        }else{
+                        if(props.emailStarred !== 1){
                           nextStarredState = 1;
                         }
-
                         props.setState({
                           isEmailStarred: nextStarredState
                         });

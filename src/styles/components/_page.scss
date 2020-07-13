@@ -74,10 +74,9 @@
 .cm-span-link {
   cursor:pointer;
   color:blue;
-  text-decoration:underline;
+  text-decoration: none;
 }
 
 .cm-span-link:hover {
-  text-decoration:none;
-  text-shadow: 1px 1px 1px #555;
+  text-decoration: underline;
 }

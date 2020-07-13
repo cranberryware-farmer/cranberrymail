@@ -43,20 +43,19 @@ class AuthForm extends React.Component {
 
   changeAuthState = authState => event => {
     event.preventDefault();
-
     this.props.onChangeAuthState(authState);
   };
 
-  togglePassword = (e) => {
-      if(this.state.ptype==="password"){
-        this.setState({
-          ptype: "text"
-        });
-      }else{
-        this.setState({
-          ptype: "password"
-        });
-      }
+  togglePassword = () => {
+    if(this.state.ptype==="password"){
+      this.setState({
+        ptype: "text"
+      });
+    }else{
+      this.setState({
+        ptype: "password"
+      });
+    }
   };
 
   handleSubmit = event => {
@@ -138,7 +137,6 @@ class AuthForm extends React.Component {
               onClick={onLogoClick}
             />
           </div>
-
         )}
         <FormGroup>
           <Label for={usernameLabel}>{usernameLabel}</Label>
@@ -147,11 +145,16 @@ class AuthForm extends React.Component {
         <FormGroup>
           <Label for={passwordLabel}>{passwordLabel}</Label>
           <InputGroup>
-          <Input {...passwordInputProps} onChange={e => this.setState({ password: e.target.value })} type={this.state.ptype} />
+            <Input
+              {...passwordInputProps}
+              onChange={e => this.setState({ password: e.target.value })}
+              type={this.state.ptype}
+            />
             <InputGroupAddon addonType="append">
-        <Button onClick={ e => this.togglePassword(e) }>{this.state.ptype==="password" ? <FaEye />:<FaEyeSlash />}</Button>
+              <Button onClick={ () => this.togglePassword() }>
+                {this.state.ptype==="password" ? <FaEye />:<FaEyeSlash />}
+              </Button>
             </InputGroupAddon>
-
           </InputGroup>
         </FormGroup>
 
@@ -163,10 +166,7 @@ class AuthForm extends React.Component {
           onClick={!this.state.isLoading ? this.handleSubmit : null}
           disabled={this.state.isLoading}>
           {this.renderButtonText()}
-          {this.state.isLoading ? < Spinner
-            type = "grow"
-            color = "light"
-          /> : null}
+          {this.state.isLoading ? <Spinner type = "grow" color = "light"/> : null}
         </Button>
         {children}
       </Form>

@@ -16,7 +16,6 @@ import {
 } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { draftToMarkdown } from 'markdown-draft-js';
 import { EditorState, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
@@ -24,7 +23,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import ComposeModal from './ComposeModal';
 import EmailPage from './EmailPage';
 import SettingsPage from './SettingsPage';
-import {stateFromHTML} from 'draft-js-import-html';
+import { stateFromHTML } from 'draft-js-import-html';
 
 function createData(id, starred, from, subject,body,attachment, timestamp) {
   return { id, starred, from, subject, timestamp };
@@ -117,29 +116,31 @@ class InboxPage extends React.Component {
     });
   };
 
-  resetSubject= () =>{
+  resetSubject= () => {
     this.setState({
       subject: this.state.orSubject
     });
   };
 
-  replyEmail = (emailBody) => {
-    let { token } = this.state.app;
-    const config = {
+  getAxiosConfig = () => {
+    const { token } = this.state.app;
+    return {
       headers: {
         Accept: 'application/json',
         Authorization: 'Bearer ' + token,
       },
     };
-    let body = emailBody;
+  }
 
-    let cc =  document.getElementById('cc');
-    let bcc = document.getElementById('bcc');
-    let to = document.getElementById('staticEmail').value;
-    let subject = document.getElementById('subject').value;
-    let messageId = this.state.messageId;
+  mailBodyWithoutAttachment = body => {
+    let config = this.getAxiosConfig();
 
-    let data = {};
+    let data;
+    const cc =  document.getElementById('cc');
+    const bcc = document.getElementById('bcc');
+    const to = document.getElementById('staticEmail').value;
+    const subject = document.getElementById('subject').value;
+    const messageId = this.state.messageId;
 
     if(this.state.attachment){
       data = new FormData();
@@ -176,6 +177,11 @@ class InboxPage extends React.Component {
         data.bcc = bcc.value;
       }
     }
+    return {data, config};
+  }
+
+  replyEmail = (emailBody) => {
+    const {data, config} = this.mailBodyWithoutAttachment(emailBody);
 
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
@@ -202,15 +208,11 @@ class InboxPage extends React.Component {
         console.log("Reply Email Unsuccessful", error);
       });
   };
+
   starEmail = (uid,emailState) => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
-      let { token } = this.state.app;
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + token,
-        },
-      };
+      const config = this.getAxiosConfig();
+
       const data = {
         curFolder: this.props.curFolder,
         uid,
@@ -239,7 +241,6 @@ class InboxPage extends React.Component {
               });
               this.setState({rows});
             }
-
           }else{
             if(emailState===0){
               toast('Email still marked as starred');
@@ -256,13 +257,8 @@ class InboxPage extends React.Component {
 
   untrashEmail = (uid) => {
     let flag = 0;
-    let { token } = this.state.app;
-    const config = {
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + token,
-      },
-    };
+
+    const config = this.getAxiosConfig();
 
     if(Array.isArray(uid)){
       let rows = this.state.rows;
@@ -309,13 +305,7 @@ class InboxPage extends React.Component {
   trashEmail = (uid) => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
       let flag = 0;
-      let { token } = this.state.app;
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + token,
-        },
-      };
+      const config = this.getAxiosConfig();
 
       if(Array.isArray(uid)){
         let rows = this.state.rows;
@@ -343,19 +333,19 @@ class InboxPage extends React.Component {
       };
 
       axios
-      .post(window._api + '/trash_emails', data, config)
-      .then(res => {
-        if (res.data.result > 0) {
-          if(flag===1){
-            toast("Emails have been deleted");
-          }else{
-            toast('Email has been deleted');
+        .post(window._api + '/trash_emails', data, config)
+        .then(res => {
+          if (res.data.result > 0) {
+            if(flag===1){
+              toast("Emails have been deleted");
+            }else{
+              toast('Email has been deleted');
+            }
           }
-        }
-      })
-      .catch(error => {
-        console.log("TrashEmail Unsuccessful", error);
-      });
+        })
+        .catch(error => {
+          console.log("TrashEmail Unsuccessful", error);
+        });
     }
 
   };
@@ -363,13 +353,7 @@ class InboxPage extends React.Component {
   spamEmail = uid => {
     if(this.props.curFolder!=='' || this.props.curFolder!==undefined){
       let flag = 0;
-      let { token } = this.state.app;
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + token,
-        },
-      };
+      const config = this.getAxiosConfig();
 
       if(Array.isArray(uid)){
         let rows = this.state.rows;
@@ -415,13 +399,7 @@ class InboxPage extends React.Component {
 
   unspamEmail = uid => {
     let flag = 0;
-    let { token } = this.state.app;
-    const config = {
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + token,
-      },
-    };
+    const config = this.getAxiosConfig();
 
     if(Array.isArray(uid)){
       let rows = this.state.rows;
@@ -464,20 +442,22 @@ class InboxPage extends React.Component {
       });
   };
 
-  saveDraft = (e) => {
-    let { token } = this.state.app;
-    const config = {
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + token,
-      },
-    };
-    this.setState({
-      savingDraft: true
-    });
 
-    let body = {};
-    let content = this.state.modalEditorState.getCurrentContent();
+  mailBodyWithAttachment = type => {
+    let config = this.getAxiosConfig();
+
+    if(type === 'draft') {
+      this.setState({
+        savingDraft: true
+      });
+    } else if( type === 'send') {
+      this.setState({
+        isSending: true
+      });
+    }
+
+    let body;
+    const content = this.state.modalEditorState.getCurrentContent();
 
     if(this.state.enableMarkdown){
       body = draftToMarkdown(convertToRaw(content));
@@ -485,12 +465,12 @@ class InboxPage extends React.Component {
       body = draftToHtml(convertToRaw(content));
     }
 
-    let cc =  document.getElementById('cc');
-    let bcc = document.getElementById('bcc');
-    let to = document.getElementById('to').value;
-    let subject = document.getElementById('subject').value;
+    const cc =  document.getElementById('cc');
+    const bcc = document.getElementById('bcc');
+    const to = document.getElementById('to').value;
+    const subject = document.getElementById('subject').value;
 
-    let data = {};
+    let data;
 
     if(this.state.attachment){
       let i=0;
@@ -535,6 +515,11 @@ class InboxPage extends React.Component {
         data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
       }
     }
+    return {data, config};
+  }
+
+  saveDraft = (e) => {
+    const { data, config } = this.mailBodyWithAttachment('draft');
 
     axios
       .post(window._api + '/save_draft', data, config)
@@ -563,75 +548,7 @@ class InboxPage extends React.Component {
   };
 
   sendEmail = (e) => {
-    let { token } = this.state.app;
-    const config = {
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + token,
-      },
-    };
-    this.setState({
-      isSending: true
-    });
-
-    let body = {};
-    let content = this.state.modalEditorState.getCurrentContent();
-
-    if(this.state.enableMarkdown){
-      body = draftToMarkdown(convertToRaw(content));
-    }else{
-      body = draftToHtml(convertToRaw(content));
-    }
-
-    let cc =  document.getElementById('cc');
-    let bcc = document.getElementById('bcc');
-    let to = document.getElementById('to').value;
-    let subject = document.getElementById('subject').value;
-
-    let data = {};
-
-    if(this.state.attachment){
-      let i=0;
-      data = new FormData();
-
-      let fileData = this.state.attachment;
-
-      for(;i<fileData.length;i++){
-        data.append('attachment[]',fileData[i]);
-      }
-
-      data.append('to',to);
-      data.append('subject',subject);
-      data.append('body',body);
-
-      if(cc !== null){
-        data.append('cc',cc.value);
-      }
-      if(bcc!== null){
-        data.append('bcc',bcc.value);
-      }
-      data.append('draft_id',this.state.draftID);
-      if(this.state.attachmentURLs.length >0) {
-        data.append('attachmentURLs',JSON.stringify(this.state.attachmentURLs));
-      }
-      config.headers['Content-Type']= 'multipart/form-data';
-    }else{
-      data = {
-        to,
-        subject,
-        body,
-      };
-      if(cc !== null){
-        data.cc = cc.value;
-      }
-      if(bcc!== null){
-        data.bcc = bcc.value;
-      }
-      data.draft_id = this.state.draftID;
-      if(this.state.attachmentURLs.length >0) {
-        data.attachmentURLs = JSON.stringify(this.state.attachmentURLs);
-      }
-    }
+    const { data, config } = this.mailBodyWithAttachment('send');
 
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
@@ -856,12 +773,7 @@ class InboxPage extends React.Component {
         });
       }
 
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + this.state.app.token,
-        },
-      };
+      const config = this.getAxiosConfig();
 
       const data = {
         folder: currentFolder,
@@ -953,12 +865,7 @@ class InboxPage extends React.Component {
         rows: []
       });
 
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + this.state.app.token,
-        },
-      };
+      const config = this.getAxiosConfig();
 
       const data = {
         folder: this.props.curFolder,
@@ -1032,12 +939,7 @@ class InboxPage extends React.Component {
         rows: []
       });
 
-      const config = {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + this.state.app.token,
-        },
-      };
+      const config = this.getAxiosConfig();
 
       const data = {
         curfolder: this.props.curFolder,
@@ -1116,8 +1018,6 @@ class InboxPage extends React.Component {
         responseType: 'blob'
       })
       .then(function (response) {
-        console.log(response);
-        console.log(response.headers['content-type']);
         const element = document.createElement("a");
         const file = new Blob([response.data], {type: response.headers['content-type']});
         const blobURL = URL.createObjectURL(file);
@@ -1187,7 +1087,8 @@ class InboxPage extends React.Component {
                     spamEmail = {this.spamEmail}
                     unspamEmail = {this.unspamEmail}
                     breakpoint = {this.props.breakpoint}
-                  ></EnhancedTable>
+                  >
+                  </EnhancedTable>
                 </React.Fragment>
               )}
 

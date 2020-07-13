@@ -24,7 +24,7 @@ import {
   FaRegWindowMinimize,
   FaSave,
 } from 'react-icons/fa';
-import {isMobile} from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { toast } from 'react-toastify';
 
 const dockStyles = {
