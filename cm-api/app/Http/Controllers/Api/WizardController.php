@@ -212,9 +212,8 @@ class WizardController extends Controller
     private function _getMxRecords($email): string
     {
         $email = explode("@", $email);
-        $command = 'dig +nocmd '.escapeshellarg($email[1])." mx +short";
-
-        $process = new Process($command);
+        
+        $process = new Process(['dig', '+nocmd', $email[1], 'mx', '+short']);
         $process->run();
 
         Log::info("Process has run", ['file' => __FILE__, 'line' => __LINE__]);
