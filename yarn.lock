@@ -1346,6 +1346,14 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
+"@types/reactstrap@^8.5.0":
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/@types/reactstrap/-/reactstrap-8.5.0.tgz#bccb7388cfbb7cbb5185def8da802b33e3cd6896"
+  integrity sha512-Mi+uYf436+PoffI8XbYYxs5O5w+XrLo+PSVGdEsIEMxmLVcNgEpgEaCNKftT4s+0NGT4AGdXCdJnJDLV9aY8OA==
+  dependencies:
+    "@types/react" "*"
+    popper.js "^1.14.1"
+
 "@types/tapable@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.2.tgz#e13182e1b69871a422d7863e11a4a6f5b814a4bd"

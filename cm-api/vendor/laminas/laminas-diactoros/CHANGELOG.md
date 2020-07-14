@@ -2,6 +2,72 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.3.1 - 2020-07-07
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#44](https://github.com/laminas/laminas-diactoros/pull/44) fixes an issue whereby the uploaded file size was being provided as an integer string, and causing type errors. The value is now cast to integer before creating an `UploadedFile` instance.
+
+## 2.3.0 - 2020-04-27
+
+### Added
+
+- [#37](https://github.com/laminas/laminas-diactoros/pull/37) adds a ConfigProvider and Module, allowing the package to be autoregistered within Mezzio and MVC applications. Each provides configuration mapping PSR-17 HTTP message factory interfaces to the Diactoros implementations of them.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
+## 2.2.3 - 2020-03-29
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Fixed `replace` version constraint in composer.json so repository can be used as replacement of `zendframework/zend-diactoros:^2.2.1`.
+
 ## 2.2.2 - 2020-01-07
 
 ### Added

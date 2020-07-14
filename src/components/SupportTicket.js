@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import { Media, Button } from 'reactstrap';
-
 import CAvatar from './CAvatar';
 
 const statusMap = {

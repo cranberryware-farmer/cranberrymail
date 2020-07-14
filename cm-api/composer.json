@@ -12,21 +12,21 @@
         "fideloper/proxy": "^4.0",
         "guzzlehttp/guzzle": "^6.4",
         "joeyrush/better-migrate-seed": "^0.3.0",
-        "laravel/framework": "^6.2",
+        "laravel/framework": "^7.0",
         "laravel/passport": "^8.4",
-        "laravel/tinker": "^1.0",
-        "laravel/ui": "^1.1",
+        "laravel/tinker": "^2.0",
+        "laravel/ui": "^2.0",
         "oscarafdev/migrations-generator": "^2.0",
         "pear-pear.horde.org/horde_cache": "*",
         "pear-pear.horde.org/horde_imap_client": "*",
         "pear/mail_mime": "^1.10"
     },
     "require-dev": {
-        "facade/ignition": "^1.4",
+        "facade/ignition": "^2.0",
         "fzaninotto/faker": "^1.4",
         "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^3.0",
-        "phpunit/phpunit": "^8.0"
+        "nunomaduro/collision": "^4.1",
+        "phpunit/phpunit": "^8.5"
     },
     "config": {
         "optimize-autoloader": true,

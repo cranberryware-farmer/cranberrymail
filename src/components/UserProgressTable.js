@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import { Table, Progress } from 'reactstrap';
-
 import CAvatar from 'components/CAvatar';
-
 import withBadge from 'hocs/withBadge';
 
 const AvatarWithBadge = withBadge({

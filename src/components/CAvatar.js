@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import classNames from 'classnames';
-
 import Avatar from 'react-avatar';
 
 const CAvatar = ({

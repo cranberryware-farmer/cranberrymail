@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import classNames from 'classnames';
-
 import { Card, CardTitle, CardSubtitle, CardText, CardBody } from 'reactstrap';
-
 import CAvatar from '../CAvatar';
 
 const UserCard = ({

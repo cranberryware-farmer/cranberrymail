@@ -16,16 +16,16 @@ class AuthPage extends React.Component {
 
   componentDidMount() {
     const token = Cookies.get("app_auth") ? Cookies.get("app_auth") : "";
-    const app_email = Cookies.get("app_email") ? Cookies.get("app_email") : "";
+    const email = Cookies.get("app_email") ? Cookies.get("app_email") : "";
     if(token){
       this.props.history.push({
         pathname: '/',
         state: {
           detail: "Retreived mailbox.",
           token,
-          email: app_email
+          email
         }
-      }); 
+      });
     }
   };
 
@@ -37,7 +37,7 @@ class AuthPage extends React.Component {
     return (
       <React.Fragment>
         <Row>
-            <ToastContainer />
+          <ToastContainer />
         </Row>
         <Row
           style={{

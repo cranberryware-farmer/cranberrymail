@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
-
 import { Card, CardHeader, CardBody, CardText, Button } from 'reactstrap';
-
 import CAvatar from 'components/CAvatar';
-
 import classNames from 'classnames';
 
 const AnnouncementCard = ({

@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import {
-    Button as RButton,
-    Form,
-    FormGroup,
-    Input,
-    Label,
-    Row,
-    Col,
-    FormText,
-    Modal,
-    ModalBody,
-    Spinner,
+  Button as RButton,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Row,
+  Col,
+  FormText,
+  Modal,
+  ModalBody,
+  Spinner,
 } from 'reactstrap';
 import { MdAttachFile } from "react-icons/md";
 // import { Editor } from 'react-draft-wysiwyg';
@@ -24,9 +24,8 @@ import {
   FaRegWindowMinimize,
   FaSave,
 } from 'react-icons/fa';
-import {isMobile} from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { toast } from 'react-toastify';
-
 
 const dockStyles = {
   position: 'fixed',
@@ -60,7 +59,6 @@ const minDockStyles = {
 
 const composeModal = (props) => {
   const dockState = props.dockState;
-
   let headerLeft, headerRight;
   let hiddenClass = '',
       hiddenAction = false;
@@ -107,7 +105,7 @@ const composeModal = (props) => {
         <Col md={headerRight} sm={headerRight} xs={headerRight} className='mt-1 mb-0'>
           <Row className='ml-0 mr-0'>
             <Col md='4' sm='4' xs='4'>
-              <FaRegWindowMinimize 
+              <FaRegWindowMinimize
                 className='cm-pointer'
                 onClick = {
                   () => {
@@ -122,7 +120,7 @@ const composeModal = (props) => {
               />
             </Col>
             <Col md='4' sm='4' xs='4'>
-              <FaWindowMaximize 
+              <FaWindowMaximize
                 className='cm-pointer'
                 onClick = {
                   () => {
@@ -189,24 +187,7 @@ const composeModal = (props) => {
             />
           </FormGroup>
           <FormGroup>
-            {/* <Editor
-              editorState={props.meditorstate}
-              wrapperClassName="demo-wrapper"
-              editorClassName="demo-editor"
-              onEditorStateChange={(es) => {
-                props.meditorstatehandler(es);
-              }}
-              id="email"
-              toolbarClassName="toolbar-class"
-              toolbar={{
-                inline: { inDropdown: true },
-                list: { inDropdown: true },
-                textAlign: { inDropdown: true },
-                link: { inDropdown: true },
-                history: { inDropdown: true },
-              }}
-              /> */}
-            <CustomToolbarEditor 
+            <CustomToolbarEditor
               id="email"
               editorState={props.meditorstate}
               onEditorStateChange={(es) => {
@@ -215,23 +196,24 @@ const composeModal = (props) => {
             />
           </FormGroup>
           <FormGroup>
-            <RButton 
+            <RButton
               onClick={() => sendEmail()}
               disabled={props.isSending}
             >
-              Send  
-              { props.isSending ? <Spinner 
+              Send
+              { props.isSending ? <Spinner
                 type = "grow"
                 color = "light"
                 size="sm"
                 className='send-spinner'
               /> : <RiSendPlaneLine /> }
             </RButton>
-            <Label for="attachment" className='float-right'><MdAttachFile /></Label>
-            <FaSave 
-              className='float-right' 
-              onClick={() => props.saveDraft()}
-            />
+            <Label for="attachment" className='float-right'>
+              <MdAttachFile />
+            </Label>
+            <label className='float-right'>
+              <FaSave onClick={() => props.saveDraft()}/>
+            </label>
             <Input
               type="file"
               name="attachment"
@@ -259,10 +241,10 @@ const composeModal = (props) => {
           {composeContent}
         </ModalBody>
       </Modal>
-    ); 
+    );
   } else if(dockState === "minimize"){
     return (
-      <Dock 
+      <Dock
         position='bottom'
         isVisible={ props.modal }
         dimMode='none'
@@ -272,10 +254,10 @@ const composeModal = (props) => {
       >
         {composeContent}
       </Dock>
-    ); 
+    );
   } else {
     return (
-      <Dock 
+      <Dock
         position='bottom'
         isVisible={ props.modal }
         dimMode='none'

@@ -23,24 +23,10 @@ import Cookies from 'js-cookie';
 import {
   toast
 } from 'react-toastify';
-
 import { folderMaps } from 'constants/folderMapping';
+import { formatPath } from 'helpers/folder-render';
 
 const bem = bn.create('sidebar');
-
-const camelCase = str => { 
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) 
-  { 
-    return word.toUpperCase(); 
-  }); 
-}
-
-const formatPath = str => {
-  let pathArr = str.split(/[./]+/);
-  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
-  str = camelCase(str);
-  return str;
-}
 
 class Sidebar extends React.Component {
   state = {
@@ -49,8 +35,8 @@ class Sidebar extends React.Component {
     isOpenPages: true,
     navItems: [],
   };
- 
-  componentDidMount(){ 
+
+  componentDidMount(){
     if(this.props.location.state!==undefined){
       this.loadFolders();
     }
@@ -82,21 +68,21 @@ class Sidebar extends React.Component {
             if(path){
               path = formatPath(path);
               lowerPath = path.toString().toLowerCase();
-            } 
+            }
             items[i]={
               to: result[i],
               name: path,
               exact: true,
               Icon: folderMaps.hasOwnProperty(lowerPath) ? folderMaps[lowerPath] : MdLabel
-            };                
+            };
           }
           for(let i=0;i<items.length; i++){
             folders.push(items[i].name);
           }
-          this.props.saveFolders(folders);  
-          this.props.saveCurFolder(items[0].name); 
+          this.props.saveFolders(folders);
+          this.props.saveCurFolder(items[0].name);
           this.setState({
-              navItems: items
+            navItems: items
           });
         }
       }
@@ -107,20 +93,17 @@ class Sidebar extends React.Component {
       Cookies.remove('app_email');
       this.props.history.push('/login');
     });
-
   };
 
   handleClick = name => () => {
     this.setState(prevState => {
       const isOpen = prevState[`isOpen${name}`];
-
       return {
         [`isOpen${name}`]: !isOpen,
       };
     });
   };
 
- 
   render() {
     return (
       <aside className={bem.b()}>
@@ -143,16 +126,19 @@ class Sidebar extends React.Component {
             />
             </SourceLink>
           </Navbar>
-          <Button 
+          <Button
             style={{
-                    marginLeft: 5,
-                    marginTop: -5
-                  }}
-            onClick={(e) => { 
-                            e.preventDefault();
-                            this.loadFolders(); 
-                }}>
-                  <FaSync />
+              marginLeft: 5,
+              marginTop: -5
+            }}
+            onClick={
+              (e) => {
+                e.preventDefault();
+                this.loadFolders();
+              }
+            }
+          >
+            <FaSync />
           </Button>
           <Nav vertical>
             {this.state.navItems.map(({ to, name, exact, Icon }, index) => (
@@ -175,7 +161,6 @@ class Sidebar extends React.Component {
               </NavItem>
             ))}
           </Nav>
-          
         </div>
       </aside>
     );

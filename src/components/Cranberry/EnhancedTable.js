@@ -19,6 +19,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import { FaTrashRestore, FaTrash, FaExclamationTriangle, FaInbox } from "react-icons/fa";
+import { formatPath } from 'helpers/folder-render';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -135,26 +136,12 @@ const useToolbarStyles = makeStyles(theme => ({
   },
 }));
 
-const camelCase = str => { 
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) 
-  { 
-    return word.toUpperCase(); 
-  }); 
-}
-
-const formatPath = str => {
-  let pathArr = str.split(/[./]+/);
-  str = pathArr.length > 1 ? pathArr.slice(-1)[0] : pathArr[0];
-  str = camelCase(str);
-  return str;
-}
-
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
   const { numSelected, tableTitle } = props;
 
   const tableHeader = formatPath(tableTitle);
-  
+
   let curFolder = (tableTitle !== undefined) ? tableTitle.toLowerCase(): '';
 
   return (
@@ -173,60 +160,75 @@ const EnhancedTableToolbar = props => {
       <div className={classes.spacer} />
       <div className={classes.actions}>
         {numSelected > 0 && (
-            <React.Fragment>
+          <React.Fragment>
             {(curFolder.match("spam") === null) ? <Tooltip title="Mark as spam">
-              <IconButton 
-                  aria-label="spam" 
-                  onClick = {() => { 
-                            props.unselectAll();
-                            props.spamEmails(props.rows);
-                }}>
-              <FaExclamationTriangle />
-            </IconButton>
-            </Tooltip>:<Tooltip title="Not Spam">
-              <IconButton 
-                aria-label="unspam" 
-                onClick = {() => { 
-                        props.unselectAll();
-                        props.unspamEmails(props.rows);
-                }}>
-              <FaInbox />
-            </IconButton>
-            </Tooltip>
-            }  
-            {(curFolder.match("trash") === null) ? <Tooltip title="Move to trash">
-              <IconButton 
-                  aria-label="delete" 
-                  onClick = {() => { 
-                            props.unselectAll();
-                            props.trashEmails(props.rows);
-                }}>
-              <FaTrash />
-            </IconButton>
-            </Tooltip>:<React.Fragment>
-              <Tooltip title="Delete emails">
               <IconButton
-                aria-label="delete" 
-                onClick = {() => { 
-                            props.unselectAll();
-                            props.trashEmails(props.rows);
-                }}>
-              <FaTrash />
+                aria-label="spam"
+                onClick = {
+                  () => {
+                    props.unselectAll();
+                    props.spamEmails(props.rows);
+                  }
+                }
+              >
+              <FaExclamationTriangle />
               </IconButton>
-            </Tooltip>
-            <Tooltip title="Restore emails">
-              <IconButton 
-                aria-label="undelete" 
-                onClick = {() => { 
+              </Tooltip>:<Tooltip title="Not Spam">
+                <IconButton
+                  aria-label="unspam"
+                  onClick = {
+                    () => {
+                      props.unselectAll();
+                      props.unspamEmails(props.rows);
+                    }
+                  }
+                >
+                  <FaInbox />
+                </IconButton>
+              </Tooltip>
+            }
+            {(curFolder.match("trash") === null) ? <Tooltip title="Move to trash">
+                <IconButton
+                  aria-label="delete"
+                  onClick = {
+                    () => {
+                      props.unselectAll();
+                      props.trashEmails(props.rows);
+                    }
+                  }
+                >
+                  <FaTrash />
+                </IconButton>
+              </Tooltip>:<React.Fragment>
+                <Tooltip title="Delete emails">
+                  <IconButton
+                    aria-label="delete"
+                    onClick = {
+                      () => {
+                        props.unselectAll();
+                        props.trashEmails(props.rows);
+                      }
+                    }
+                  >
+                    <FaTrash />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Restore emails">
+                  <IconButton
+                    aria-label="undelete"
+                    onClick = {
+                      () => {
                         props.unselectAll();
                         props.untrashEmails(props.rows);
-                }}>
-              <FaTrashRestore />
-            </IconButton>
-            </Tooltip>
-            </React.Fragment>
+                      }
+                    }
+                  >
+                    <FaTrashRestore />
+                  </IconButton>
+                </Tooltip>
+              </React.Fragment>
             }
-            </React.Fragment>
+          </React.Fragment>
         )}
       </div>
     </Toolbar>
@@ -341,12 +343,12 @@ const EnhancedTable = ({
     e.preventDefault();
     let el = document.querySelector('#star-' + id);
     let sFlag = el.getAttribute('data-starred');
-    
+
     if (sFlag === '1') {
       starEmail(id,0);
     } else {
       starEmail(id,1);
-    }  
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -366,14 +368,13 @@ const EnhancedTable = ({
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-  
+
   useEffect(() => {
       if(breakpoint==='xs'){
         setDense(true);
       }
-      
   });
-  
+
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
@@ -440,68 +441,59 @@ const EnhancedTable = ({
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
-                  
                   if(breakpoint==='xs'){
-                    return(<React.Fragment>
-                      <TableRow
-                        hover
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        selected={isItemSelected}
-                        className="hl-tr"
-                      >
-                      <TableCell
-                          padding="checkbox"
-                          onClick={event => handleClick(event, row.id)}
-                          rowSpan={5}
+                    return(
+                      <React.Fragment>
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={row.id}
+                          selected={isItemSelected}
+                          className="hl-tr"
                         >
-                          <Checkbox
-                            checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
-                          />
-                        </TableCell> 
-                       </TableRow>
+                          <TableCell
+                            padding="checkbox"
+                            onClick={event => handleClick(event, row.id)}
+                            rowSpan={5}
+                          >
+                            <Checkbox
+                              checked={isItemSelected}
+                              inputProps={{ 'aria-labelledby': labelId }}
+                            />
+                          </TableCell>
+                        </TableRow>
                         {Object.keys(row).map((row_key, row_key_index) => {
                           if (row_key !== 'id') {
                             if (row_key === 'starred') {
                               let ri = <TableCell>
-                              <span
-                                id={'star-' + row.id}
-                                onClick={e => toggleStar(e, row.id)}
-                                data-starred={row[row_key]}
-                                className="starred"
-                              >
-                                {row[row_key] === 1 ? '\u2605' : '\u2606'}
-                              </span>
-                            </TableCell>;
-                                  return (
-                                    <TableRow>
-                                      {ri}
-                                    </TableRow>
-                                  );
-                                  
-                              
-                              
+                                          <span
+                                            id={'star-' + row.id}
+                                            onClick={e => toggleStar(e, row.id)}
+                                            data-starred={row[row_key]}
+                                            className="starred"
+                                          >
+                                            {row[row_key] === 1 ? '\u2605' : '\u2606'}
+                                          </span>
+                                        </TableCell>;
+                              return (
+                                <TableRow>
+                                  {ri}
+                                </TableRow>
+                              );
                             } else if (row_key === 'subject') {
-                              
                               let maxText=30;
                               let ri = <TableCell
-                                            onClick={event => openEmail(event,row.id)}
+                                          onClick={event => openEmail(event,row.id)}
                                         >
                                           {row[row_key].substr(0, maxText)}...
                                         </TableCell>;
-  
-                                
-                                  return (
-                                    <TableRow>
-                                      {ri}
-                                    </TableRow>
-                                  );
-                              
-                              
+                              return (
+                                <TableRow>
+                                  {ri}
+                                </TableRow>
+                              );
                             } else if (row_key === 'attachment') {
                               /*return (
                                 <TableRow>
@@ -514,117 +506,103 @@ const EnhancedTable = ({
                               let date = row[row_key].split(" ");
                               date = date[0];
                               let ri = <TableCell
-                                onClick={event => openEmail(event,row.id)}
-                              >
-                                {date}
-                              </TableCell>;
-    
-                                    return (
-                                      <TableRow>
-                                        {ri}
-                                      </TableRow>
-                                    );
+                                          onClick={event => openEmail(event,row.id)}
+                                        >
+                                          {date}
+                                        </TableCell>;
+                              return (
+                                <TableRow>
+                                  {ri}
+                                </TableRow>
+                              );
                             }else{
                               let ri = <TableCell
-                                onClick={event => openEmail(event, row.id)}
-                              >
-                                <strong>{row[row_key]}</strong>
-                              </TableCell>;
-    
-                                  return (
-                                    <TableRow>
-                                      {ri}
-                                    </TableRow>
-                                  );
-                              
-                              
+                                          onClick={event => openEmail(event, row.id)}
+                                        >
+                                          <strong>{row[row_key]}</strong>
+                                        </TableCell>;
+
+                              return (
+                                <TableRow>
+                                  {ri}
+                                </TableRow>
+                              );
                             }
                           }
                           return null;
                         })}
-                        </React.Fragment>
+                      </React.Fragment>
                     );
-                  
                   }else{
-                    return(<TableRow
-                      hover
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.id}
-                      selected={isItemSelected}
-                      className="hl-tr"
-                    >
-                    <TableCell
-                        padding="checkbox"
-                        onClick={event => handleClick(event, row.id)}
-                        rowSpan={1}
+                    return(
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
+                        className="hl-tr"
                       >
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell> 
-                     
-                      {Object.keys(row).map((row_key, row_key_index) => {
-                        if (row_key !== 'id') {
-                          if (row_key === 'starred') {
-                            let ri = <TableCell>
-                            <span
-                              id={'star-' + row.id}
-                              onClick={e => toggleStar(e, row.id)}
-                              data-starred={row[row_key]}
-                              className="starred"
-                            >
-                              {row[row_key] === 1 ? '\u2605' : '\u2606'}
-                            </span>
-                          </TableCell>;
-                              return ri;
-                              
-                          } else if (row_key === 'subject') {
-                            
-                            let ri = <TableCell
-                                          onClick={event => openEmail(event,row.id)}
-                                      >
-                                        {row[row_key].substr(0, 40)}...
-                                      </TableCell>;
+                        <TableCell
+                          padding="checkbox"
+                          onClick={event => handleClick(event, row.id)}
+                          rowSpan={1}
+                        >
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                          />
+                        </TableCell>
 
-                              
-                             
-                                return ri;
-                             
-                            
-                          } else if (row_key === 'attachment') {
-                            /*return (
-                              <TableRow>
-                              <TableCell>
-                                {row[row_key] === 1 ? '\u1F4CE' : ''}
-                              </TableCell>
-                              </TableRow>
-                            );*/
-                          }else if(row_key==='timestamp'){
-                            let date = row[row_key];
-                            let ri = <TableCell
-                              onClick={event => openEmail(event,row.id)}
-                            >
-                              {date}
-                            </TableCell>;
-  
-                                  return ri;
-                          }else{
-                            let ri = <TableCell
-                              onClick={event => openEmail(event,row.id)}
-                            >
-                              {row[row_key]}
-                            </TableCell>;
-  
-                           return ri;
-                            
-                            
+                        {Object.keys(row).map((row_key, row_key_index) => {
+                          if (row_key !== 'id') {
+                            if (row_key === 'starred') {
+                              let ri = <TableCell>
+                                          <span
+                                            id={'star-' + row.id}
+                                            onClick={e => toggleStar(e, row.id)}
+                                            data-starred={row[row_key]}
+                                            className="starred"
+                                          >
+                                            {row[row_key] === 1 ? '\u2605' : '\u2606'}
+                                          </span>
+                                        </TableCell>;
+                              return ri;
+                            } else if (row_key === 'subject') {
+                              let ri = <TableCell
+                                          onClick={event => openEmail(event,row.id)}
+                                        >
+                                          {row[row_key].substr(0, 40)}...
+                                        </TableCell>;
+                              return ri;
+                            } else if (row_key === 'attachment') {
+                              /*return (
+                                <TableRow>
+                                <TableCell>
+                                  {row[row_key] === 1 ? '\u1F4CE' : ''}
+                                </TableCell>
+                                </TableRow>
+                              );*/
+                            }else if(row_key==='timestamp'){
+                              let date = row[row_key];
+                              let ri = <TableCell
+                                          onClick={event => openEmail(event,row.id)}
+                                        >
+                                          {date}
+                                        </TableCell>;
+                              return ri;
+                            }else{
+                              let ri = <TableCell
+                                          onClick={event => openEmail(event,row.id)}
+                                        >
+                                          {row[row_key]}
+                                        </TableCell>;
+                              return ri;
+                            }
                           }
-                        }
-                        return null;
-                      })}
+                          return null;
+                        })}
                       </TableRow>
                   );
                 }

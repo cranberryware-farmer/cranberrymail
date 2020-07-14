@@ -1,40 +1,54 @@
 <?php
-
+/**
+ * Home Controller
+ *
+ * PHP Version 7.3
+ *
+ * @category Productivity
+ * @package  CranberryMail
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
+ */
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Home Controller
+ *
+ * @category Controller
+ * @package  Cranberrymail
+ * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
+ * @license  GNU AGPL-3.0 https://github.com/cranberryware/cranberrymail/blob/master/LICENSE
+ * @link     https://github.com/cranberryware/cranberrymail
+ */
 class HomeController extends Controller
 {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\Support\Renderable
     {
-            Log::info("Moving to login screen",['file' => __FILE__, 'line' => __LINE__]);
-            return view('reactidx');
-
+        Log::info(
+            "Moving to login screen",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
+        return view('reactidx');
     }
 
     /**
-     * @param Request $request
+     * Checks DB
+     *
+     * @param Request $request Laravel Request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function db_check(Request $request){
+    public function dbCheck(Request $request): \Illuminate\Http\JsonResponse
+    {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
         $db = $_POST['db'];
@@ -43,46 +57,51 @@ class HomeController extends Controller
         $flag = 0;
 
         try {
-            $pdo = new \PDO("$conn:host=$servername;dbname=$db", $username, $password);
+            $pdo = new \PDO(
+                "$conn:host=$servername;dbname=$db", $username, $password
+            );
             // set the PDO error mode to exception
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            return response()->json([
-                "status" => 0,
-                "message" => "Please click on OK to drop existing database. Click on Cancel to choose new database or use existing database."
-            ], 200);
+            return response()->json(
+                [
+                    "status" => 0,
+                    "message" => "Please click on OK to drop existing database. \
+                        Click on Cancel to choose new database or \
+                        use existing database."
+                ], 200
+            );
         } catch(\PDOException $e) {
             $flag = 1;
         }
 
-        if($flag==1){
+        if ($flag==1) {
             try {
                 $pdo = new \PDO("$conn:host=".$servername, $username, $password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                $db = "`".str_replace("`","``",$db)."`";
+                $db = "`" . str_replace("`", "``", $db) . "`";
                 $pdo->query("CREATE DATABASE IF NOT EXISTS $db");
                 $pdo->query("use $db");
-                return response()->json([
-                    "status" => 1,
-                    "message" => "DB created"
-                ], 200);
+                return response()->json(
+                    ["status" => 1, "message" => "DB created"], 200
+                );
             } catch(\PDOException $e) {
-                return response()->json([
-                    "status" => 0,
-                    "message" => "No DB found"
-                ], 200);
+                return response()->json(
+                    ["status" => 0, "message" => "No DB found"], 200
+                );
             }
-
-
         }
     }
 
     /**
-     * @param Request $request
+     * Drops a Database and recreates it
+     *
+     * @param Request $request Laravel Request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function drop_create_db(Request $request){
-
+    public function dropCreateDB(Request $request): \Illuminate\Http\JsonResponse
+    {
         $conn = $_POST["conn"];
         $servername = $_POST['hostname'];
         $db = $_POST['db'];
@@ -93,54 +112,36 @@ class HomeController extends Controller
             $pdo = new \PDO("$conn:host=$servername", $username, $password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-            $db = "`".str_replace("`","``",$db)."`";
+            $db = "`" . str_replace("`", "``", $db) . "`";
             $pdo->query("DROP DATABASE $db");
             $pdo->query("CREATE DATABASE IF NOT EXISTS $db");
             $pdo->query("use $db");
-            return response()->json([
-                "status" => 1,
-                "message" => "New database has been created"
-            ], 200);
+            return response()->json(
+                ["status" => 1, "message" => "New database has been created"], 200
+            );
         } catch(\PDOException $e) {
-            return response()->json([
-                "status" => 0,
-                "message" => "Unable to delete database. Please delete and create new database manually to proceed."
-            ], 200);
+            return response()->json(
+                [
+                    "status" => 0,
+                    "message" => "Unable to delete database. Please delete \
+                        and create new database manually to proceed."
+                ], 200
+            );
         }
     }
 
     /**
-     * @param string $driver
-     */
-    private function controlSessionDriver($driver) {
-        $envPath = base_path() . '/cmail_settings/.env';
-        if(file_exists($envPath)){
-            $lines = file($envPath);
-            $result = '';
-
-            foreach($lines as $line) {
-                if(strpos($line, 'SESSION_DRIVER=') === 0) {
-                    $result .= "SESSION_DRIVER=" . $driver . "\n";
-                } else if(strpos($line, 'APP_ENV=') === 0) {
-                    $result .= "APP_ENV=local\n";
-                } else {
-                    $result .= $line;
-                }
-            }
-
-            file_put_contents($envPath, $result);
-        }
-    }
-
-    /**
-     * @param Request $request
+     * Changes session driver
+     *
+     * @param Request $request Laravel Request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function ChangeSessionDriver(Request $request) {
-        $this->controlSessionDriver("file");
-        return response()->json([
-            "status" => 1,
-            "message" => "Session Driver is set to file."
-        ], 200);
+    public function changeSessionDriver(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $this->controlSessionDriver("file", "local");
+        return response()->json(
+            ["status" => 1, "message" => "Session Driver is set to file."], 200
+        );
     }
 }

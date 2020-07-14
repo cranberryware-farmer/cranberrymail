@@ -50,7 +50,7 @@ class PublishTemplatesCommand extends Command {
         // to a place where the user can edit
         // them how they wish.
         File::copyDirectory(
-            __DIR__.'/../templates',
+            __DIR__.'/../Templates',
             $this->option('path')
         );
     }
@@ -61,7 +61,7 @@ class PublishTemplatesCommand extends Command {
     protected function pointConfigFileTemplatesToNewLocation()
     {
         $configPath = app_path('config/packages/way/generators/config.php');
-        $updated = str_replace('vendor/way/generators/src/Way/Generators/templates', $this->option('path'), File::get($configPath));
+        $updated = str_replace('vendor/way/generators/src/Way/Generators/Templates', $this->option('path'), File::get($configPath));
 
         File::put($configPath, $updated);
     }
@@ -74,7 +74,7 @@ class PublishTemplatesCommand extends Command {
     protected function getOptions()
     {
         return [
-            ['path', null, InputOption::VALUE_OPTIONAL, 'Which directory should the templates be copied to?', 'app/templates']
+            ['path', null, InputOption::VALUE_OPTIONAL, 'Which directory should the templates be copied to?', 'app/Templates']
         ];
     }
 
