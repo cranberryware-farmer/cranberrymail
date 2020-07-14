@@ -490,7 +490,8 @@ class InboxPage extends React.Component {
           this.resetFields();
           this.setState({
             modal: false,
-            isSending: false
+            isSending: false,
+            draftID: 0
           });
           toast('Email has been sent');
         } else {
@@ -514,7 +515,8 @@ class InboxPage extends React.Component {
       document.getElementById('attachment').value = '';
       this.setState({
         modalEditorState: EditorState.createEmpty(),
-        attachment: false
+        attachment: false,
+        draftID: 0
       });
     }
   };
