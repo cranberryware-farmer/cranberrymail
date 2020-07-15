@@ -678,6 +678,7 @@ class InboxPage extends React.Component {
   };
 
   getRowIndex = (uid) => {
+    console.log(this.state.emailThreads);
     let { rows } = this.state;
     let max = rows.length;
     let i =0;
@@ -885,7 +886,7 @@ class InboxPage extends React.Component {
                 isAttached,
                 fdate,
               );
-              threads[i] = res.data[i].threads;
+              threads[i] = res.data[i].thread;
             }
 
             if (erows.length > 0) {
