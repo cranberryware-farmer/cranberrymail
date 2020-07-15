@@ -12,7 +12,9 @@ import {
   Label,
   InputGroup,
   InputGroupAddon,
-  Spinner
+  Spinner,
+  ListGroup,
+  ListGroupItem
 } from 'reactstrap';
 import {
   FaEye,
@@ -20,6 +22,7 @@ import {
 } from 'react-icons/fa';
 import { withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { validateEmail } from 'helpers/common-functions';
 
 class AuthForm extends React.Component {
   constructor(props){
@@ -30,7 +33,9 @@ class AuthForm extends React.Component {
       password: '',
       ptype: 'password',
       cbox: '',
-      token: ''
+      token: '',
+      isValidated: 0, // 0=loaded, 1=pass, 2=fail
+      validationMessage: []
     };
   }
   get isLogin() {
@@ -60,9 +65,30 @@ class AuthForm extends React.Component {
 
   handleSubmit = event => {
     event.preventDefault();
-    this.setState({isLoading : true});
+    
+    let error = false;
 
-    if(this.isLogin){
+    let errorMessages = [];
+
+    if ( !this.state.email ) {
+      errorMessages.push(<ListGroupItem color="danger" className="cm-validation-message">Please fill Email</ListGroupItem>);
+      error = true;
+    } else {
+      if (!validateEmail(this.state.email)) {
+        errorMessages.push(<ListGroupItem color="danger" className="cm-validation-message">Email is not valid</ListGroupItem>);
+        error = true;
+      }
+    }
+    if ( !this.state.password ) {
+      errorMessages.push(<ListGroupItem color="danger" className="cm-validation-message">Please fill Password</ListGroupItem>);
+      error = true;
+    }
+
+    if (!error && this.isLogin) {
+      this.setState({
+        isLoading : true,
+        validationMessage: []
+      });
       const fields = {
         email: this.state.email,
         password: this.state.password,
@@ -73,8 +99,11 @@ class AuthForm extends React.Component {
         return response;
       }, error => {
         if (error.response.status === 401) {
-          toast("Incorrect email or password");
-          this.setState({isLoading : false});
+          const errMsg = [<ListGroupItem color="danger" className="cm-validation-message">Incorrect email or password</ListGroupItem>];
+          this.setState({
+            isLoading : false,
+            validationMessage: errMsg
+          });
         }
         return Promise.reject(error);
       });
@@ -82,9 +111,10 @@ class AuthForm extends React.Component {
       axios.post(window._api+"/login",fields).then(res => {
         if(res.data.status===1){
           this.setState({
-            token: res.data.success.token
+            token: res.data.success.token,
+            isLoading : false,
+            validationMessage: []
           });
-          this.setState({isLoading : false});
 
           this.props.history.push({
             pathname: '/',
@@ -96,10 +126,34 @@ class AuthForm extends React.Component {
           });
           Cookies.set('app_auth', res.data.success.token);
           Cookies.set('app_email', this.state.email);
+        } else {
+          let errMsgs = [];
+          if(res.data.hasOwnProperty('error') && Object.keys(res.data.error).length > 0) {
+            const errors = res.data.error;
+            if(errors.hasOwnProperty('email') && errors.email.length > 0) {
+              errors.email.forEach(item => {
+                errMsgs.push(<ListGroupItem color="danger" className="cm-validation-message">{item}</ListGroupItem>);
+              });
+            }
+            if(errors.hasOwnProperty('password') && errors.password.length > 0) {
+              errors.password.forEach(item => {
+                errMsgs.push(<ListGroupItem color="danger" className="cm-validation-message">{item}</ListGroupItem>);
+              });
+            }
+          }
+          this.setState({
+            isLoading : false,
+            validationMessage: errMsgs
+          });
         }
       })
       .catch(error => {
         console.log("Invalid Creds", error);
+      });
+    } else {
+      this.setState({
+        isValidated : 2,
+        validationMessage: errorMessages
       });
     }
   };
@@ -126,7 +180,7 @@ class AuthForm extends React.Component {
     } = this.props;
 
     return (
-      <Form onSubmit={this.handleSubmit}>
+      <Form onSubmit={!this.state.isLoading ? this.handleSubmit : null}>
         {showLogo && (
           <div className="text-center pb-4">
             <img
@@ -140,7 +194,11 @@ class AuthForm extends React.Component {
         )}
         <FormGroup>
           <Label for={usernameLabel}>{usernameLabel}</Label>
-          <Input {...usernameInputProps} onChange={e => this.setState({ email: e.target.value })}/>
+          <Input 
+            {...usernameInputProps}
+            onChange={e => this.setState({ email: e.target.value })}
+            required
+          />
         </FormGroup>
         <FormGroup>
           <Label for={passwordLabel}>{passwordLabel}</Label>
@@ -149,6 +207,7 @@ class AuthForm extends React.Component {
               {...passwordInputProps}
               onChange={e => this.setState({ password: e.target.value })}
               type={this.state.ptype}
+              required
             />
             <InputGroupAddon addonType="append">
               <Button onClick={ () => this.togglePassword() }>
@@ -163,12 +222,15 @@ class AuthForm extends React.Component {
           size="lg"
           className="bg-gradient-theme-left border-0"
           block
-          onClick={!this.state.isLoading ? this.handleSubmit : null}
-          disabled={this.state.isLoading}>
+          disabled={this.state.isLoading}
+        >
           {this.renderButtonText()}
           {this.state.isLoading ? <Spinner type = "grow" color = "light"/> : null}
         </Button>
         {children}
+        <ListGroup className="mt-2">
+          {this.state.validationMessage}
+        </ListGroup>
       </Form>
     );
   }

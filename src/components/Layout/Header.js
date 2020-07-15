@@ -169,22 +169,27 @@ class Header extends React.Component {
                   className="border-light"
                 >
                   <ListGroup flush>
-                    {/* <ListGroupItem tag="a" href="#" className="border-light">
+                    {/* <ListGroupItem tag="a" href="javascript:void(0);" className="border-light">
                       <MdPersonPin /> Profile
                     </ListGroupItem>
-                    <ListGroupItem tag="a" href="#" className="border-light">
+                    <ListGroupItem tag="a" href="javascript:void(0);" className="border-light">
                       <MdInsertChart /> Stats
                     </ListGroupItem>
-                    <ListGroupItem tag="a" href="#" className="border-light">
+                    <ListGroupItem tag="a" href="javascript:void(0);" className="border-light">
                       <MdMessage /> Messages
                     </ListGroupItem>
-                    <ListGroupItem tag="a" href="#" className="border-light">
+                    <ListGroupItem tag="a" href="javascript:void(0);" className="border-light">
                       <MdSettingsApplications /> Settings
                     </ListGroupItem>
-                    <ListGroupItem tag="a" href="#" className="border-light">
+                    <ListGroupItem tag="a" href="javascript:void(0);" className="border-light">
                       <MdHelp /> Help
                     </ListGroupItem> */}
-                    <ListGroupItem tag="a" href="#" action className="border-light">
+                    <ListGroupItem 
+                      tag="a" 
+                      href="javascript:void(0);" 
+                      action 
+                      className="border-light"
+                    >
                       <span onClick={()=>{
                         this.props.triggerCentralLoading(true);
                         let el=this;
@@ -205,7 +210,10 @@ class Header extends React.Component {
                         .catch(error => {
                           console.log("Logout Unsuccessful", error);
                         });
-                      }}><MdExitToApp /> Signout</span>
+                      }}
+                    >
+                      <MdExitToApp /> Signout
+                    </span>
                     </ListGroupItem>
                   </ListGroup>
                 </UserCard>
