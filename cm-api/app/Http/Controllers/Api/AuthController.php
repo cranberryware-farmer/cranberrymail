@@ -35,14 +35,14 @@ class AuthController extends Controller
      *
      * @var int
      */
-    public $successStatus = 200;
+    private $_successStatus = 200;
 
     /**
      * Unauthorized status variable
      *
      * @var int
      */
-    public $unAuthStatus = 401;
+    private $_unAuthStatus = 401;
 
     /**
      * Implements login
@@ -58,80 +58,68 @@ class AuthController extends Controller
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
-        $auth_arr = ['email' => request('email'), 'password' => request('password')];
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]
+        );
 
-        if (Auth::attempt($auth_arr)) {
-            $user = Auth::user();
-            $success['token'] =  $user->createToken('Cmail')-> accessToken;
-            $request->session()->put('auth_token', $success['token']);
-            Log::info(
-                "Token generated for user",
+        if ($validator->fails()) {
+            Log::error(
+                "Error while validating your email or password",
                 ['file' => __FILE__, 'line' => __LINE__]
             );
             return response()->json(
-                ['success' => $success, "status" => 1],
-                $this-> successStatus
+                ['error'=>$validator->errors(), 'status' => 0],
+                $this->_successStatus
             );
+        }
+
+        $auth_arr = ['email' => request('email'), 'password' => request('password')];
+
+        $input = $request->all();
+
+        try {
+            $oClient = $this->loginIMAPClient(
+                $input["email"],
+                $input["password"]
+            );
+        } catch(\Exception $e) {
+            return response()->json(
+                ['error'=>'Invalid email or password', "status" => 0],
+                $this->_unAuthStatus
+            );
+        }
+
+        $password_key = Crypt::encryptString($input['password']);
+
+        if (User::where('email', request('email'))->exists()) {
+            $user = User::where('email', $input["email"])->first();
+
+            $user->key = $password_key;
+            $user->password = bcrypt($input['password']);
+
+            $user->save();
         } else {
-            if (User::where('email', request('email'))->exists()) {
-                Log::info(
-                    "User is not authorised",
-                    ['file' => __FILE__, 'line' => __LINE__]
-                );
-                return response()->json(
-                    ['error'=>'Unauthorised', "status" => 0], $this->unAuthStatus
-                );
-            }
-
-            $validator = Validator::make(
-                $request->all(),
-                [
-                    'email' => 'required|email',
-                    'password' => 'required'
-                ]
-            );
-
-            if ($validator->fails()) {
-                Log::error(
-                    "Error while validating your email or password",
-                    ['file' => __FILE__, 'line' => __LINE__]
-                );
-                return response()->json(
-                    ['error'=>$validator->errors(), 'status' => 0],
-                    $this->unAuthStatus
-                );
-            }
-
-            $input = $request->all();
-
-            try {
-                $oClient = $this->loginIMAPClient(
-                    $input["email"],
-                    $input["password"]
-                );
-            } catch(\Exception $e) {
-                return response()->json(
-                    ['error'=>'Invalid email or password', "status" => 0],
-                    $this->unAuthStatus
-                );
-            }
-
-            $input['key'] =  Crypt::encryptString($input['password']);
+            $input['key'] =  $password_key;
             $input['password'] = bcrypt($input['password']);
 
             $user = User::create($input);
-
-            $success['token'] =  $user->createToken('AppName')-> accessToken;
-            $request->session()->put('auth_token', $success['token']);
-            Log::info(
-                "Token successfully generated for the user",
-                ['file' => __FILE__, 'line' => __LINE__]
-            );
-            return response()->json(
-                ['success' => $success, "status" => 1],
-                $this-> successStatus
-            );
         }
+
+        $success['token'] = $user->createToken('Cmail')-> accessToken;
+        $request->session()->put('auth_token', $success['token']);
+        $request->session()->put('password_key', $password_key);
+        Log::info(
+            "Token successfully generated for the user",
+            ['file' => __FILE__, 'line' => __LINE__]
+        );
+        return response()->json(
+            ['success' => $success, "status" => 1],
+            $this->_successStatus
+        );
     }
 
     /**
@@ -148,7 +136,7 @@ class AuthController extends Controller
         );
         return response()->json(
             ['success' => $user, "status" => 1],
-            $this->successStatus
+            $this->_successStatus
         );
     }
 
@@ -174,7 +162,7 @@ class AuthController extends Controller
                 "status" => 1,
                 "message" => "Logged out successfully"
             ],
-            $this->successStatus
+            $this->_successStatus
         );
     }
 }

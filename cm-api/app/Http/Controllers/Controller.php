@@ -33,7 +33,29 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    /**
+     * Laravel Auth User Details
+     */
     protected $user;
+
+    /**
+     * Force Logout Response
+     *
+     * @var array
+     */
+    protected $forceLogout = [];
+
+    /**
+     * Main constructor.
+     */
+    public function __construct()
+    {
+        $this->forceLogout = [
+            'success' => false,
+            'force_logout' => true,
+            'error' => __('Invalid Access.')
+        ];
+    }
 
     /**
      * Rewrites ENV variables in the process of installation and upgrade
@@ -66,17 +88,20 @@ class Controller extends BaseController
 
     /**
      * Create IMAP Object
-     *
+     * 
+     * @param Illuminate\Http\Request $req Laravel Request
+     * 
      * @return bool|\Horde_Imap_Client_Socket
      * @throws \Horde_Imap_Client_Exception
      */
-    protected function getIMAPCredential()
+    protected function getIMAPCredential($req)
     {
         $user = Auth::user();
         if ($user && isset($user->email)) {
             $this->user = $user;
             $email = $user->email;
-            $password=Crypt::decryptString($user->key);
+            $password_key = $req->session()->get('password_key', '');
+            $password=Crypt::decryptString($password_key);
 
             return $this->loginIMAPClient($email, $password);
         }

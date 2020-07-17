@@ -1,9 +1,9 @@
 <?php
 /**
  * Custom middleware for authentication
- * 
+ *
  * PHP Version 7.3
- * 
+ *
  * @category Productivity
  * @package  CranberryMail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -16,7 +16,7 @@ use Closure;
 
 /**
  * Middleware Class
- * 
+ *
  * @category MiddleWare
  * @package  Cranberrymail
  * @author   CranberryWare Development Team (NetTantra Technologies) <support@oss.nettantra.com>
@@ -30,14 +30,17 @@ class CranberryAuth
      *
      * @param \Illuminate\Http\Request $request Laravel Request
      * @param \Closure                 $next    Pass-on variable
-     * 
+     *
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
         $auth_token = $request->session()->get('auth_token', '');
         $app_token = $request->cookie('app_auth');
-        if ($auth_token === $app_token) {
+        if (!empty($auth_token)
+            && !empty($app_token)
+            && $auth_token === $app_token
+        ) {
             return $next($request);
         } else {
             $request->session()->flush();
@@ -45,8 +48,8 @@ class CranberryAuth
                 [
                     'success' => false,
                     'force_logout' => true,
-                    'error' => __('Invalid Access.')
-                ]
+                    'error' => __('Invalid Session.')
+                ], 200
             );
         }
     }

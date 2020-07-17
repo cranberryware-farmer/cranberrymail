@@ -29,6 +29,14 @@ use Mail_mime;
 class ImapController extends Controller
 {
     /**
+     * ImapController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
      * Formats MailBox Folder Names
      *
      * @param string $folder_name the folder name of mailbox
@@ -52,7 +60,20 @@ class ImapController extends Controller
      */
     public function getFolders(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $mailBoxes = $this->_getMailBoxes($oClient);
         Log::info("Got mailboxes", ['file' => __FILE__, 'line' => __LINE__]);
@@ -154,7 +175,20 @@ class ImapController extends Controller
      */
     public function unTrashEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $trash = $this->_getMailBox($oClient, $request->input("trash"));
         $inbox = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -195,7 +229,20 @@ class ImapController extends Controller
      */
     public function trashEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $trashFolder = $this->_getMailBox($oClient, $request->input("trash"));
         $curFolder = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -287,7 +334,20 @@ class ImapController extends Controller
      */
     public function unSpamEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $spam = $this->_getMailBox($oClient, $request->input("spam"));
         $inbox = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -326,7 +386,20 @@ class ImapController extends Controller
      */
     public function saveDraft(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $draft_folder = $request->session()->get('draft_folder', '');
 
@@ -415,7 +488,20 @@ class ImapController extends Controller
      */
     public function spamEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $spamFolder = $this->_getMailBox($oClient, $request->input("spam"));
         $curFolder = $this->_getMailBox($oClient, $request->input("curfolder"));
@@ -467,7 +553,20 @@ class ImapController extends Controller
      */
     public function starEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $curFolder = $request->input("curFolder");
         $starEmail = $request->input("emailState");
@@ -574,7 +673,7 @@ class ImapController extends Controller
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
-        $data = $this->_fetchMailQuery("search", $mailbox, $query);
+        $data = $this->_fetchMailQuery("search", $mailbox, $query, $request);
 
         Log::info(
             "Mail Search Complete",
@@ -590,14 +689,28 @@ class ImapController extends Controller
      * @param string                         $type      Type of request
      * @param string                         $mailbox   Mailbox name
      * @param Horde_Imap_Client_Search_Query $searchqry Search Query Object
+     * @param Request                        $req       Laravel Request
      *
      * @return array
      * @throws \Horde_Imap_Client_Exception
      * @throws \Horde_Imap_Client_Exception_NoSupportExtension
      */
-    private function _fetchMailQuery($type, $mailbox, $searchqry): array
+    private function _fetchMailQuery($type, $mailbox, $searchqry, $req): array
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($req);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $thread = $oClient->thread(
             $mailbox,
@@ -774,7 +887,20 @@ class ImapController extends Controller
      */
     public function getEmails(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $mailbox = $request->input("folder");
         $query = new \Horde_Imap_Client_Search_Query();
@@ -788,7 +914,7 @@ class ImapController extends Controller
             ['file' => __FILE__, 'line' => __LINE__]
         );
 
-        $data = $this->_fetchMailQuery("list", $mailbox, $query);
+        $data = $this->_fetchMailQuery("list", $mailbox, $query, $request);
 
         Log::info(
             "List Emails data fetched",
@@ -809,7 +935,20 @@ class ImapController extends Controller
      */
     public function getEmail(Request $request): \Illuminate\Http\JsonResponse
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $mailbox = $request->input("folder");
 
@@ -933,7 +1072,20 @@ class ImapController extends Controller
      */
     public function downloadAttachment(Request $request): \Illuminate\Http\Response
     {
-        $oClient = $this->getIMAPCredential();
+        try {
+            $oClient = $this->getIMAPCredential($request);
+            Log::error(
+                "Successfully Logged in to IMAP Server.",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+        } catch(\Exception $e) {
+            report($e);
+            Log::error(
+                "Unable to Login. Force Logout",
+                ['file' => __FILE__, 'line' => __LINE__]
+            );
+            return response()->json($this->forceLogout, 200);
+        }
 
         $mailbox = $request->input("mailbox");
         $file_name = $request->input("file_name");
