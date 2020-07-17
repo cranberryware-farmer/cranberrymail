@@ -24,7 +24,7 @@ import {
   FaRegWindowMinimize,
   FaSave,
 } from 'react-icons/fa';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isMobileOnly } from 'react-device-detect';
 import { toast } from 'react-toastify';
 
 const dockStyles = {
@@ -49,12 +49,16 @@ const minDockStyles = {
   background: 'white',
   left: 'unset',
   top: 'unset',
-  width: '25%',
+  width: isMobile ? '70%' : '25%',
   height: '10%',
   right: '10px',
   bottom: '5px',
   'border-radius': '15px 15px 0px 0px',
   overflow: 'hidden',
+};
+
+const defaultModalStyles = {
+  minWidth: "75%",
 };
 
 const composeModal = (props) => {
@@ -64,8 +68,8 @@ const composeModal = (props) => {
       hiddenAction = false;
 
   if(dockState === "maximize"){
-    headerLeft = 8;
-    headerRight = 4;
+    headerLeft = isMobile ? (isMobileOnly ? 8 : 9) : 10;
+    headerRight = isMobile ? (isMobileOnly ? 4 : 3) : 2;
   } else if(dockState === "minimize"){
     headerLeft = 7;
     headerRight = 5;
@@ -236,6 +240,7 @@ const composeModal = (props) => {
         isOpen={props.modal}
         toggle={() => { props.closemodal() }}
         className={props.classnm}
+        style={defaultModalStyles}
       >
         <ModalBody>
           {composeContent}
