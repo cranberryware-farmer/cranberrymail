@@ -31,6 +31,14 @@ use Illuminate\Support\Facades\Crypt;
 class SmtpController extends Controller
 {
     /**
+     * SmtpController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
      * Loads SMTP configs
      *
      * @return array
@@ -131,7 +139,20 @@ class SmtpController extends Controller
             if ($draft_id) {
                 $draft_folder = $request->session()->get('draft_folder', '');
 
-                $oClient = $this->getIMAPCredential();
+                try {
+                    $oClient = $this->getIMAPCredential();
+                    Log::error(
+                        "Successfully Logged in to IMAP Server.",
+                        ['file' => __FILE__, 'line' => __LINE__]
+                    );
+                } catch(\Exception $e) {
+                    report($e);
+                    Log::error(
+                        "Unable to Login. Force Logout",
+                        ['file' => __FILE__, 'line' => __LINE__]
+                    );
+                    return response()->json($this->forceLogout, 200);
+                }
 
                 $ids = new \Horde_Imap_Client_Ids($draft_id);
                 $oClient->store(

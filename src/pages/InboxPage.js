@@ -16,6 +16,7 @@ import ComposeModal from './ComposeModal';
 import EmailPage from './EmailPage';
 import SettingsPage from './SettingsPage';
 import { stateFromHTML } from 'draft-js-import-html';
+import Cookies from 'js-cookie';
 
 function createData(id, starred, from, subject,body,attachment, timestamp) {
   return { id, starred, from, subject, timestamp };
@@ -172,28 +173,39 @@ class InboxPage extends React.Component {
     return {data, config};
   }
 
+  redirectToLogin = () => {
+    Cookies.remove('app_auth');
+    Cookies.remove('app_email');
+    this.props.history.push('/login');
+  }
+
   replyEmail = (emailBody) => {
     const {data, config} = this.mailBodyWithoutAttachment(emailBody);
 
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
       .then(res => {
-        if (res.data.result > 0) {
-          this.editorHandler();
-          this.setState({
-            attachment: false
-          });
-          toast('Email has been sent');
-          this.resetSubject();
-          this.closeModal();
-          this.closeEditors();
-          const currentFolder = this.props.curFolder;
-          const currentFolderLower = currentFolder.toString().toLowerCase();
-          if(currentFolderLower.match('draft') !== null){
-            this.fetchEmails();
-          }
+        const { data } = res;
+        if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+          this.redirectToLogin();
         } else {
-          toast(res.data.message);
+          if (data.result > 0) {
+            this.editorHandler();
+            this.setState({
+              attachment: false
+            });
+            toast('Email has been sent');
+            this.resetSubject();
+            this.closeModal();
+            this.closeEditors();
+            const currentFolder = this.props.curFolder;
+            const currentFolderLower = currentFolder.toString().toLowerCase();
+            if(currentFolderLower.match('draft') !== null){
+              this.fetchEmails();
+            }
+          } else {
+            toast(data.message);
+          }
         }
       })
       .catch(error => {
@@ -215,25 +227,30 @@ class InboxPage extends React.Component {
       axios
         .post(window._api + '/star_emails', data, config)
         .then(res => {
-          if (res.data.result > 0) {
-            if(emailState === 0){
-              toast('Email moved to Inbox');
-            } else {
-              toast('Email moved to Starred');
-            }
-
-            if (this.state.page === 'list') {
-              let rows = this.state.rows;
-              rows = rows.filter((row) => {
-                return row.id !== uid;
-              });
-              this.setState({rows});
-            }
+          const { data } = res;
+          if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+            this.redirectToLogin();
           } else {
-            if (emailState === 0) {
-              toast('Email still marked as starred');
+            if (data.result > 0) {
+              if(emailState === 0){
+                toast('Email moved to Inbox');
+              } else {
+                toast('Email moved to Starred');
+              }
+
+              if (this.state.page === 'list') {
+                let rows = this.state.rows;
+                rows = rows.filter((row) => {
+                  return row.id !== uid;
+                });
+                this.setState({rows});
+              }
             } else {
-              toast('Unable to mark email as starred');
+              if (emailState === 0) {
+                toast('Email still marked as starred');
+              } else {
+                toast('Unable to mark email as starred');
+              }
             }
           }
         })
@@ -276,19 +293,24 @@ class InboxPage extends React.Component {
     };
 
     axios
-    .post(window._api + '/untrash_emails', data, config)
-    .then(res => {
-      if (res.data.result > 0) {
-        if (flag === 1) {
-          toast("Emails have been restored");
+      .post(window._api + '/untrash_emails', data, config)
+      .then(res => {
+        const { data } = res;
+        if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+          this.redirectToLogin();
         } else {
-          toast('Email has been restored');
+          if (data.result > 0) {
+            if (flag === 1) {
+              toast("Emails have been restored");
+            } else {
+              toast('Email has been restored');
+            }
+          }
         }
-      }
-    })
-    .catch(error => {
-      console.log("Untrash Unsuccessful", error);
-    });
+      })
+      .catch(error => {
+        console.log("Untrash Unsuccessful", error);
+      });
   };
 
   trashEmail = uuid => {
@@ -305,11 +327,16 @@ class InboxPage extends React.Component {
       axios
         .post(window._api + '/trash_emails', data, config)
         .then(res => {
-          if (res.data.result > 0) {
-            if (flag === 1) {
-              toast("Emails have been deleted");
-            } else {
-              toast('Email has been deleted');
+          const { data } = res;
+          if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+            this.redirectToLogin();
+          } else {
+            if (data.result > 0) {
+              if (flag === 1) {
+                toast("Emails have been deleted");
+              } else {
+                toast('Email has been deleted');
+              }
             }
           }
         })
@@ -334,11 +361,16 @@ class InboxPage extends React.Component {
       axios
         .post(window._api + '/spam_emails', data, config)
         .then(res => {
-          if (res.data.result > 0) {
-            if (flag === 1) {
-              toast("Emails marked as spam");
-            } else {
-              toast('Email marked as spam');
+          const { data } = res;
+          if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+            this.redirectToLogin();
+          } else {
+            if (data.result > 0) {
+              if (flag === 1) {
+                toast("Emails marked as spam");
+              } else {
+                toast('Email marked as spam');
+              }
             }
           }
         })
@@ -360,11 +392,16 @@ class InboxPage extends React.Component {
     axios
       .post(window._api + '/unspam_emails', data, config)
       .then(res => {
-        if (res.data.result > 0) {
-          if (flag === 1) {
-            toast("Emails have been restored");
-          } else {
-            toast('Email has been restored');
+        const { data } = res;
+        if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+          this.redirectToLogin();
+        } else {
+          if (data.result > 0) {
+            if (flag === 1) {
+              toast("Emails have been restored");
+            } else {
+              toast('Email has been restored');
+            }
           }
         }
       })
@@ -452,22 +489,27 @@ class InboxPage extends React.Component {
     axios
       .post(window._api + '/save_draft', data, config)
       .then(res => {
-        if (res.data.success) {
-          this.setState({
-            savingDraft: false,
-            draftID: res.data.draft
-          });
-          const currentFolder = this.props.curFolder;
-          const currentFolderLower = currentFolder.toString().toLowerCase();
-          if(currentFolderLower.match('draft') !== null){
-            this.fetchEmails();
-          }
-          toast('Email has been saved to draft');
+        const { data } = res;
+        if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+          this.redirectToLogin();
         } else {
-          this.setState({
-            savingDraft: false
-          });
-          // toast(res.message);
+          if (data.success) {
+            this.setState({
+              savingDraft: false,
+              draftID: data.draft
+            });
+            const currentFolder = this.props.curFolder;
+            const currentFolderLower = currentFolder.toString().toLowerCase();
+            if(currentFolderLower.match('draft') !== null){
+              this.fetchEmails();
+            }
+            toast('Email has been saved to draft');
+          } else {
+            this.setState({
+              savingDraft: false
+            });
+            // toast(res.message);
+          }
         }
       })
       .catch(error => {
@@ -481,24 +523,29 @@ class InboxPage extends React.Component {
     axios
       .post(window._api + '/smtp/sendEmail', data, config)
       .then(res => {
-        if (res.data.result > 0) {
-          const currentFolder = this.props.curFolder;
-          const currentFolderLower = currentFolder.toString().toLowerCase();
-          if(currentFolderLower.match('draft') !== null){
-            this.fetchEmails();
-          }
-          this.resetFields();
-          this.setState({
-            modal: false,
-            isSending: false,
-            draftID: 0
-          });
-          toast('Email has been sent');
+        const { data } = res;
+        if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+          this.redirectToLogin();
         } else {
-          this.setState({
-            isSending: false
-          });
-          toast(res.data.message);
+          if (data.result > 0) {
+            const currentFolder = this.props.curFolder;
+            const currentFolderLower = currentFolder.toString().toLowerCase();
+            if(currentFolderLower.match('draft') !== null){
+              this.fetchEmails();
+            }
+            this.resetFields();
+            this.setState({
+              modal: false,
+              isSending: false,
+              draftID: 0
+            });
+            toast('Email has been sent');
+          } else {
+            this.setState({
+              isSending: false
+            });
+            toast(data.message);
+          }
         }
       })
       .catch(error => {
@@ -720,25 +767,30 @@ class InboxPage extends React.Component {
         .post(window._api + '/email', data, config)
         .then(res => {
           if (res.status === 200 && res.data.length > 0) {
-            if (currentFolderLower.match("draft") !== null) {
-              const {body, to, uid, cc, bcc, subject, attachment} = res.data[0];
-              this.setState({
-                modal: true,
-                dockState: 'normal',
-                toCompose: to,
-                ccCompose: cc,
-                bccCompose: bcc,
-                subjectCompose: subject,
-                modalEditorState: EditorState.createWithContent(stateFromHTML(body)),
-                draftID: uid,
-                attachmentURLs: attachment
-              });
+            const { data } = res;
+            if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+              this.redirectToLogin();
             } else {
-              this.setEmailNode(res.data[0]);
-              this.setState({
-                "thread" : res.data
-              });
-              this.closeEditors();
+              if (currentFolderLower.match("draft") !== null) {
+                const {body, to, uid, cc, bcc, subject, attachment} = data[0];
+                this.setState({
+                  modal: true,
+                  dockState: 'normal',
+                  toCompose: to,
+                  ccCompose: cc,
+                  bccCompose: bcc,
+                  subjectCompose: subject,
+                  modalEditorState: EditorState.createWithContent(stateFromHTML(body)),
+                  draftID: uid,
+                  attachmentURLs: attachment
+                });
+              } else {
+                this.setEmailNode(data[0]);
+                this.setState({
+                  "thread" : data
+                });
+                this.closeEditors();
+              }
             }
           } else {
             this.setState({
@@ -803,42 +855,47 @@ class InboxPage extends React.Component {
         .post(window._api + '/emails', data, config)
         .then(res => {
           if (res.status === 200) {
-            let erows = [],
-              threads = [],
-              starred = 0,
-              curFolder = this.props.curFolder.toString().toLowerCase();
-            if(curFolder.search("starred") > 0){
-              starred = 1;
-            }
-
-            for (let i = 0; i < res.data.length; i++) {
-              const fdate = this.renderDateFormatted(new Date(res.data[i].date*1000));
-              const isAttached = res.data[i].hasAttachments ? 1 : 0;
-
-              erows[i] = createData(
-                res.data[i].uid,
-                starred,
-                res.data[i].from,
-                res.data[i].subject,
-                undefined, //body
-                isAttached,
-                fdate,
-              );
-             threads[i] = res.data[i].thread;
-            }
-
-            if (erows.length > 0) {
-              this.setState({
-                rows: erows,
-                emailThreads: threads,
-                busy: 0,
-              });
+            const { data } = res;
+            if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+              this.redirectToLogin();
             } else {
-              this.setState({
-                rows: '',
-                emailThreads: [],
-                busy: 0,
-              });
+              let erows = [],
+                threads = [],
+                starred = 0,
+                curFolder = this.props.curFolder.toString().toLowerCase();
+              if(curFolder.search("starred") > 0){
+                starred = 1;
+              }
+
+              for (let i = 0; i < data.length; i++) {
+                const fdate = this.renderDateFormatted(new Date(data[i].date*1000));
+                const isAttached = data[i].hasAttachments ? 1 : 0;
+
+                erows[i] = createData(
+                  data[i].uid,
+                  starred,
+                  data[i].from,
+                  data[i].subject,
+                  undefined, //body
+                  isAttached,
+                  fdate,
+                );
+                threads[i] = data[i].thread;
+              }
+
+              if (erows.length > 0) {
+                this.setState({
+                  rows: erows,
+                  emailThreads: threads,
+                  busy: 0,
+                });
+              } else {
+                this.setState({
+                  rows: '',
+                  emailThreads: [],
+                  busy: 0,
+                });
+              }
             }
           }
         })
@@ -866,40 +923,45 @@ class InboxPage extends React.Component {
         .post(window._api + '/search_emails', data, config)
         .then(res => {
           if (res.status === 200) {
-            let erows = [];
-            let threads = [];
-            for (let i = 0; i < res.data.length; i++) {
-              const fdate = new Date(res.data[i].date).toLocaleDateString('en-GB', {
-                month: 'numeric',
-                day: 'numeric',
-                year: 'numeric',
-              });
-              const isAttached = res.data[i].hasAttachments ? 1 : 0;
-
-              erows[i] = createData(
-                res.data[i].uid,
-                0,
-                res.data[i].from[0].mail,
-                res.data[i].subject,
-                undefined, //body
-                isAttached,
-                fdate,
-              );
-              threads[i] = res.data[i].threads;
-            }
-
-            if (erows.length > 0) {
-              this.setState({
-                rows: erows,
-                emailThreads: threads,
-                busy: 0,
-              });
+            const { data } = res;
+            if(data.hasOwnProperty("success") && data.hasOwnProperty("force_logout") && data.success === false && data.force_logout === true){
+              this.redirectToLogin();
             } else {
-              this.setState({
-                rows: '',
-                emailThreads: threads,
-                busy: 0,
-              });
+              let erows = [];
+              let threads = [];
+              for (let i = 0; i < data.length; i++) {
+                const fdate = new Date(data[i].date).toLocaleDateString('en-GB', {
+                  month: 'numeric',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+                const isAttached = data[i].hasAttachments ? 1 : 0;
+
+                erows[i] = createData(
+                  data[i].uid,
+                  0,
+                  data[i].from[0].mail,
+                  data[i].subject,
+                  undefined, //body
+                  isAttached,
+                  fdate,
+                );
+                threads[i] = data[i].threads;
+              }
+
+              if (erows.length > 0) {
+                this.setState({
+                  rows: erows,
+                  emailThreads: threads,
+                  busy: 0,
+                });
+              } else {
+                this.setState({
+                  rows: '',
+                  emailThreads: threads,
+                  busy: 0,
+                });
+              }
             }
           }
         })
